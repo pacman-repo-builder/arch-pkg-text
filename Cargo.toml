@@ -1,0 +1,33 @@
+[package]
+name = "inspect-pacman-db"
+description = "Inspect Arch Linux's pacman database without libalpm"
+version = "0.0.0"
+authors = ["khai96_ <hvksmr1996@gmail.com>"]
+license = "MIT"
+edition = "2021"
+repository = "https://github.com/pacman-repo-builder/inspect-pacman-db.git"
+readme = "README.md"
+include = [
+  "/src",
+  "/Cargo.toml",
+  "/README.md",
+]
+
+[lib]
+name = "inspect_pacman_db"
+path = "src/lib.rs"
+
+[features]
+default = ["std", "gzip"]
+cli = ["std", "gzip"]
+std = ["strum/std"]
+gzip = ["libflate"]
+
+[dependencies]
+derive_more = { version = "1.0.0", default-features = false, features = ["as_ref", "deref", "display", "error"] }
+libflate = { version = "2.1.0", default-features = false, optional = true }
+pipe-trait = "0.4.0"
+strum = { version = "0.26.3", default-features = false, features = ["derive", "phf"] }
+
+[dev-dependencies]
+pretty_assertions = "1.4.1"
