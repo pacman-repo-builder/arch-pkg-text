@@ -9,7 +9,7 @@ pub struct Field<Name>(Name);
 
 impl<Name> Field<Name> {
     /// Get an immutable reference to the name of the field.
-    pub const fn name(&self) -> &Name {
+    pub const fn name(&self) -> &'_ Name {
         &self.0
     }
 
@@ -24,7 +24,7 @@ pub type RawField<'a> = Field<&'a str>;
 
 impl<'a> RawField<'a> {
     /// Get the name of the field as a string slice.
-    pub const fn name_str(&self) -> &str {
+    pub const fn name_str(&self) -> &'_ str {
         self.name()
     }
 }
