@@ -44,6 +44,8 @@ pub enum FieldName {
     Version,
     #[strum(serialize = "DESC")]
     Description,
+    #[strum(serialize = "GROUPS")]
+    Groups,
     #[strum(serialize = "CSIZE")]
     CompressedSize,
     #[strum(serialize = "ISIZE")]

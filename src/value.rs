@@ -162,6 +162,14 @@ def_num_wrappers! {
 }
 
 def_list_wrappers! {
+    /// Type of value of `GROUPS`.
+    GroupList {
+        /// [Iterator] type of [`GroupList`].
+        Iter = GroupIter;
+        /// Type of [iterator item](Iterator::Item) of [`GroupList`].
+        Item = Group;
+    }
+
     /// Type of value of `LICENSE`.
     LicenseList {
         /// [Iterator] type of [`LicenseList`].
