@@ -29,6 +29,16 @@ impl<'a> RawField<'a> {
     }
 }
 
+/// Parsed field of a package description.
+pub type ParsedField = Field<FieldName>;
+
+impl ParsedField {
+    /// Get the name of the field as a string slice.
+    pub fn name_str(&self) -> &'static str {
+        self.name().into()
+    }
+}
+
 /// Field name of a package description.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)] // core traits
 #[derive(AsRefStr, Display, EnumString, IntoStaticStr)] // strum traits
