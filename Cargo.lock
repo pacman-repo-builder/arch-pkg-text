@@ -121,20 +121,10 @@ name = "inspect-pacman-db"
 version = "0.0.0"
 dependencies = [
  "derive_more",
- "iter-scan",
  "libflate",
  "pipe-trait",
  "pretty_assertions",
  "strum",
-]
-
-[[package]]
-name = "iter-scan"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "263fd95d8aeca030839199211538845a9968c359217d360bb49ddbdf92d1623c"
-dependencies = [
- "replace_with",
 ]
 
 [[package]]
@@ -310,12 +300,6 @@ checksum = "ec0be4795e2f6a28069bec0b5ff3e2ac9bafc99e6a9a7dc3547996c5c816922c"
 dependencies = [
  "getrandom",
 ]
-
-[[package]]
-name = "replace_with"
-version = "0.1.7"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e3a8614ee435691de62bcffcf4a66d91b3594bf1428a5722e79103249a095690"
 
 [[package]]
 name = "rle-decode-fast"

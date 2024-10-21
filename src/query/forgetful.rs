@@ -1,6 +1,5 @@
 use super::Query;
 use crate::field::{ParsedField, RawField};
-use iter_scan::IterScan;
 use pipe_trait::Pipe;
 
 /// [Query] without a cache.
@@ -14,11 +13,12 @@ where
     fn query_raw_text(self, field: ParsedField) -> Option<&'a str> {
         let text = self.0.as_ref();
 
-        let mut lines_with_end_offset = text
-            .split('\n')
-            .scan_copy(("", 0), |(_, end_offset), line| {
-                (line, end_offset + line.len() + '\n'.len_utf8())
-            });
+        let mut lines_with_end_offset = text.lines().map(|line| {
+            (
+                line,
+                line.as_ptr() as usize + line.len() - text.as_ptr() as usize,
+            )
+        });
 
         let (_, value_start_offset) = lines_with_end_offset.by_ref().find(|(line, _)| {
             line.trim()

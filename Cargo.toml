@@ -25,7 +25,6 @@ gzip = ["libflate"]
 
 [dependencies]
 derive_more = { version = "1.0.0", default-features = false, features = ["as_ref", "deref", "display", "error"] }
-iter-scan = "0.2.0"
 libflate = { version = "2.1.0", default-features = false, optional = true }
 pipe-trait = "0.4.0"
 strum = { version = "0.26.3", default-features = false, features = ["derive", "phf"] }
