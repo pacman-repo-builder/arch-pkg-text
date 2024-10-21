@@ -32,7 +32,7 @@ where
             .take_while(|(line, _)| RawField::try_from(line.trim()).is_err())
             .last()?; // no last means empty iterator, which means no content
 
-        let value = text[value_start_offset..value_end_offset].trim_matches('\n');
+        let value = text[value_start_offset..value_end_offset].trim_matches(['\n', '\r']);
 
         if value.is_empty() {
             None
