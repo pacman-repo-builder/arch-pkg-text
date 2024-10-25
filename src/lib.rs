@@ -2,5 +2,3 @@
 pub mod field;
 pub mod query;
 pub mod value;
-
-pub use strum;
