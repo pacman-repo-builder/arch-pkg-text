@@ -33,9 +33,20 @@ impl<'a> RawField<'a> {
 pub type ParsedField = Field<FieldName>;
 
 impl ParsedField {
+    /// Create a new [`ParsedField`].
+    pub const fn new(name: FieldName) -> Self {
+        Field(name)
+    }
+
     /// Get the name of the field as a string slice.
     pub fn name_str(&self) -> &'static str {
         self.name().into()
+    }
+}
+
+impl From<FieldName> for ParsedField {
+    fn from(value: FieldName) -> Self {
+        ParsedField::new(value)
     }
 }
 
