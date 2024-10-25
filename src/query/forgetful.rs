@@ -6,6 +6,13 @@ use pipe_trait::Pipe;
 #[derive(Debug, Clone, Copy)]
 pub struct ForgetfulQuerier<Text>(Text);
 
+impl<Text> ForgetfulQuerier<Text> {
+    /// Query the `text` without cache.
+    pub const fn new(text: Text) -> Self {
+        ForgetfulQuerier(text)
+    }
+}
+
 impl<'a, Text> Query<'a> for &'a ForgetfulQuerier<Text>
 where
     Text: AsRef<str>,
