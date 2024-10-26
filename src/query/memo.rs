@@ -37,23 +37,42 @@ macro_rules! def_cache {
         $(#[$attrs:meta])*
         $field:ident $(,)? $(;)?
     )*) => {
-        #[derive(Debug, Default, Clone)]
+        #[derive(Debug, Clone, Copy)]
+        enum CacheErr {
+            OccupiedWithNone,
+            Unoccupied,
+        }
+
+        #[derive(Debug, Clone)]
         #[allow(non_snake_case, reason = "We don't access the field names directly, keep it simple.")]
         struct Cache<'a> {$(
             $(#[$attrs])*
-            $field: Option<Option<&'a str>>,
+            $field: Result<&'a str, CacheErr>, // Result<&str, CacheErr> uses less memory than Option<Option<&str>>
         )*}
 
         impl<'a> Cache<'a> {
             fn get(&self, field: &FieldName) -> Option<Option<&'a str>> {
                 match field {$(
-                    FieldName::$field => self.$field,
+                    FieldName::$field => match self.$field {
+                        Ok(value) => Some(Some(value)),
+                        Err(CacheErr::OccupiedWithNone) => Some(None),
+                        Err(CacheErr::Unoccupied) => None,
+                    },
                 )*}
             }
 
             fn add(&mut self, field: &FieldName, value: Option<&'a str>) {
-                match field {$(
-                    FieldName::$field => self.$field = Some(value),
+                match (field, value) {$(
+                    (FieldName::$field, Some(value)) => self.$field = Ok(value),
+                    (FieldName::$field, None) => self.$field = Err(CacheErr::OccupiedWithNone),
+                )*}
+            }
+        }
+
+        impl<'a> Default for Cache<'a> {
+            fn default() -> Self {
+                Cache {$(
+                    $field: Err(CacheErr::Unoccupied),
                 )*}
             }
         }
