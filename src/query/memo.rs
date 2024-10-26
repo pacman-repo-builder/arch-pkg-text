@@ -36,3 +36,6 @@ where
             .as_deref()
     }
 }
+
+#[cfg(feature = "std")]
+pub mod aliases;
