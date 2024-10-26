@@ -1,8 +1,5 @@
 use super::{common::query_raw_text_from, Query};
-use crate::{
-    collections::{GetEntry, OrInsertWith},
-    field::ParsedField,
-};
+use crate::{collections::GetMutOrInsertWith, field::ParsedField};
 use core::str::Lines;
 
 /// [Query] with a cache.
@@ -29,13 +26,13 @@ impl<'a, Cache> MemoQuerier<'a, Cache> {
 
 impl<'a, Cache> Query<'a> for &'a mut MemoQuerier<'a, Cache>
 where
-    &'a mut Cache: GetEntry<ParsedField>,
-    <&'a mut Cache as GetEntry<ParsedField>>::Entry: OrInsertWith<'a, Item = Option<&'a str>>,
+    Cache: GetMutOrInsertWith<'a, ParsedField, Item = Option<&'a str>>,
 {
     fn query_raw_text(self, field: ParsedField) -> Option<&'a str> {
         self.cache
-            .get_entry(field)
-            .or_insert_with(|| query_raw_text_from(self.lines.by_ref(), self.text, field))
+            .get_mut_or_insert_with(field, || {
+                query_raw_text_from(self.lines.by_ref(), self.text, field)
+            })
             .as_deref()
     }
 }

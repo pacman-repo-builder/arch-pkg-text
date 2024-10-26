@@ -1,13 +1,12 @@
-pub trait GetEntry<Key> {
-    type Entry;
-    fn get_entry(self, key: Key) -> Self::Entry;
-}
-
-pub trait OrInsertWith<'a> {
+pub trait GetMutOrInsertWith<'a, Key> {
     type Item;
-    fn or_insert_with<F>(self, default: F) -> &'a mut Self::Item
+    fn get_mut_or_insert_with<Default>(
+        &'a mut self,
+        key: Key,
+        default: Default,
+    ) -> &'a mut Self::Item
     where
-        F: FnOnce() -> Self::Item;
+        Default: FnOnce() -> Self::Item;
 }
 
 #[cfg(feature = "std")]
