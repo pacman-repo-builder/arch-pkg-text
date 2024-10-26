@@ -21,6 +21,7 @@ impl<'a> MemoQuerier<'a> {
 
     fn parse_next(&mut self) -> Option<(&'a str, RawField<'a>, &'a str)> {
         let mut lines = self.text.lines();
+
         let (field_str, raw_field) = if let Some((field_str, raw_field)) = self.last {
             lines.next()?;
             (field_str, raw_field)
@@ -29,6 +30,7 @@ impl<'a> MemoQuerier<'a> {
             let raw_field = RawField::parse_raw(field_str).ok()?;
             (field_str, raw_field)
         };
+
         let value_start_offset =
             field_str.as_ptr() as usize + field_str.len() - self.text.as_ptr() as usize;
         let next = lines.find_map(|line| -> Option<(&'a str, RawField<'a>)> {
@@ -36,6 +38,7 @@ impl<'a> MemoQuerier<'a> {
             let raw_field = RawField::parse_raw(field_str).ok()?;
             Some((field_str, raw_field))
         });
+
         let Some((next_field_str, next_raw_field)) = next else {
             let value = self.text[value_start_offset..].trim_matches(['\n', '\r']);
             self.text = "";
