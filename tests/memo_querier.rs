@@ -56,4 +56,17 @@ fn query() {
     let mut arch = querier.arch_mut().unwrap().into_iter();
     assert_eq!(arch.next().map(|x| x.as_str()), Some("x86_64"));
     assert_eq!(arch.next().map(|x| x.as_str()), None);
+
+    let mut querier = MemoQuerier::new(TEXT);
+    assert!(querier.conflicts_mut().is_none());
+    assert!(querier.provides_mut().is_none());
+
+    let file_name = querier.file_name_mut().unwrap();
+    assert_eq!(
+        file_name.as_str(),
+        "gnome-shell-1:46.2-1-x86_64.pkg.tar.zst",
+    );
+
+    let name = querier.name_mut().unwrap();
+    assert_eq!(name.as_str(), "gnome-shell");
 }
