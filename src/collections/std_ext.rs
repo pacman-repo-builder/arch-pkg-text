@@ -1,12 +1,6 @@
 use super::{GetEntry, OrInsertWith};
 use core::hash::{BuildHasher, Hash};
 use std::collections::{btree_map, hash_map, BTreeMap, HashMap};
-// use core::cmp::Eq;
-
-// impl<Key, Value, State> GetEntry<Key> for HashMap<Key, Value, State> {
-//     type Entry<'a> = hash_map::Entry<'a, Key, Value>;
-//     fn get_entry(&mut self, key: Key) -> Self::Entry<'_> {}
-// }
 
 impl<'a, Key, Value, State> GetEntry<Key> for &'a mut HashMap<Key, Value, State>
 where
