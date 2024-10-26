@@ -62,6 +62,7 @@ pub trait Query<'a>: Sized {
     }
 }
 
+mod common;
 mod forgetful;
 mod memo;
 
