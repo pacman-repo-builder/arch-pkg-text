@@ -82,7 +82,6 @@ def_traits! {
     }
 }
 
-mod common;
 mod forgetful;
 mod memo;
 
