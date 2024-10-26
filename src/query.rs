@@ -63,7 +63,7 @@ pub trait Query<'a>: Sized {
 }
 
 mod forgetful;
+mod memo;
 
 pub use forgetful::ForgetfulQuerier;
-
-// TODO: MemoQuerier?
+pub use memo::MemoQuerier;
