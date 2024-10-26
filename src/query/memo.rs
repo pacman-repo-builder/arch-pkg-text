@@ -1,13 +1,12 @@
-use super::{common::query_raw_text_from, QueryMut};
-use crate::field::{FieldName, ParsedField};
-use core::str::Lines;
+use super::QueryMut;
+use crate::field::{FieldName, ParsedField, RawField};
 
 /// [Query](QueryMut) with a cache.
 #[derive(Debug, Clone)]
 pub struct MemoQuerier<'a> {
     text: &'a str,
-    lines: Lines<'a>,
     cache: Cache<'a>,
+    tracker: ParseNextTracker<'a>,
 }
 
 impl<'a> MemoQuerier<'a> {
@@ -15,9 +14,57 @@ impl<'a> MemoQuerier<'a> {
     pub fn new(text: &'a str) -> Self {
         MemoQuerier {
             text,
-            lines: text.lines(),
             cache: Cache::default(),
+            tracker: ParseNextTracker::Start,
         }
+    }
+
+    fn parse_next(&mut self) -> Option<(&'a str, RawField<'a>, &'a str)> {
+        let mut lines = self.text.lines();
+        let (field_str, raw_field) = match self.tracker {
+            ParseNextTracker::Start => {
+                let field_str = lines.next()?.trim();
+                let raw_field = RawField::parse_raw(field_str).ok()?;
+                self.tracker = ParseNextTracker::Middle {
+                    last_field_str: field_str,
+                    last_raw_field: raw_field,
+                };
+                (field_str, raw_field)
+            }
+            ParseNextTracker::Middle {
+                last_field_str,
+                last_raw_field,
+            } => {
+                lines.next()?;
+                (last_field_str, last_raw_field)
+            }
+            ParseNextTracker::End => return None,
+        };
+        let value_start_offset =
+            field_str.as_ptr() as usize + field_str.len() - self.text.as_ptr() as usize;
+        let next = lines.find_map(|line| -> Option<(&'a str, RawField<'a>)> {
+            let field_str = line.trim();
+            let raw_field = RawField::parse_raw(field_str).ok()?;
+            Some((field_str, raw_field))
+        });
+        let Some((next_field_str, next_raw_field)) = next else {
+            let value = self.text[value_start_offset..].trim_matches(['\n', '\r']);
+            self.text = "";
+            self.tracker = ParseNextTracker::End;
+            return Some((field_str, raw_field, value));
+        };
+
+        let value_end_offset = next_field_str.as_ptr() as usize - self.text.as_ptr() as usize;
+        let value = self.text[value_start_offset..value_end_offset].trim_matches(['\n', '\r']);
+
+        // prepare for the next call
+        self.tracker = ParseNextTracker::Middle {
+            last_field_str: next_field_str,
+            last_raw_field: next_raw_field,
+        };
+        self.text = &self.text[value_end_offset..];
+
+        Some((field_str, raw_field, value))
     }
 }
 
@@ -26,10 +73,30 @@ impl<'a> QueryMut<'a> for MemoQuerier<'a> {
         if let Some(value) = self.cache.get(field.name()) {
             return value;
         }
-        let value = query_raw_text_from(self.lines.by_ref(), self.text, field);
-        self.cache.add(field.name(), value);
-        value
+
+        while let Some((_, raw_field, value)) = self.parse_next() {
+            let Ok(parsed_field) = raw_field.try_as_parsed_name::<FieldName>() else {
+                continue;
+            };
+            let value = if value.is_empty() { None } else { Some(value) };
+            self.cache.add(&parsed_field, value);
+            if parsed_field == field {
+                return value;
+            }
+        }
+
+        None
     }
+}
+
+#[derive(Debug, Clone, Copy)]
+enum ParseNextTracker<'a> {
+    Start,
+    Middle {
+        last_field_str: &'a str,
+        last_raw_field: RawField<'a>,
+    },
+    End,
 }
 
 macro_rules! def_cache {
