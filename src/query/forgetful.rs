@@ -22,7 +22,7 @@ impl<'a> Query<'a> for ForgetfulQuerier<'a> {
             )
         });
 
-        let (_, value_start_offset) = lines_with_end_offset.by_ref().find(|(line, _)| {
+        let (_, value_start_offset) = lines_with_end_offset.find(|(line, _)| {
             line.trim()
                 .pipe(RawField::try_from)
                 .ok()
