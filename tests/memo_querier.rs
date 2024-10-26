@@ -49,4 +49,8 @@ fn query() {
 
     let name = querier.name_mut().unwrap();
     assert_eq!(name.as_str(), "gnome-shell");
+
+    let mut arch = querier.arch_mut().unwrap().into_iter();
+    assert_eq!(arch.next().map(|x| x.as_str()), Some("x86_64"));
+    assert_eq!(arch.next().map(|x| x.as_str()), None);
 }
