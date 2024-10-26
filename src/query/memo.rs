@@ -25,10 +25,6 @@ impl<'a> MemoQuerier<'a> {
             ParseNextTracker::Start => {
                 let field_str = lines.next()?.trim();
                 let raw_field = RawField::parse_raw(field_str).ok()?;
-                self.tracker = ParseNextTracker::Middle {
-                    last_field_str: field_str,
-                    last_raw_field: raw_field,
-                };
                 (field_str, raw_field)
             }
             ParseNextTracker::Middle {
