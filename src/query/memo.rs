@@ -1,8 +1,8 @@
-use super::{common::query_raw_text_from, Query};
+use super::{common::query_raw_text_from, QueryMut};
 use crate::field::{FieldName, ParsedField};
 use core::str::Lines;
 
-/// [Query] with a cache.
+/// [Query](QueryMut) with a cache.
 #[derive(Debug, Clone)]
 pub struct MemoQuerier<'a> {
     text: &'a str,
@@ -21,8 +21,8 @@ impl<'a> MemoQuerier<'a> {
     }
 }
 
-impl<'a> Query<'a> for &'a mut MemoQuerier<'a> {
-    fn query_raw_text(self, field: ParsedField) -> Option<&'a str> {
+impl<'a> QueryMut<'a> for MemoQuerier<'a> {
+    fn query_raw_text_mut(&mut self, field: ParsedField) -> Option<&'a str> {
         if let Some(value) = self.cache.get(field.name()) {
             return value;
         }
