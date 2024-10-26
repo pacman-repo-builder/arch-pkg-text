@@ -68,6 +68,3 @@ mod memo;
 
 pub use forgetful::ForgetfulQuerier;
 pub use memo::MemoQuerier;
-
-#[cfg(feature = "std")]
-pub use memo::aliases::{BTreeMemoQuerier, HashMemoQuerier};
