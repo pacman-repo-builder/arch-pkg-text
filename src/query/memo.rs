@@ -76,6 +76,18 @@ macro_rules! def_cache {
                 )*}
             }
         }
+
+        #[test]
+        fn test_cache_fields() {$({
+            use pretty_assertions::assert_eq;
+            let field = &FieldName::$field;
+            let mut cache = Cache::default();
+            assert_eq!(cache.get(field), None);
+            cache.add(field, None);
+            assert_eq!(cache.get(field), Some(None));
+            cache.add(field, Some("foo"));
+            assert_eq!(cache.get(field), Some(Some("foo")));
+        })*}
     };
 }
 
