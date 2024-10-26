@@ -6,7 +6,7 @@ use crate::field::{FieldName, ParsedField, RawField};
 pub struct MemoQuerier<'a> {
     text: &'a str,
     cache: Cache<'a>,
-    tracker: ParseNextTracker<'a>,
+    last: Option<(&'a str, RawField<'a>)>,
 }
 
 impl<'a> MemoQuerier<'a> {
@@ -15,26 +15,22 @@ impl<'a> MemoQuerier<'a> {
         MemoQuerier {
             text,
             cache: Cache::default(),
-            tracker: ParseNextTracker::Start,
+            last: None,
         }
     }
 
     fn parse_next(&mut self) -> Option<(&'a str, RawField<'a>, &'a str)> {
         let mut lines = self.text.lines();
-        let (field_str, raw_field) = match self.tracker {
-            ParseNextTracker::Start => {
+        let (field_str, raw_field) = match self.last {
+            None => {
                 let field_str = lines.next()?.trim();
                 let raw_field = RawField::parse_raw(field_str).ok()?;
                 (field_str, raw_field)
             }
-            ParseNextTracker::Middle {
-                last_field_str,
-                last_raw_field,
-            } => {
+            Some((field_str, raw_field)) => {
                 lines.next()?;
-                (last_field_str, last_raw_field)
+                (field_str, raw_field)
             }
-            ParseNextTracker::End => return None,
         };
         let value_start_offset =
             field_str.as_ptr() as usize + field_str.len() - self.text.as_ptr() as usize;
@@ -46,7 +42,7 @@ impl<'a> MemoQuerier<'a> {
         let Some((next_field_str, next_raw_field)) = next else {
             let value = self.text[value_start_offset..].trim_matches(['\n', '\r']);
             self.text = "";
-            self.tracker = ParseNextTracker::End;
+            self.last = None;
             return Some((field_str, raw_field, value));
         };
 
@@ -54,10 +50,7 @@ impl<'a> MemoQuerier<'a> {
         let value = self.text[value_start_offset..value_end_offset].trim_matches(['\n', '\r']);
 
         // prepare for the next call
-        self.tracker = ParseNextTracker::Middle {
-            last_field_str: next_field_str,
-            last_raw_field: next_raw_field,
-        };
+        self.last = Some((next_field_str, next_raw_field));
         self.text = &self.text[value_end_offset..];
 
         Some((field_str, raw_field, value))
@@ -83,16 +76,6 @@ impl<'a> QueryMut<'a> for MemoQuerier<'a> {
 
         None
     }
-}
-
-#[derive(Debug, Clone, Copy)]
-enum ParseNextTracker<'a> {
-    Start,
-    Middle {
-        last_field_str: &'a str,
-        last_raw_field: RawField<'a>,
-    },
-    End,
 }
 
 macro_rules! def_cache {
