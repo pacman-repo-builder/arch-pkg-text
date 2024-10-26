@@ -47,6 +47,9 @@ fn query() {
     assert_eq!(make_depends.next().map(|x| x.as_str()), Some("sassc"));
     assert_eq!(make_depends.next().map(|x| x.as_str()), None);
 
+    assert!(querier.conflicts_mut().is_none());
+    assert!(querier.provides_mut().is_none());
+
     let name = querier.name_mut().unwrap();
     assert_eq!(name.as_str(), "gnome-shell");
 
