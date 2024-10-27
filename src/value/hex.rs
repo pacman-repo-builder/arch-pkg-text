@@ -1,4 +1,8 @@
-use core::mem::size_of;
+use core::{
+    mem::size_of,
+    ops::{BitOrAssign, Shl},
+    str::Chars,
+};
 
 pub trait ParseHex: Sized {
     fn parse_hex(input: &str) -> (&'_ str, Self);
@@ -12,13 +16,7 @@ macro_rules! impl_parse_hex {
                 let mut array: [$num; LEN] = [0; LEN];
 
                 for item in array.iter_mut().rev() {
-                    const DIGIT_COUNT: usize = size_of::<$num>() * 2;
-                    for digit_pos in 0..DIGIT_COUNT {
-                        let Some(digit_value) = chars.next_back().and_then(parse_hex_digit) else {
-                            return (chars.as_str(), array);
-                        };
-                        *item |= (digit_value as $num) << (digit_pos * 4);
-                    }
+                    *item = parse_hex_value::<$num, { size_of::<$num>() }>(&mut chars);
                 }
 
                 (chars.as_str(), array)
@@ -28,6 +26,28 @@ macro_rules! impl_parse_hex {
 }
 
 impl_parse_hex!(u8 u16 u32 u64 u128);
+
+impl ParseHex for u128 {
+    fn parse_hex(input: &str) -> (&'_ str, Self) {
+        let mut chars = input.chars();
+        let value = parse_hex_value::<_, { size_of::<u128>() }>(&mut chars);
+        (chars.as_str(), value)
+    }
+}
+
+fn parse_hex_value<Value, const SIZE: usize>(chars: &mut Chars) -> Value
+where
+    Value: From<u8> + BitOrAssign + Shl<usize, Output = Value>,
+{
+    let mut value: Value = 0.into();
+    for digit_pos in 0..(SIZE * 2) {
+        let Some(digit_value) = chars.next_back().and_then(parse_hex_digit) else {
+            return value;
+        };
+        value |= Value::from(digit_value) << (digit_pos * 4);
+    }
+    value
+}
 
 fn parse_hex_digit(digit: char) -> Option<u8> {
     let code = match digit {
