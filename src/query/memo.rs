@@ -19,7 +19,7 @@ impl<'a> MemoQuerier<'a> {
         }
     }
 
-    fn parse_next(&mut self) -> Option<(&'a str, RawField<'a>, &'a str)> {
+    fn parse_next(&mut self) -> Option<(RawField<'a>, &'a str)> {
         let mut lines = self.text.lines();
 
         let (field_str, raw_field) = if let Some((field_str, raw_field)) = self.last {
@@ -43,7 +43,7 @@ impl<'a> MemoQuerier<'a> {
             let value = self.text[value_start_offset..].trim_matches(['\n', '\r']);
             self.text = "";
             self.last = None;
-            return Some((field_str, raw_field, value));
+            return Some((raw_field, value));
         };
 
         let value_end_offset = next_field_str.as_ptr() as usize - self.text.as_ptr() as usize;
@@ -53,7 +53,7 @@ impl<'a> MemoQuerier<'a> {
         self.last = Some((next_field_str, next_raw_field));
         self.text = &self.text[value_end_offset..];
 
-        Some((field_str, raw_field, value))
+        Some((raw_field, value))
     }
 }
 
@@ -63,7 +63,7 @@ impl<'a> QueryMut<'a> for MemoQuerier<'a> {
             return value;
         }
 
-        while let Some((_, raw_field, value)) = self.parse_next() {
+        while let Some((raw_field, value)) = self.parse_next() {
             let Ok(parsed_field) = raw_field.try_as_parsed_name::<FieldName>() else {
                 continue;
             };
