@@ -1,6 +1,6 @@
-use super::{hex::ParseHex, Md5Checksum};
+use super::{hex::ParseHex, Hex128};
 
-impl<'a> Md5Checksum<'a> {
+impl<'a> Hex128<'a> {
     /// Convert the hex string into a 128-bit unsigned integer.
     pub fn u128(self) -> Option<u128> {
         let (invalid, value) = ParseHex::parse_hex(self.0);

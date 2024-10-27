@@ -193,11 +193,11 @@ def_str_wrappers! {
 
 def_hex_wrappers! {
     /// Type of value of `MD5SUM`.
-    Md5Checksum {
+    Hex128 {
         size = 16;
     }
     /// Type of value of `SHA256SUM`.
-    Sha256Checksum {
+    Hex256 {
         size = 32;
     }
 }
@@ -270,6 +270,6 @@ mod dependency_and_reason;
 mod dependency_name;
 mod dependency_specification;
 mod dependency_specification_operator;
-mod md5_checksum;
+mod hex128;
 
 pub use dependency_specification_operator::DependencySpecificationOperator;

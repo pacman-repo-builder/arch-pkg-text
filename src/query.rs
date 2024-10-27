@@ -61,8 +61,8 @@ def_traits! {
         description, description_mut  = Description -> Description;
         compressed_size, compressed_size_mut  = CompressedSize -> Size;
         installed_size, installed_size_mut  = InstalledSize -> Size;
-        md5_checksum, md5_checksum_mut  = Md5Checksum -> Md5Checksum;
-        sha256_checksum, sha256_checksum_mut  = Sha256Checksum -> Sha256Checksum;
+        md5_checksum, md5_checksum_mut  = Md5Checksum -> Hex128;
+        sha256_checksum, sha256_checksum_mut  = Sha256Checksum -> Hex256;
         pgp_signature, pgp_signature_mut  = PgpSignature -> PgpSignature;
         url, url_mut  = Url -> Url;
         build_date, build_date_mut  = BuildDate -> Timestamp;
