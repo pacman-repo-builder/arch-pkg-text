@@ -11,19 +11,6 @@ fn md5() {
             0xf8, 0xeb,
         ]),
     );
-    assert_eq!(
-        md5.u16_array(),
-        Some([0x165f, 0x0412, 0x2017, 0xec76, 0x5795, 0x94b1, 0x7f15, 0xf8eb]),
-    );
-    assert_eq!(
-        md5.u32_array(),
-        Some([0x165f0412, 0x2017ec76, 0x579594b1, 0x7f15f8eb]),
-    );
-    assert_eq!(
-        md5.u64_array(),
-        Some([0x165f04122017ec76, 0x579594b17f15f8eb]),
-    );
-    assert_eq!(md5.u128_array(), Some([0x165f04122017ec76579594b17f15f8eb]));
 }
 
 #[test]

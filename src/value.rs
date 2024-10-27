@@ -1,6 +1,5 @@
 use core::{
     iter::{DoubleEndedIterator, FusedIterator},
-    mem::size_of,
     num::ParseIntError,
     str::Split,
 };
@@ -25,25 +24,14 @@ macro_rules! impl_str {
 }
 
 macro_rules! impl_hex {
-    ($container:ident, $size:literal, {$(
-        $name:ident -> $item:ident;
-    )*}) => {
-        impl<'a> $container<'a> {$(
-            pub fn $name(&self) -> Option<[$item; $size / size_of::<$item>()]> {
+    ($container:ident, $size:literal) => {
+        impl<'a> $container<'a> {
+            /// Convert hex string into an array of [`u8`].
+            pub fn u8_array(&self) -> Option<[u8; $size]> {
                 let (invalid, array) = ParseHex::parse_hex(self);
                 invalid.is_empty().then_some(array)
             }
-        )*}
-    };
-
-    ($container:ident, $size:literal) => {
-        impl_hex!($container, $size, {
-            u8_array -> u8;
-            u16_array -> u16;
-            u32_array -> u32;
-            u64_array -> u64;
-            u128_array -> u128;
-        });
+        }
     };
 }
 
