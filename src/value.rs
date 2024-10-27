@@ -52,7 +52,7 @@ macro_rules! def_num_wrappers {
         $name:ident = $num:ty;
     )*) => {$(
         $(#[$attrs])*
-        #[derive(Debug, Display, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, AsRef, Deref)]
+        #[derive(Debug, Display, Clone, Copy, AsRef, Deref)]
         pub struct $name<'a>(&'a str);
         impl_num!($name, $num);
     )*};
