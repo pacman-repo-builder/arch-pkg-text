@@ -19,6 +19,7 @@ impl<'a> MemoQuerier<'a> {
         }
     }
 
+    /// Parse the next key-value pair, save it to cache and return it.
     fn next_entry(&mut self) -> Option<(RawField<'a>, &'a str)> {
         let mut lines = self.text.lines();
 
@@ -56,6 +57,7 @@ impl<'a> MemoQuerier<'a> {
         Some((raw_field, value))
     }
 
+    /// Private function for testing the internal cache.
     #[doc(hidden)]
     pub fn __has_cache(&self, field: FieldName) -> bool {
         self.cache.get(&field).is_some()
