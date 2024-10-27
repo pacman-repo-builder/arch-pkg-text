@@ -46,6 +46,32 @@ macro_rules! def_str_wrappers {
     )*};
 }
 
+macro_rules! def_hex_wrappers {
+    ($(
+        $(#[$attrs:meta])*
+        $name:ident;
+    )*) => {$(
+        $(#[$attrs])*
+        #[derive(Debug, Display, Clone, Copy, AsRef, Deref)]
+        pub struct $name<'a>(pub &'a str);
+        impl_str!($name);
+        // TODO: parse as hex
+    )*};
+}
+
+macro_rules! def_b64_wrappers {
+    ($(
+        $(#[$attrs:meta])*
+        $name:ident;
+    )*) => {$(
+        $(#[$attrs])*
+        #[derive(Debug, Display, Clone, Copy, AsRef, Deref)]
+        pub struct $name<'a>(pub &'a str);
+        impl_str!($name);
+        // TODO: parse as base64
+    )*};
+}
+
 macro_rules! def_num_wrappers {
     ($(
         $(#[$attrs:meta])*
@@ -142,16 +168,22 @@ def_str_wrappers! {
     Version;
     /// Type of value of `DESC`.
     Description;
-    /// Type of value of `MD5SUM`.
-    Md5Checksum;
-    /// Type of value of `SHA256SUM`.
-    Sha256Checksum;
-    /// Type of value of `PGPSIG`.
-    PgpSignature;
     /// Type of value of `URL`.
     Url;
     /// Type of value of `PACKAGER`.
     Packager;
+}
+
+def_hex_wrappers! {
+    /// Type of value of `MD5SUM`.
+    Md5Checksum;
+    /// Type of value of `SHA256SUM`.
+    Sha256Checksum;
+}
+
+def_b64_wrappers! {
+    /// Type of value of `PGPSIG`.
+    PgpSignature;
 }
 
 def_num_wrappers! {
