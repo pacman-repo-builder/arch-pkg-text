@@ -8,6 +8,14 @@ impl<'a> DependencyName<'a> {
     /// > Names are not allowed to start with hyphens or dots.
     /// >
     /// > -- from <https://wiki.archlinux.org/title/PKGBUILD#pkgname>
+    ///
+    /// ```
+    /// # use inspect_pacman_db::value::DependencyName;
+    /// # use pretty_assertions::assert_eq;
+    /// let (name, rest) = DependencyName::parse("rustup>=1.27.0-1");
+    /// assert_eq!(name, DependencyName("rustup"));
+    /// assert_eq!(rest, ">=1.27.0-1");
+    /// ```
     pub fn parse(input: &'a str) -> (Self, &'a str) {
         let stop = input
             .char_indices()

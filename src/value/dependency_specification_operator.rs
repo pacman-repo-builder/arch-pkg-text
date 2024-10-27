@@ -18,6 +18,33 @@ pub enum DependencySpecificationOperator {
 
 impl DependencySpecificationOperator {
     /// Parse a dependency spec operator from an input string.
+    ///
+    /// ```
+    /// # use inspect_pacman_db::value::DependencySpecificationOperator;
+    /// # use pretty_assertions::assert_eq;
+    /// assert_eq!(
+    ///     DependencySpecificationOperator::parse("<1.27.0-1"),
+    ///     Some((DependencySpecificationOperator::Less, "1.27.0-1")),
+    /// );
+    /// assert_eq!(
+    ///     DependencySpecificationOperator::parse("<=1.27.0-1"),
+    ///     Some((DependencySpecificationOperator::LessOrEqual, "1.27.0-1")),
+    /// );
+    /// assert_eq!(
+    ///     DependencySpecificationOperator::parse("=1.27.0-1"),
+    ///     Some((DependencySpecificationOperator::Equal, "1.27.0-1")),
+    /// );
+    /// assert_eq!(
+    ///     DependencySpecificationOperator::parse(">=1.27.0-1"),
+    ///     Some((DependencySpecificationOperator::GreaterOrEqual, "1.27.0-1")),
+    /// );
+    /// assert_eq!(
+    ///     DependencySpecificationOperator::parse(">1.27.0-1"),
+    ///     Some((DependencySpecificationOperator::Greater, "1.27.0-1")),
+    /// );
+    /// assert_eq!(DependencySpecificationOperator::parse("1.27.0-1"), None);
+    ///
+    /// ```
     pub fn parse(input: &str) -> Option<(Self, &'_ str)> {
         use DependencySpecificationOperator::*;
         [LessOrEqual, GreaterOrEqual, Less, Equal, Greater] // XOrEqual must place before X
