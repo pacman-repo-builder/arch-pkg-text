@@ -55,6 +55,11 @@ impl<'a> MemoQuerier<'a> {
 
         Some((raw_field, value))
     }
+
+    #[doc(hidden)]
+    pub fn __has_cache(&self, field: FieldName) -> bool {
+        self.cache.get(&field).is_some()
+    }
 }
 
 impl<'a> QueryMut<'a> for MemoQuerier<'a> {
