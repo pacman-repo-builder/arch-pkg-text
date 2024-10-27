@@ -51,6 +51,13 @@ pub enum ParseRawFieldError {
 
 impl<'a> RawField<'a> {
     /// Parse a [`RawField`] from a [`str`].
+    ///
+    /// ```
+    /// # use inspect_pacman_db::field::RawField;
+    /// # use pretty_assertions::assert_eq;
+    /// let raw_field = RawField::parse_raw("%NAME%").unwrap();
+    /// assert_eq!(raw_field.name_str(), "NAME");
+    /// ```
     pub fn parse_raw(input: &'a str) -> Result<Self, ParseRawFieldError> {
         let field_name = input
             .strip_prefix('%')
@@ -73,6 +80,14 @@ impl<'a> RawField<'a> {
     }
 
     /// Try converting a [`RawField`] into a [`Field<Name>`].
+    ///
+    /// ```
+    /// # use inspect_pacman_db::field::{FieldName, ParsedField, RawField};
+    /// # use pretty_assertions::assert_eq;
+    /// let raw_field = RawField::parse_raw("%NAME%").unwrap();
+    /// let parsed_field: ParsedField = raw_field.try_as_parsed_name().unwrap();
+    /// assert_eq!(parsed_field.name(), &FieldName::Name);
+    /// ```
     pub fn try_as_parsed_name<Name>(
         &'a self,
     ) -> Result<Field<Name>, <&'a str as TryInto<Name>>::Error>
