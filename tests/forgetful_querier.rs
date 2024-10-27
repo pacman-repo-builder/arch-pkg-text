@@ -16,9 +16,9 @@ fn query() {
         "gnome-shell-1:46.2-1-x86_64.pkg.tar.zst",
     );
 
-    let mut arch = querier.architecture().unwrap().into_iter();
-    assert_eq!(arch.next().map(|x| x.as_str()), Some("x86_64"));
-    assert_eq!(arch.next().map(|x| x.as_str()), None);
+    let mut architecture = querier.architecture().unwrap().into_iter();
+    assert_eq!(architecture.next().map(|x| x.as_str()), Some("x86_64"));
+    assert_eq!(architecture.next().map(|x| x.as_str()), None);
 
     let description = querier.description().unwrap();
     assert_eq!(description.as_str(), "Next generation desktop shell");
