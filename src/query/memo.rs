@@ -150,3 +150,8 @@ def_cache!(
     Url License Arch BuildDate Packager
     Depends CheckDepends MakeDepends OptDepends Provides Conflicts Replaces
 );
+
+#[cfg(feature = "parking_lot")]
+mod parking_lot_ext;
+#[cfg(feature = "std")]
+mod std_ext;
