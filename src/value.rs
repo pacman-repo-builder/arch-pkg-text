@@ -125,8 +125,8 @@ macro_rules! def_list_wrappers {
         impl<'a> FusedIterator for $iter_name<'a> {}
 
         $(#[$item_attrs])*
-        #[derive(Debug, Display, Clone, Copy, AsRef, Deref)]
-        pub struct $item_name<'a>(&'a str);
+        #[derive(Debug, Display, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, AsRef, Deref)]
+        pub struct $item_name<'a>(pub &'a str);
         impl_str!($item_name);
     )*};
 }

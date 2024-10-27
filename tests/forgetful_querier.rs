@@ -1,6 +1,6 @@
 use inspect_pacman_db::{
     query::{ForgetfulQuerier, Query},
-    value::{Description, FileName, Name},
+    value::{Architecture, Description, FileName, Name},
 };
 use pretty_assertions::assert_eq;
 
@@ -18,8 +18,8 @@ fn query() {
     );
 
     let mut architecture = querier.architecture().unwrap().into_iter();
-    assert_eq!(architecture.next().map(|x| x.as_str()), Some("x86_64"));
-    assert_eq!(architecture.next().map(|x| x.as_str()), None);
+    assert_eq!(architecture.next(), Some(Architecture("x86_64")));
+    assert_eq!(architecture.next(), None);
 
     assert_eq!(
         querier.description(),
