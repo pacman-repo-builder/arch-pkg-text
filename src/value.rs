@@ -27,8 +27,8 @@ macro_rules! impl_hex {
     ($container:ident, $size:literal) => {
         impl<'a> $container<'a> {
             /// Convert hex string into an array of [`u8`].
-            pub fn u8_array(&self) -> Option<[u8; $size]> {
-                let (invalid, array) = ParseHex::parse_hex(self);
+            pub fn u8_array(self) -> Option<[u8; $size]> {
+                let (invalid, array) = ParseHex::parse_hex(self.0);
                 invalid.is_empty().then_some(array)
             }
         }
