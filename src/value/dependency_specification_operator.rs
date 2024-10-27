@@ -43,7 +43,6 @@ impl DependencySpecificationOperator {
     ///     Some((DependencySpecificationOperator::Greater, "1.27.0-1")),
     /// );
     /// assert_eq!(DependencySpecificationOperator::parse("1.27.0-1"), None);
-    ///
     /// ```
     pub fn parse(input: &str) -> Option<(Self, &'_ str)> {
         use DependencySpecificationOperator::*;
