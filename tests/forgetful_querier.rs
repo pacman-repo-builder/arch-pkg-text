@@ -10,11 +10,11 @@ const TEXT: &str = include_str!("fixtures/gnome-shell.desc");
 fn query() {
     let querier = ForgetfulQuerier::new(TEXT);
 
-    assert_eq!(querier.name(), Some(Name::new("gnome-shell")));
+    assert_eq!(querier.name(), Some(Name("gnome-shell")));
 
     assert_eq!(
         querier.file_name(),
-        Some(FileName::new("gnome-shell-1:46.2-1-x86_64.pkg.tar.zst")),
+        Some(FileName("gnome-shell-1:46.2-1-x86_64.pkg.tar.zst")),
     );
 
     let mut architecture = querier.architecture().unwrap().into_iter();
@@ -23,6 +23,6 @@ fn query() {
 
     assert_eq!(
         querier.description(),
-        Some(Description::new("Next generation desktop shell")),
+        Some(Description("Next generation desktop shell")),
     );
 }
