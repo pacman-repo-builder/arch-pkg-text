@@ -72,9 +72,9 @@ pub enum FieldName {
     #[strum(serialize = "ISIZE")]
     InstalledSize,
     #[strum(serialize = "MD5SUM")]
-    Md5Sum,
+    Md5Checksum,
     #[strum(serialize = "SHA256SUM")]
-    Sha256Sum,
+    Sha256Checksum,
     #[strum(serialize = "PGPSIG")]
     PgpSignature,
     #[strum(serialize = "URL")]
@@ -82,19 +82,19 @@ pub enum FieldName {
     #[strum(serialize = "LICENSE")]
     License,
     #[strum(serialize = "ARCH")]
-    Arch,
+    Architecture,
     #[strum(serialize = "BUILDDATE")]
     BuildDate,
     #[strum(serialize = "PACKAGER")]
     Packager,
     #[strum(serialize = "DEPENDS")]
-    Depends,
+    Dependencies,
     #[strum(serialize = "MAKEDEPENDS")]
-    MakeDepends,
+    MakeDependencies,
     #[strum(serialize = "CHECKDEPENDS")]
-    CheckDepends,
+    CheckDependencies,
     #[strum(serialize = "OPTDEPENDS")]
-    OptDepends,
+    OptionalDependencies,
     #[strum(serialize = "PROVIDES")]
     Provides,
     #[strum(serialize = "CONFLICTS")]

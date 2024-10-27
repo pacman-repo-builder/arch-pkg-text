@@ -16,7 +16,7 @@ fn query() {
         "gnome-shell-1:46.2-1-x86_64.pkg.tar.zst",
     );
 
-    let mut arch = querier.arch().unwrap().into_iter();
+    let mut arch = querier.architecture().unwrap().into_iter();
     assert_eq!(arch.next().map(|x| x.as_str()), Some("x86_64"));
     assert_eq!(arch.next().map(|x| x.as_str()), None);
 

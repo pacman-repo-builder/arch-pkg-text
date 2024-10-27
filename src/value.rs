@@ -143,9 +143,9 @@ def_str_wrappers! {
     /// Type of value of `DESC`.
     Description;
     /// Type of value of `MD5SUM`.
-    Md5Sum;
+    Md5Checksum;
     /// Type of value of `SHA256SUM`.
-    Sha256Sum;
+    Sha256Checksum;
     /// Type of value of `PGPSIG`.
     PgpSignature;
     /// Type of value of `URL`.
@@ -165,7 +165,7 @@ def_list_wrappers! {
     /// Type of value of `GROUPS`.
     GroupList {
         /// [Iterator] type of [`GroupList`].
-        Iter = GroupIter;
+        Iter = GroupIterator;
         /// Type of [iterator item](Iterator::Item) of [`GroupList`].
         Item = Group;
     }
@@ -173,49 +173,49 @@ def_list_wrappers! {
     /// Type of value of `LICENSE`.
     LicenseList {
         /// [Iterator] type of [`LicenseList`].
-        Iter = LicenseIter;
+        Iter = LicenseIterator;
         /// Type of [iterator item](Iterator::Item) of [`LicenseList`].
         Item = License;
     }
 
     /// Type of value of `ARCH`.
-    ArchList {
-        /// [Iterator] type of [`ArchList`].
-        Iter = ArchIter;
-        /// Type of [iterator item](Iterator::Item) of [`ArchList`].
-        Item = Arch;
+    ArchitectureList {
+        /// [Iterator] type of [`ArchitectureList`].
+        Iter = ArchitectureIterator;
+        /// Type of [iterator item](Iterator::Item) of [`ArchitectureList`].
+        Item = Architecture;
     }
 
     /// Type of value of `DEPENDS`, `MAKEDEPENDS`, `CHECKDEPENDS`, `PROVIDES`, `CONFLICTS`, and `REPLACES`.
-    DependList {
-        /// [Iterator] type of [`DependList`].
-        Iter = DependIter;
-        /// Type of [iterator item](Iterator::Item) of [`DependList`].
-        Item = Depend;
+    DependencyList {
+        /// [Iterator] type of [`DependencyList`].
+        Iter = DependencyIterator;
+        /// Type of [iterator item](Iterator::Item) of [`DependencyList`].
+        Item = Dependency;
     }
 
     /// Type of value of `OPTDEPENDS`.
-    DependAndReasonList {
-        /// [Iterator] type of [`DependAndReasonList`].
-        Iter = DependAndReasonIter;
-        /// Type of [iterator item](Iterator::Item) of [`DependAndReasonList`].
-        Item = DependAndReason;
+    DependencyAndReasonList {
+        /// [Iterator] type of [`DependencyAndReasonList`].
+        Iter = DependencyAndReasonIterator;
+        /// Type of [iterator item](Iterator::Item) of [`DependencyAndReasonList`].
+        Item = DependencyAndReason;
     }
 }
 
 def_str_wrappers! {
-    /// Name of a [dependency](Depend). It could either be a [package name](Name) or a soname of a library.
-    DependName;
-    /// Reason for installing a [dependency](DependAndReason).
-    DependReason;
-    /// Specification of a [dependency](DependName).
-    DependSpec;
+    /// Name of a [dependency](Dependency). It could either be a [package name](Name) or a soname of a library.
+    DependencyName;
+    /// Reason for installing a [dependency](DependencyAndReason).
+    DependencyReason;
+    /// Specification of a [dependency](DependencyName).
+    DependencySpecification;
 }
 
-mod depend;
-mod depend_and_reason;
-mod depend_name;
-mod depend_spec;
-mod depend_spec_operator;
+mod dependency;
+mod dependency_and_reason;
+mod dependency_name;
+mod dependency_specification;
+mod dependency_specification_operator;
 
-pub use depend_spec_operator::DependSpecOperator;
+pub use dependency_specification_operator::DependencySpecificationOperator;

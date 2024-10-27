@@ -1,6 +1,6 @@
-use super::DependName;
+use super::DependencyName;
 
-impl<'a> DependName<'a> {
+impl<'a> DependencyName<'a> {
     /// Extract a valid dependency name from an input string.
     ///
     /// > Package names should only consist of lowercase alphanumerics and
@@ -11,15 +11,15 @@ impl<'a> DependName<'a> {
     pub fn parse(input: &'a str) -> (Self, &'a str) {
         let stop = input
             .char_indices()
-            .find(|&(index, char)| !DependName::is_valid_char(index, char));
+            .find(|&(index, char)| !DependencyName::is_valid_char(index, char));
 
         let Some((stop_index, _)) = stop else {
-            return (DependName(input), "");
+            return (DependencyName(input), "");
         };
 
         let content = &input[..stop_index];
         let rest = &input[stop_index..];
-        (DependName(content), rest)
+        (DependencyName(content), rest)
     }
 
     /// Check if a character belongs to a dependency name.

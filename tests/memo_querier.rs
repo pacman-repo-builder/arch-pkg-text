@@ -14,8 +14,8 @@ fn query() {
     assert!(querier.__has_cache(FieldName::FileName).not());
     assert!(querier.__has_cache(FieldName::Name).not());
     assert!(querier.__has_cache(FieldName::Description).not());
-    assert!(querier.__has_cache(FieldName::Arch).not());
-    assert!(querier.__has_cache(FieldName::MakeDepends).not());
+    assert!(querier.__has_cache(FieldName::Architecture).not());
+    assert!(querier.__has_cache(FieldName::MakeDependencies).not());
 
     // load a fresh item
     let name = querier.name_mut().unwrap();
@@ -23,8 +23,8 @@ fn query() {
     assert!(querier.__has_cache(FieldName::FileName));
     assert!(querier.__has_cache(FieldName::Name));
     assert!(querier.__has_cache(FieldName::Description).not());
-    assert!(querier.__has_cache(FieldName::Arch).not());
-    assert!(querier.__has_cache(FieldName::MakeDepends).not());
+    assert!(querier.__has_cache(FieldName::Architecture).not());
+    assert!(querier.__has_cache(FieldName::MakeDependencies).not());
 
     // load a cached item
     let file_name = querier.file_name_mut().unwrap();
@@ -34,48 +34,54 @@ fn query() {
     );
 
     // load another fresh item
-    let mut arch = querier.arch_mut().unwrap().into_iter();
-    assert_eq!(arch.next().map(|x| x.as_str()), Some("x86_64"));
-    assert_eq!(arch.next().map(|x| x.as_str()), None);
+    let mut architecture = querier.architecture_mut().unwrap().into_iter();
+    assert_eq!(architecture.next().map(|x| x.as_str()), Some("x86_64"));
+    assert_eq!(architecture.next().map(|x| x.as_str()), None);
     assert!(querier.__has_cache(FieldName::FileName));
     assert!(querier.__has_cache(FieldName::Name));
     assert!(querier.__has_cache(FieldName::Description));
-    assert!(querier.__has_cache(FieldName::Arch));
-    assert!(querier.__has_cache(FieldName::MakeDepends).not());
+    assert!(querier.__has_cache(FieldName::Architecture));
+    assert!(querier.__has_cache(FieldName::MakeDependencies).not());
 
     // load another cache item
     let description = querier.description_mut().unwrap();
     assert_eq!(description.as_str(), "Next generation desktop shell");
 
     // load the very last item
-    let mut make_depends = querier.make_depends_mut().unwrap().into_iter();
-    assert_eq!(make_depends.next().map(|x| x.as_str()), Some("asciidoc"));
+    let mut make_dependencies = querier.make_dependencies_mut().unwrap().into_iter();
     assert_eq!(
-        make_depends.next().map(|x| x.as_str()),
+        make_dependencies.next().map(|x| x.as_str()),
+        Some("asciidoc"),
+    );
+    assert_eq!(
+        make_dependencies.next().map(|x| x.as_str()),
         Some("bash-completion"),
     );
     assert_eq!(
-        make_depends.next().map(|x| x.as_str()),
+        make_dependencies.next().map(|x| x.as_str()),
         Some("evolution-data-server"),
     );
-    assert_eq!(make_depends.next().map(|x| x.as_str()), Some("gi-docgen"));
-    assert_eq!(make_depends.next().map(|x| x.as_str()), Some("git"));
     assert_eq!(
-        make_depends.next().map(|x| x.as_str()),
+        make_dependencies.next().map(|x| x.as_str()),
+        Some("gi-docgen"),
+    );
+    assert_eq!(make_dependencies.next().map(|x| x.as_str()), Some("git"));
+    assert_eq!(
+        make_dependencies.next().map(|x| x.as_str()),
         Some("gnome-keybindings"),
     );
     assert_eq!(
-        make_depends.next().map(|x| x.as_str()),
+        make_dependencies.next().map(|x| x.as_str()),
         Some("gobject-introspection"),
     );
-    assert_eq!(make_depends.next().map(|x| x.as_str()), Some("meson"));
-    assert_eq!(make_depends.next().map(|x| x.as_str()), Some("sassc"));
-    assert_eq!(make_depends.next().map(|x| x.as_str()), None);
+    assert_eq!(make_dependencies.next().map(|x| x.as_str()), Some("meson"));
+    assert_eq!(make_dependencies.next().map(|x| x.as_str()), Some("sassc"));
+    assert_eq!(make_dependencies.next().map(|x| x.as_str()), None);
     assert!(querier.__has_cache(FieldName::FileName));
     assert!(querier.__has_cache(FieldName::Name));
     assert!(querier.__has_cache(FieldName::Description));
-    assert!(querier.__has_cache(FieldName::Arch));
-    assert!(querier.__has_cache(FieldName::MakeDepends));
+    assert!(querier.__has_cache(FieldName::Architecture));
+    assert!(querier.__has_cache(FieldName::MakeDependencies));
 
     // load items that don't exist
     assert!(querier.conflicts_mut().is_none());
@@ -84,17 +90,17 @@ fn query() {
     // retry the cache
     let name = querier.name_mut().unwrap();
     assert_eq!(name.as_str(), "gnome-shell");
-    let mut arch = querier.arch_mut().unwrap().into_iter();
-    assert_eq!(arch.next().map(|x| x.as_str()), Some("x86_64"));
-    assert_eq!(arch.next().map(|x| x.as_str()), None);
+    let mut architecture = querier.architecture_mut().unwrap().into_iter();
+    assert_eq!(architecture.next().map(|x| x.as_str()), Some("x86_64"));
+    assert_eq!(architecture.next().map(|x| x.as_str()), None);
 
     // second querier
     let mut querier = MemoQuerier::new(TEXT);
     assert!(querier.__has_cache(FieldName::FileName).not());
     assert!(querier.__has_cache(FieldName::Name).not());
     assert!(querier.__has_cache(FieldName::Description).not());
-    assert!(querier.__has_cache(FieldName::Arch).not());
-    assert!(querier.__has_cache(FieldName::MakeDepends).not());
+    assert!(querier.__has_cache(FieldName::Architecture).not());
+    assert!(querier.__has_cache(FieldName::MakeDependencies).not());
 
     // load items that don't exist, which should fill the cache
     assert!(querier.conflicts_mut().is_none());
@@ -102,8 +108,8 @@ fn query() {
     assert!(querier.__has_cache(FieldName::FileName));
     assert!(querier.__has_cache(FieldName::Name));
     assert!(querier.__has_cache(FieldName::Description));
-    assert!(querier.__has_cache(FieldName::Arch));
-    assert!(querier.__has_cache(FieldName::MakeDepends));
+    assert!(querier.__has_cache(FieldName::Architecture));
+    assert!(querier.__has_cache(FieldName::MakeDependencies));
 
     // load the very first item
     let file_name = querier.file_name_mut().unwrap();
@@ -132,8 +138,8 @@ fn query_std_mutex() {
     assert!(has_cache(&querier, FieldName::FileName).not());
     assert!(has_cache(&querier, FieldName::Name).not());
     assert!(has_cache(&querier, FieldName::Description).not());
-    assert!(has_cache(&querier, FieldName::Arch).not());
-    assert!(has_cache(&querier, FieldName::MakeDepends).not());
+    assert!(has_cache(&querier, FieldName::Architecture).not());
+    assert!(has_cache(&querier, FieldName::MakeDependencies).not());
 
     // load a fresh item
     let name = querier.name().unwrap();
@@ -141,8 +147,8 @@ fn query_std_mutex() {
     assert!(has_cache(&querier, FieldName::FileName));
     assert!(has_cache(&querier, FieldName::Name));
     assert!(has_cache(&querier, FieldName::Description).not());
-    assert!(has_cache(&querier, FieldName::Arch).not());
-    assert!(has_cache(&querier, FieldName::MakeDepends).not());
+    assert!(has_cache(&querier, FieldName::Architecture).not());
+    assert!(has_cache(&querier, FieldName::MakeDependencies).not());
 
     // load a cached item
     let file_name = querier.file_name().unwrap();
@@ -152,48 +158,54 @@ fn query_std_mutex() {
     );
 
     // load another fresh item
-    let mut arch = querier.arch().unwrap().into_iter();
-    assert_eq!(arch.next().map(|x| x.as_str()), Some("x86_64"));
-    assert_eq!(arch.next().map(|x| x.as_str()), None);
+    let mut architecture = querier.architecture().unwrap().into_iter();
+    assert_eq!(architecture.next().map(|x| x.as_str()), Some("x86_64"));
+    assert_eq!(architecture.next().map(|x| x.as_str()), None);
     assert!(has_cache(&querier, FieldName::FileName));
     assert!(has_cache(&querier, FieldName::Name));
     assert!(has_cache(&querier, FieldName::Description));
-    assert!(has_cache(&querier, FieldName::Arch));
-    assert!(has_cache(&querier, FieldName::MakeDepends).not());
+    assert!(has_cache(&querier, FieldName::Architecture));
+    assert!(has_cache(&querier, FieldName::MakeDependencies).not());
 
     // load another cache item
     let description = querier.description().unwrap();
     assert_eq!(description.as_str(), "Next generation desktop shell");
 
     // load the very last item
-    let mut make_depends = querier.make_depends().unwrap().into_iter();
-    assert_eq!(make_depends.next().map(|x| x.as_str()), Some("asciidoc"));
+    let mut make_dependencies = querier.make_dependencies().unwrap().into_iter();
     assert_eq!(
-        make_depends.next().map(|x| x.as_str()),
+        make_dependencies.next().map(|x| x.as_str()),
+        Some("asciidoc"),
+    );
+    assert_eq!(
+        make_dependencies.next().map(|x| x.as_str()),
         Some("bash-completion"),
     );
     assert_eq!(
-        make_depends.next().map(|x| x.as_str()),
+        make_dependencies.next().map(|x| x.as_str()),
         Some("evolution-data-server"),
     );
-    assert_eq!(make_depends.next().map(|x| x.as_str()), Some("gi-docgen"));
-    assert_eq!(make_depends.next().map(|x| x.as_str()), Some("git"));
     assert_eq!(
-        make_depends.next().map(|x| x.as_str()),
+        make_dependencies.next().map(|x| x.as_str()),
+        Some("gi-docgen"),
+    );
+    assert_eq!(make_dependencies.next().map(|x| x.as_str()), Some("git"));
+    assert_eq!(
+        make_dependencies.next().map(|x| x.as_str()),
         Some("gnome-keybindings"),
     );
     assert_eq!(
-        make_depends.next().map(|x| x.as_str()),
+        make_dependencies.next().map(|x| x.as_str()),
         Some("gobject-introspection"),
     );
-    assert_eq!(make_depends.next().map(|x| x.as_str()), Some("meson"));
-    assert_eq!(make_depends.next().map(|x| x.as_str()), Some("sassc"));
-    assert_eq!(make_depends.next().map(|x| x.as_str()), None);
+    assert_eq!(make_dependencies.next().map(|x| x.as_str()), Some("meson"));
+    assert_eq!(make_dependencies.next().map(|x| x.as_str()), Some("sassc"));
+    assert_eq!(make_dependencies.next().map(|x| x.as_str()), None);
     assert!(has_cache(&querier, FieldName::FileName));
     assert!(has_cache(&querier, FieldName::Name));
     assert!(has_cache(&querier, FieldName::Description));
-    assert!(has_cache(&querier, FieldName::Arch));
-    assert!(has_cache(&querier, FieldName::MakeDepends));
+    assert!(has_cache(&querier, FieldName::Architecture));
+    assert!(has_cache(&querier, FieldName::MakeDependencies));
 
     // load items that don't exist
     assert!(querier.conflicts().is_none());
@@ -202,9 +214,9 @@ fn query_std_mutex() {
     // retry the cache
     let name = querier.name().unwrap();
     assert_eq!(name.as_str(), "gnome-shell");
-    let mut arch = querier.arch().unwrap().into_iter();
-    assert_eq!(arch.next().map(|x| x.as_str()), Some("x86_64"));
-    assert_eq!(arch.next().map(|x| x.as_str()), None);
+    let mut architecture = querier.architecture().unwrap().into_iter();
+    assert_eq!(architecture.next().map(|x| x.as_str()), Some("x86_64"));
+    assert_eq!(architecture.next().map(|x| x.as_str()), None);
 }
 
 #[cfg(feature = "parking_lot")]
@@ -222,8 +234,8 @@ fn query_parking_lot_mutex() {
     assert!(has_cache(&querier, FieldName::FileName).not());
     assert!(has_cache(&querier, FieldName::Name).not());
     assert!(has_cache(&querier, FieldName::Description).not());
-    assert!(has_cache(&querier, FieldName::Arch).not());
-    assert!(has_cache(&querier, FieldName::MakeDepends).not());
+    assert!(has_cache(&querier, FieldName::Architecture).not());
+    assert!(has_cache(&querier, FieldName::MakeDependencies).not());
 
     // load a fresh item
     let name = querier.name().unwrap();
@@ -231,8 +243,8 @@ fn query_parking_lot_mutex() {
     assert!(has_cache(&querier, FieldName::FileName));
     assert!(has_cache(&querier, FieldName::Name));
     assert!(has_cache(&querier, FieldName::Description).not());
-    assert!(has_cache(&querier, FieldName::Arch).not());
-    assert!(has_cache(&querier, FieldName::MakeDepends).not());
+    assert!(has_cache(&querier, FieldName::Architecture).not());
+    assert!(has_cache(&querier, FieldName::MakeDependencies).not());
 
     // load a cached item
     let file_name = querier.file_name().unwrap();
@@ -242,48 +254,54 @@ fn query_parking_lot_mutex() {
     );
 
     // load another fresh item
-    let mut arch = querier.arch().unwrap().into_iter();
-    assert_eq!(arch.next().map(|x| x.as_str()), Some("x86_64"));
-    assert_eq!(arch.next().map(|x| x.as_str()), None);
+    let mut architecture = querier.architecture().unwrap().into_iter();
+    assert_eq!(architecture.next().map(|x| x.as_str()), Some("x86_64"));
+    assert_eq!(architecture.next().map(|x| x.as_str()), None);
     assert!(has_cache(&querier, FieldName::FileName));
     assert!(has_cache(&querier, FieldName::Name));
     assert!(has_cache(&querier, FieldName::Description));
-    assert!(has_cache(&querier, FieldName::Arch));
-    assert!(has_cache(&querier, FieldName::MakeDepends).not());
+    assert!(has_cache(&querier, FieldName::Architecture));
+    assert!(has_cache(&querier, FieldName::MakeDependencies).not());
 
     // load another cache item
     let description = querier.description().unwrap();
     assert_eq!(description.as_str(), "Next generation desktop shell");
 
     // load the very last item
-    let mut make_depends = querier.make_depends().unwrap().into_iter();
-    assert_eq!(make_depends.next().map(|x| x.as_str()), Some("asciidoc"));
+    let mut make_dependencies = querier.make_dependencies().unwrap().into_iter();
     assert_eq!(
-        make_depends.next().map(|x| x.as_str()),
+        make_dependencies.next().map(|x| x.as_str()),
+        Some("asciidoc"),
+    );
+    assert_eq!(
+        make_dependencies.next().map(|x| x.as_str()),
         Some("bash-completion"),
     );
     assert_eq!(
-        make_depends.next().map(|x| x.as_str()),
+        make_dependencies.next().map(|x| x.as_str()),
         Some("evolution-data-server"),
     );
-    assert_eq!(make_depends.next().map(|x| x.as_str()), Some("gi-docgen"));
-    assert_eq!(make_depends.next().map(|x| x.as_str()), Some("git"));
     assert_eq!(
-        make_depends.next().map(|x| x.as_str()),
+        make_dependencies.next().map(|x| x.as_str()),
+        Some("gi-docgen"),
+    );
+    assert_eq!(make_dependencies.next().map(|x| x.as_str()), Some("git"));
+    assert_eq!(
+        make_dependencies.next().map(|x| x.as_str()),
         Some("gnome-keybindings"),
     );
     assert_eq!(
-        make_depends.next().map(|x| x.as_str()),
+        make_dependencies.next().map(|x| x.as_str()),
         Some("gobject-introspection"),
     );
-    assert_eq!(make_depends.next().map(|x| x.as_str()), Some("meson"));
-    assert_eq!(make_depends.next().map(|x| x.as_str()), Some("sassc"));
-    assert_eq!(make_depends.next().map(|x| x.as_str()), None);
+    assert_eq!(make_dependencies.next().map(|x| x.as_str()), Some("meson"));
+    assert_eq!(make_dependencies.next().map(|x| x.as_str()), Some("sassc"));
+    assert_eq!(make_dependencies.next().map(|x| x.as_str()), None);
     assert!(has_cache(&querier, FieldName::FileName));
     assert!(has_cache(&querier, FieldName::Name));
     assert!(has_cache(&querier, FieldName::Description));
-    assert!(has_cache(&querier, FieldName::Arch));
-    assert!(has_cache(&querier, FieldName::MakeDepends));
+    assert!(has_cache(&querier, FieldName::Architecture));
+    assert!(has_cache(&querier, FieldName::MakeDependencies));
 
     // load items that don't exist
     assert!(querier.conflicts().is_none());
@@ -292,7 +310,7 @@ fn query_parking_lot_mutex() {
     // retry the cache
     let name = querier.name().unwrap();
     assert_eq!(name.as_str(), "gnome-shell");
-    let mut arch = querier.arch().unwrap().into_iter();
-    assert_eq!(arch.next().map(|x| x.as_str()), Some("x86_64"));
-    assert_eq!(arch.next().map(|x| x.as_str()), None);
+    let mut architecture = querier.architecture().unwrap().into_iter();
+    assert_eq!(architecture.next().map(|x| x.as_str()), Some("x86_64"));
+    assert_eq!(architecture.next().map(|x| x.as_str()), None);
 }

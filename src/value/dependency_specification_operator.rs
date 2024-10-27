@@ -1,9 +1,9 @@
 use strum::{AsRefStr, Display, EnumString, IntoStaticStr};
 
-/// Operator at the start of a [`DependSpec`](super::DependSpec).
+/// Operator at the start of a [`DependencySpecification`](super::DependencySpecification).
 #[derive(Debug, Clone, Copy, PartialEq, Eq)] // core traits
 #[derive(AsRefStr, Display, EnumString, IntoStaticStr)] // strum traits
-pub enum DependSpecOperator {
+pub enum DependencySpecificationOperator {
     #[strum(serialize = "<")]
     Less = -2,
     #[strum(serialize = "<=")]
@@ -16,10 +16,10 @@ pub enum DependSpecOperator {
     Greater = 2,
 }
 
-impl DependSpecOperator {
+impl DependencySpecificationOperator {
     /// Parse a dependency spec operator from an input string.
     pub fn parse(input: &str) -> Option<(Self, &'_ str)> {
-        use DependSpecOperator::*;
+        use DependencySpecificationOperator::*;
         [LessOrEqual, GreaterOrEqual, Less, Equal, Greater] // XOrEqual must place before X
             .into_iter()
             .find_map(|candidate| {

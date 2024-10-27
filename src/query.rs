@@ -61,8 +61,8 @@ def_traits! {
         description, description_mut  = Description -> Description;
         compressed_size, compressed_size_mut  = CompressedSize -> Size;
         installed_size, installed_size_mut  = InstalledSize -> Size;
-        md5sum, md5sum_mut  = Md5Sum -> Md5Sum;
-        sha256sum, sha256sum_mut  = Sha256Sum -> Sha256Sum;
+        md5_checksum, md5_checksum_mut  = Md5Checksum -> Md5Checksum;
+        sha256_checksum, sha256_checksum_mut  = Sha256Checksum -> Sha256Checksum;
         pgp_signature, pgp_signature_mut  = PgpSignature -> PgpSignature;
         url, url_mut  = Url -> Url;
         build_date, build_date_mut  = BuildDate -> Timestamp;
@@ -71,14 +71,14 @@ def_traits! {
     list {
         groups, groups_mut = Groups -> GroupList;
         license, license_mut = License -> LicenseList;
-        arch, arch_mut = Arch -> ArchList;
-        depends, depends_mut = Depends -> DependList;
-        make_depends, make_depends_mut = MakeDepends -> DependList;
-        check_depends, check_depends_mut = CheckDepends -> DependList;
-        opt_depends, opt_depends_mut = OptDepends -> DependAndReasonList;
-        provides, provides_mut = Provides -> DependList;
-        conflicts, conflicts_mut = Conflicts -> DependList;
-        replaces, replaces_mut = Replaces -> DependList;
+        architecture, architecture_mut = Architecture -> ArchitectureList;
+        dependencies, dependencies_mut = Dependencies -> DependencyList;
+        make_dependencies, make_dependencies_mut = MakeDependencies -> DependencyList;
+        check_dependencies, check_dependencies_mut = CheckDependencies -> DependencyList;
+        opt_dependencies, opt_dependencies_mut = OptionalDependencies -> DependencyAndReasonList;
+        provides, provides_mut = Provides -> DependencyList;
+        conflicts, conflicts_mut = Conflicts -> DependencyList;
+        replaces, replaces_mut = Replaces -> DependencyList;
     }
 }
 

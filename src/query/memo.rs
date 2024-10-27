@@ -146,9 +146,10 @@ macro_rules! def_cache {
 
 def_cache!(
     FileName Name Base Version Description Groups
-    CompressedSize InstalledSize Md5Sum Sha256Sum PgpSignature
-    Url License Arch BuildDate Packager
-    Depends CheckDepends MakeDepends OptDepends Provides Conflicts Replaces
+    CompressedSize InstalledSize Md5Checksum Sha256Checksum
+    PgpSignature Url License Architecture BuildDate Packager
+    Dependencies CheckDependencies MakeDependencies OptionalDependencies
+    Provides Conflicts Replaces
 );
 
 #[cfg(feature = "parking_lot")]
