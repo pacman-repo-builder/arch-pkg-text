@@ -19,7 +19,7 @@ impl<'a> MemoQuerier<'a> {
         }
     }
 
-    fn parse_next(&mut self) -> Option<(RawField<'a>, &'a str)> {
+    fn next_entry(&mut self) -> Option<(RawField<'a>, &'a str)> {
         let mut lines = self.text.lines();
 
         let (field_str, raw_field) = if let Some((field_str, raw_field)) = self.last {
@@ -68,7 +68,7 @@ impl<'a> QueryMut<'a> for MemoQuerier<'a> {
             return value;
         }
 
-        while let Some((raw_field, value)) = self.parse_next() {
+        while let Some((raw_field, value)) = self.next_entry() {
             let Ok(parsed_field) = raw_field.try_as_parsed_name::<FieldName>() else {
                 continue;
             };
