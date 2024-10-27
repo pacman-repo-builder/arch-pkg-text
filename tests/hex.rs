@@ -11,6 +11,7 @@ fn md5() {
             0xf8, 0xeb,
         ]),
     );
+    assert_eq!(md5.u128(), Some(0x165f04122017ec76579594b17f15f8eb));
 }
 
 #[test]

@@ -269,5 +269,6 @@ mod dependency_name;
 mod dependency_specification;
 mod dependency_specification_operator;
 mod hex;
+mod md5_checksum;
 
 pub use dependency_specification_operator::DependencySpecificationOperator;
