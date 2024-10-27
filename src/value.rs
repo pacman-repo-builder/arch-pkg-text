@@ -85,7 +85,6 @@ macro_rules! def_b64_wrappers {
         #[derive(Debug, Display, Clone, Copy, AsRef, Deref)]
         pub struct $name<'a>(pub &'a str);
         impl_str!($name);
-        // TODO: parse as base64
     )*};
 }
 
