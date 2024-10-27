@@ -1,9 +1,11 @@
 use core::{
     iter::{DoubleEndedIterator, FusedIterator},
+    mem::size_of,
     num::ParseIntError,
     str::Split,
 };
 use derive_more::{AsRef, Deref, Display};
+use hex::ParseHex;
 use pipe_trait::Pipe;
 
 macro_rules! impl_str {
@@ -19,6 +21,29 @@ macro_rules! impl_str {
                 &self.0.as_ref()
             }
         }
+    };
+}
+
+macro_rules! impl_hex {
+    ($container:ident, $size:literal, {$(
+        $name:ident -> $item:ident;
+    )*}) => {
+        impl<'a> $container<'a> {$(
+            pub fn $name(&self) -> Option<[$item; $size / size_of::<$item>()]> {
+                let (invalid, array) = ParseHex::parse_hex(self);
+                invalid.is_empty().then_some(array)
+            }
+        )*}
+    };
+
+    ($container:ident, $size:literal) => {
+        impl_hex!($container, $size, {
+            u8_array -> u8;
+            u16_array -> u16;
+            u32_array -> u32;
+            u64_array -> u64;
+            u128_array -> u128;
+        });
     };
 }
 
@@ -49,13 +74,15 @@ macro_rules! def_str_wrappers {
 macro_rules! def_hex_wrappers {
     ($(
         $(#[$attrs:meta])*
-        $name:ident;
+        $name:ident {
+            size = $size:literal;
+        }
     )*) => {$(
         $(#[$attrs])*
         #[derive(Debug, Display, Clone, Copy, AsRef, Deref)]
         pub struct $name<'a>(pub &'a str);
         impl_str!($name);
-        // TODO: parse as hex
+        impl_hex!($name, $size);
     )*};
 }
 
@@ -176,9 +203,13 @@ def_str_wrappers! {
 
 def_hex_wrappers! {
     /// Type of value of `MD5SUM`.
-    Md5Checksum;
+    Md5Checksum {
+        size = 16;
+    }
     /// Type of value of `SHA256SUM`.
-    Sha256Checksum;
+    Sha256Checksum {
+        size = 32;
+    }
 }
 
 def_b64_wrappers! {
@@ -249,5 +280,6 @@ mod dependency_and_reason;
 mod dependency_name;
 mod dependency_specification;
 mod dependency_specification_operator;
+mod hex;
 
 pub use dependency_specification_operator::DependencySpecificationOperator;

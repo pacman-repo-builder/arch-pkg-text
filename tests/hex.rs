@@ -1,0 +1,40 @@
+use inspect_pacman_db::value::{Md5Checksum, Sha256Checksum};
+use pretty_assertions::assert_eq;
+
+#[test]
+fn md5() {
+    let md5 = Md5Checksum("165f04122017ec76579594b17f15f8eb");
+    assert_eq!(
+        md5.u8_array(),
+        Some([
+            0x16, 0x5f, 0x04, 0x12, 0x20, 0x17, 0xec, 0x76, 0x57, 0x95, 0x94, 0xb1, 0x7f, 0x15,
+            0xf8, 0xeb,
+        ]),
+    );
+    assert_eq!(
+        md5.u16_array(),
+        Some([0x165f, 0x0412, 0x2017, 0xec76, 0x5795, 0x94b1, 0x7f15, 0xf8eb]),
+    );
+    assert_eq!(
+        md5.u32_array(),
+        Some([0x165f0412, 0x2017ec76, 0x579594b1, 0x7f15f8eb]),
+    );
+    assert_eq!(
+        md5.u64_array(),
+        Some([0x165f04122017ec76, 0x579594b17f15f8eb]),
+    );
+    assert_eq!(md5.u128_array(), Some([0x165f04122017ec76579594b17f15f8eb]));
+}
+
+#[test]
+fn sha256() {
+    let sha256 = Sha256Checksum("37cba20b05b899dcbe2e565b1c20b7cfc6411ffcb014b977edb2d8afbc3a530b");
+    assert_eq!(
+        sha256.u8_array(),
+        Some([
+            0x37, 0xcb, 0xa2, 0x0b, 0x05, 0xb8, 0x99, 0xdc, 0xbe, 0x2e, 0x56, 0x5b, 0x1c, 0x20,
+            0xb7, 0xcf, 0xc6, 0x41, 0x1f, 0xfc, 0xb0, 0x14, 0xb9, 0x77, 0xed, 0xb2, 0xd8, 0xaf,
+            0xbc, 0x3a, 0x53, 0x0b,
+        ]),
+    );
+}
