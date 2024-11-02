@@ -4,7 +4,7 @@ impl<'a> Dependency<'a> {
     /// Extract [`DependencyName`] and [`DependencySpecification`].
     ///
     /// ```
-    /// # use inspect_pacman_db::value::{Dependency, DependencyName, DependencySpecification};
+    /// # use parse_arch_pkg_desc::value::{Dependency, DependencyName, DependencySpecification};
     /// # use pretty_assertions::assert_eq;
     /// let depend = Dependency("rustup>=1.27.0-1");
     /// let (name, spec) = depend.components();

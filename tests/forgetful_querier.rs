@@ -1,4 +1,4 @@
-use inspect_pacman_db::{
+use parse_arch_pkg_desc::{
     query::{ForgetfulQuerier, Query},
     value::{Architecture, Description, FileName, Name},
 };

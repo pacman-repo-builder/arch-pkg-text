@@ -4,7 +4,7 @@ impl<'a> DependencyAndReason<'a> {
     /// Extract [`Dependency`] and [`DependencyReason`].
     ///
     /// ```
-    /// # use inspect_pacman_db::value::{Dependency, DependencyAndReason, DependencyReason};
+    /// # use parse_arch_pkg_desc::value::{Dependency, DependencyAndReason, DependencyReason};
     /// # use pretty_assertions::assert_eq;
     /// let depend_and_reason = DependencyAndReason("lldb: rust-lldb script");
     /// let (depend, reason) = depend_and_reason.components();

@@ -20,7 +20,7 @@ impl DependencySpecificationOperator {
     /// Parse a dependency spec operator from an input string.
     ///
     /// ```
-    /// # use inspect_pacman_db::value::DependencySpecificationOperator;
+    /// # use parse_arch_pkg_desc::value::DependencySpecificationOperator;
     /// # use pretty_assertions::assert_eq;
     /// assert_eq!(
     ///     DependencySpecificationOperator::parse("<1.27.0-1"),

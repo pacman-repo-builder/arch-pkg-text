@@ -1,5 +1,5 @@
 use core::ops::Not;
-use inspect_pacman_db::{
+use parse_arch_pkg_desc::{
     field::FieldName,
     query::{MemoQuerier, QueryMut},
     value::{Architecture, Dependency},
@@ -121,7 +121,7 @@ fn query() {
 #[cfg(feature = "std")]
 #[test]
 fn query_std_mutex() {
-    use inspect_pacman_db::query::Query;
+    use parse_arch_pkg_desc::query::Query;
     use pipe_trait::Pipe;
     use std::sync::Mutex;
 
@@ -211,8 +211,8 @@ fn query_std_mutex() {
 #[cfg(feature = "parking_lot")]
 #[test]
 fn query_parking_lot_mutex() {
-    use inspect_pacman_db::query::Query;
     use parking_lot::Mutex;
+    use parse_arch_pkg_desc::query::Query;
     use pipe_trait::Pipe;
 
     fn has_cache(querier: &Mutex<MemoQuerier>, field: FieldName) -> bool {

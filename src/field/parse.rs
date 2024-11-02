@@ -53,7 +53,7 @@ impl<'a> RawField<'a> {
     /// Parse a [`RawField`] from a [`str`].
     ///
     /// ```
-    /// # use inspect_pacman_db::field::RawField;
+    /// # use parse_arch_pkg_desc::field::RawField;
     /// # use pretty_assertions::assert_eq;
     /// let raw_field = RawField::parse_raw("%NAME%").unwrap();
     /// assert_eq!(raw_field.name_str(), "NAME");
@@ -82,7 +82,7 @@ impl<'a> RawField<'a> {
     /// Try converting a [`RawField`] into a [`Field<Name>`].
     ///
     /// ```
-    /// # use inspect_pacman_db::field::{FieldName, ParsedField, RawField};
+    /// # use parse_arch_pkg_desc::field::{FieldName, ParsedField, RawField};
     /// # use pretty_assertions::assert_eq;
     /// let raw_field = RawField::parse_raw("%NAME%").unwrap();
     /// let parsed_field: ParsedField = raw_field.try_as_parsed_name().unwrap();
