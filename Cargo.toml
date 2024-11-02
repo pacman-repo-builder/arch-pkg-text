@@ -21,7 +21,7 @@ path = "src/lib.rs"
 [features]
 default = []
 parking_lot = ["std", "dep:parking_lot"]
-std = []
+std = ["strum/std"]
 
 [dependencies]
 derive_more = { version = "1.0.0", default-features = false, features = ["as_ref", "deref", "display", "error"] }
