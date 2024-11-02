@@ -1,6 +1,6 @@
 [package]
 name = "inspect-pacman-db"
-description = "Inspect Arch Linux's pacman database without libalpm"
+description = "Pure Rust library to parse package description text of a pacman package"
 version = "0.0.0"
 authors = ["khai96_ <hvksmr1996@gmail.com>"]
 license = "MIT"
