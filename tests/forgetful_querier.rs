@@ -1,5 +1,5 @@
 use parse_arch_pkg_desc::{
-    query::{ForgetfulQuerier, Query},
+    db::query::{ForgetfulQuerier, Query},
     value::{Architecture, Description, FileName, Name},
 };
 use pretty_assertions::assert_eq;

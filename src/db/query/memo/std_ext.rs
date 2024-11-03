@@ -1,5 +1,5 @@
 use super::MemoQuerier;
-use crate::{
+use crate::db::{
     field::ParsedField,
     query::{Query, QueryMut},
 };

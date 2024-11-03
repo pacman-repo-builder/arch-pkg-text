@@ -1,5 +1,5 @@
 use super::{Query, QueryMut};
-use crate::field::{ParsedField, RawField};
+use crate::db::field::{ParsedField, RawField};
 use pipe_trait::Pipe;
 
 /// [Query] without a cache.
