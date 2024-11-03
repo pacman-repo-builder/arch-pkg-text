@@ -66,6 +66,15 @@ impl<'a> RawField<'a> {
     }
 
     /// Try converting a [`RawField`] into a [`Field<Name, Architecture>`].
+    ///
+    /// ```
+    /// # use parse_arch_pkg_desc::srcinfo::field::{FieldName, ParsedField, RawField};
+    /// # use pretty_assertions::assert_eq;
+    /// let raw_field = RawField::parse_raw("source_x86_64");
+    /// let parsed_field: ParsedField<&str> = raw_field.to_parsed().unwrap();
+    /// assert_eq!(parsed_field.name(), &FieldName::Source);
+    /// assert_eq!(parsed_field.architecture_str(), Some("x86_64"));
+    /// ```
     pub fn to_parsed<Name, Architecture>(&self) -> ParseResult<'a, Name, Architecture>
     where
         &'a str: TryInto<Name> + TryInto<Architecture>,
