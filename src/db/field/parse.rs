@@ -11,6 +11,12 @@ pub enum ParseFieldError<ParseNameError> {
 
 impl<Name> Field<Name> {
     /// Parse a [`Field`] from [`str`].
+    /// ```
+    /// # use parse_arch_pkg_desc::db::field::{FieldName, ParsedField};
+    /// # use pretty_assertions::assert_eq;
+    /// let parsed_field = ParsedField::parse("%NAME%").unwrap();
+    /// assert_eq!(parsed_field.name(), &FieldName::Name);
+    /// ```
     pub fn parse<'a>(value: &'a str) -> Result<Self, <Self as TryFrom<&'a str>>::Error>
     where
         &'a str: TryInto<Name>,
