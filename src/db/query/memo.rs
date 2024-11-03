@@ -71,7 +71,7 @@ impl<'a> QueryMut<'a> for MemoQuerier<'a> {
         }
 
         while let Some((raw_field, value)) = self.next_entry() {
-            let Ok(parsed_field) = raw_field.try_as_parsed_name::<FieldName>() else {
+            let Ok(parsed_field) = raw_field.to_parsed::<FieldName>() else {
                 continue;
             };
             let value = if value.is_empty() { None } else { Some(value) };

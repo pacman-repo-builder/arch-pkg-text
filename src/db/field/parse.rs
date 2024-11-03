@@ -91,10 +91,10 @@ impl<'a> RawField<'a> {
     /// # use parse_arch_pkg_desc::db::field::{FieldName, ParsedField, RawField};
     /// # use pretty_assertions::assert_eq;
     /// let raw_field = RawField::parse_raw("%NAME%").unwrap();
-    /// let parsed_field: ParsedField = raw_field.try_as_parsed_name().unwrap();
+    /// let parsed_field: ParsedField = raw_field.to_parsed().unwrap();
     /// assert_eq!(parsed_field.name(), &FieldName::Name);
     /// ```
-    pub fn try_as_parsed_name<Name>(&self) -> Result<Field<Name>, <&'a str as TryInto<Name>>::Error>
+    pub fn to_parsed<Name>(&self) -> Result<Field<Name>, <&'a str as TryInto<Name>>::Error>
     where
         &'a str: TryInto<Name>,
     {
