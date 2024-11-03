@@ -56,20 +56,22 @@ impl<Name, Architecture> Field<Name, Architecture> {
     }
 }
 
-/// Raw string field of a package description.
-pub type RawField<'a> = Field<&'a str, &'a str>;
-
-impl<'a> RawField<'a> {
+impl<'a, Architecture> Field<&'a str, Architecture> {
     /// Get the name of the field as a string slice.
     pub const fn name_str(&self) -> &'_ str {
         self.name()
     }
+}
 
+impl<'a, Name> Field<Name, &'a str> {
     /// Get the name of the field as a string slice.
     pub fn architecture_str(&self) -> Option<&'_ str> {
         self.architecture().copied()
     }
 }
+
+/// Raw string field of a package description.
+pub type RawField<'a> = Field<&'a str, &'a str>;
 
 /// Parsed field of a package description.
 pub type ParsedField<Architecture> = Field<FieldName, Architecture>;
