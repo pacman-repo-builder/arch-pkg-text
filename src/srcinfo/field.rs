@@ -163,3 +163,6 @@ pub enum FieldName {
     #[strum(serialize = "sha512sums")]
     Sha512Checksums,
 }
+
+mod parse;
+pub use parse::*;
