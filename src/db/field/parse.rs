@@ -88,9 +88,7 @@ impl<'a> RawField<'a> {
     /// let parsed_field: ParsedField = raw_field.try_as_parsed_name().unwrap();
     /// assert_eq!(parsed_field.name(), &FieldName::Name);
     /// ```
-    pub fn try_as_parsed_name<Name>(
-        &'a self,
-    ) -> Result<Field<Name>, <&'a str as TryInto<Name>>::Error>
+    pub fn try_as_parsed_name<Name>(&self) -> Result<Field<Name>, <&'a str as TryInto<Name>>::Error>
     where
         &'a str: TryInto<Name>,
     {

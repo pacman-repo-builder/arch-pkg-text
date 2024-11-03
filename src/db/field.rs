@@ -24,7 +24,7 @@ pub type RawField<'a> = Field<&'a str>;
 
 impl<'a> RawField<'a> {
     /// Get the name of the field as a string slice.
-    pub const fn name_str(&self) -> &'_ str {
+    pub const fn name_str(&self) -> &'a str {
         self.name()
     }
 }
