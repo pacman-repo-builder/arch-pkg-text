@@ -23,11 +23,11 @@ impl<Name, Architecture> Field<Name, Architecture> {
     /// assert_eq!(parsed_field.name(), &FieldName::Source);
     /// assert_eq!(parsed_field.architecture_str(), Some("x86_64"));
     /// ```
-    pub fn parse<'a>(raw_field: &'a str) -> ParseResult<'a, Name, Architecture>
+    pub fn parse<'a>(input: &'a str) -> ParseResult<'a, Name, Architecture>
     where
         &'a str: TryInto<Name> + TryInto<Architecture>,
     {
-        RawField::parse_raw(raw_field).to_parsed()
+        RawField::parse_raw(input).to_parsed()
     }
 }
 
@@ -37,8 +37,8 @@ where
     &'a str: TryInto<Name> + TryInto<Architecture>,
 {
     type Error = ParseError<'a, Name, Architecture>;
-    fn try_from(raw_field: &'a str) -> ParseResult<'a, Name, Architecture> {
-        RawField::parse_raw(raw_field).to_parsed()
+    fn try_from(value: &'a str) -> ParseResult<'a, Name, Architecture> {
+        RawField::parse_raw(value).to_parsed()
     }
 }
 
@@ -64,10 +64,10 @@ impl<'a> RawField<'a> {
     /// assert_eq!(raw_field.name_str(), "source");
     /// assert_eq!(raw_field.architecture_str(), Some("x86_64"));
     /// ```
-    pub fn parse_raw(raw_field: &'a str) -> Self {
-        let (name, architecture) = match raw_field.split_once('_') {
+    pub fn parse_raw(input: &'a str) -> Self {
+        let (name, architecture) = match input.split_once('_') {
             Some((name, architecture)) => (name, Some(architecture)),
-            None => (raw_field, None),
+            None => (input, None),
         };
         RawField { name, architecture }
     }
