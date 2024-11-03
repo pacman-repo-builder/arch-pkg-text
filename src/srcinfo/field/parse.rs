@@ -37,6 +37,26 @@ where
 
 impl<'a> RawField<'a> {
     /// Parse a [`RawField`] from a [`str`].
+    ///
+    /// **Without architecture:**
+    ///
+    /// ```
+    /// # use parse_arch_pkg_desc::srcinfo::field::RawField;
+    /// # use pretty_assertions::assert_eq;
+    /// let raw_field = RawField::parse_raw("source");
+    /// assert_eq!(raw_field.name_str(), "source");
+    /// assert_eq!(raw_field.architecture_str(), None);
+    /// ```
+    ///
+    /// **With architecture:**
+    ///
+    /// ```
+    /// # use parse_arch_pkg_desc::srcinfo::field::RawField;
+    /// # use pretty_assertions::assert_eq;
+    /// let raw_field = RawField::parse_raw("source_x86_64");
+    /// assert_eq!(raw_field.name_str(), "source");
+    /// assert_eq!(raw_field.architecture_str(), Some("x86_64"));
+    /// ```
     pub fn parse_raw(raw_field: &'a str) -> Self {
         let (name, architecture) = match raw_field.split_once('_') {
             Some((name, architecture)) => (name, Some(architecture)),
