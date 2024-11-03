@@ -16,6 +16,13 @@ type ParseResult<'a, Name, Architecture> =
 
 impl<Name, Architecture> Field<Name, Architecture> {
     /// Parse a [`Field`] from [`str`].
+    /// ```
+    /// # use parse_arch_pkg_desc::srcinfo::field::{Field, FieldName, ParsedField};
+    /// # use pretty_assertions::assert_eq;
+    /// let parsed_field: ParsedField<&str> = Field::parse("source_x86_64").unwrap();
+    /// assert_eq!(parsed_field.name(), &FieldName::Source);
+    /// assert_eq!(parsed_field.architecture_str(), Some("x86_64"));
+    /// ```
     pub fn parse<'a>(raw_field: &'a str) -> ParseResult<'a, Name, Architecture>
     where
         &'a str: TryInto<Name> + TryInto<Architecture>,
