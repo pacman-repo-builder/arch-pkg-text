@@ -1,6 +1,6 @@
 use strum::{AsRefStr, Display, EnumString, IntoStaticStr};
 
-/// Field of a package description.
+/// Field of a `.SRCINFO` file.
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub struct Field<Name, Architecture> {
     name: Name,
@@ -70,10 +70,10 @@ impl<'a, Name> Field<Name, &'a str> {
     }
 }
 
-/// Raw string field of a package description.
+/// Raw string field of a `.SRCINFO` file.
 pub type RawField<'a> = Field<&'a str, &'a str>;
 
-/// Parsed field of a package description.
+/// Parsed field of a `.SRCINFO` file.
 pub type ParsedField<Architecture> = Field<FieldName, Architecture>;
 
 impl<Architecture> ParsedField<Architecture> {
@@ -90,7 +90,7 @@ impl<Architecture> From<FieldName> for ParsedField<Architecture> {
     }
 }
 
-/// Field name of a package description.
+/// Field name of a `.SRCINFO` file.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)] // core traits
 #[derive(AsRefStr, Display, EnumString, IntoStaticStr)] // strum traits
 #[strum(use_phf)]
