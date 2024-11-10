@@ -1,6 +1,6 @@
 use super::{hex::ParseHex, Hex128};
 
-impl<'a> Hex128<'a> {
+impl<'a> Hex128<&'a str> {
     /// Convert the hex string into a 128-bit unsigned integer.
     pub fn u128(self) -> Option<u128> {
         let (invalid, value) = ParseHex::parse_hex(self.0);
