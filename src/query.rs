@@ -18,7 +18,7 @@ macro_rules! def_traits {
             fn query_raw_text(&self, field: ParsedField) -> Option<&'a str>;
             $(
                 $(#[$scalar_attrs])*
-                fn $scalar_name(&self) -> Option<value::$scalar_value_type<'a>> {
+                fn $scalar_name(&self) -> Option<value::$scalar_value_type<&'a str>> {
                     self.query_raw_text(ParsedField::new(FieldName::$scalar_field_name))
                         .map(value::$scalar_value_type::new)
                 }
@@ -36,7 +36,7 @@ macro_rules! def_traits {
             fn query_raw_text_mut(&mut self, field: ParsedField) -> Option<&'a str>;
             $(
                 $(#[$scalar_attrs])*
-                fn $scalar_name_mut(&mut self) -> Option<value::$scalar_value_type<'a>> {
+                fn $scalar_name_mut(&mut self) -> Option<value::$scalar_value_type<&'a str>> {
                     self.query_raw_text_mut(ParsedField::new(FieldName::$scalar_field_name))
                         .map(value::$scalar_value_type::new)
                 }

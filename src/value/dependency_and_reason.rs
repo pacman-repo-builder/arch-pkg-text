@@ -1,6 +1,6 @@
 use super::{Dependency, DependencyAndReason, DependencyReason};
 
-impl<'a> DependencyAndReason<'a> {
+impl<'a> DependencyAndReason<&'a str> {
     /// Extract [`Dependency`] and [`DependencyReason`].
     ///
     /// ```
@@ -11,7 +11,7 @@ impl<'a> DependencyAndReason<'a> {
     /// assert_eq!(depend, Dependency("lldb"));
     /// assert_eq!(reason, Some(DependencyReason("rust-lldb script")));
     /// ```
-    pub fn components(&self) -> (Dependency<'a>, Option<DependencyReason<'a>>) {
+    pub fn components(&self) -> (Dependency<&'a str>, Option<DependencyReason<&'a str>>) {
         // split with ": " instead of ':' because of epoch in version
         match self.split_once(": ") {
             Some((depend, reason)) => (
