@@ -123,7 +123,7 @@ pub enum FieldName {
     #[strum(serialize = "groups")]
     Groups,
     #[strum(serialize = "install")]
-    Install,
+    InstallScriptName,
     #[strum(serialize = "license")]
     License,
     #[strum(serialize = "noextract")]
