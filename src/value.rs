@@ -176,7 +176,7 @@ macro_rules! def_list_wrappers {
 }
 
 def_str_wrappers! {
-    /// Type of value of `FILENAME` and `noextract`.
+    /// Type of value of `FILENAME`, `noextract`, and `install`.
     FileName;
     /// Type of value of `NAME` and `pkgname`.
     Name;
@@ -192,8 +192,6 @@ def_str_wrappers! {
     Url;
     /// Type of value of `PACKAGER`.
     Packager;
-    /// Type of value of `install`.
-    InstallScriptName;
     /// Type of value of `changelog`.
     ChangeLog;
     /// Type of value of `options`.
