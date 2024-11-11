@@ -209,7 +209,7 @@ def_hex_wrappers! {
     Hex128 {
         size = 16;
     }
-    /// Type of value of `sha1sums`.
+    /// Type of value of `sha1sums` and `validpgpkeys`.
     Hex160 {
         size = 20;
     }
@@ -228,10 +228,6 @@ def_hex_wrappers! {
     /// Type of value of `sha512sums`.
     Hex512 {
         size = 64;
-    }
-    /// Type of value of `validpgpkeys`.
-    PgpKey {
-        size = 20;
     }
 }
 
