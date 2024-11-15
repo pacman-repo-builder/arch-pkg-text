@@ -203,7 +203,7 @@ def_str_wrappers! {
 }
 
 def_hex_wrappers! {
-    /// Type of value of `MD5SUM`.
+    /// Type of value of `MD5SUM` and `md5sums`.
     Hex128 {
         size = 16;
     }
