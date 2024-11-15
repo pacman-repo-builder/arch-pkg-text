@@ -200,6 +200,8 @@ def_str_wrappers! {
     FilePath;
     /// Type of value of `source`.
     Source;
+    /// Type of value of `validpgpkeys`.
+    PgpKey;
 }
 
 def_hex_wrappers! {
@@ -207,7 +209,7 @@ def_hex_wrappers! {
     Hex128 {
         size = 16;
     }
-    /// Type of value of `sha1sums` and `validpgpkeys`.
+    /// Type of value of `sha1sums`.
     Hex160 {
         size = 20;
     }
