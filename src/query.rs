@@ -12,7 +12,7 @@ macro_rules! def_traits {
             fn query_raw_text(&self, field: ParsedField) -> Option<&'a str>;
             $(
                 $(#[$attrs])*
-                fn $name(&self) -> Option<value::$value_type<&'a str>> {
+                fn $name(&self) -> Option<value::$value_type<'a>> {
                     self.query_raw_text(ParsedField::new(FieldName::$field_name))
                         .map(value::$value_type::new)
                 }
@@ -23,7 +23,7 @@ macro_rules! def_traits {
             fn query_raw_text_mut(&mut self, field: ParsedField) -> Option<&'a str>;
             $(
                 $(#[$attrs])*
-                fn $name_mut(&mut self) -> Option<value::$value_type<&'a str>> {
+                fn $name_mut(&mut self) -> Option<value::$value_type<'a>> {
                     self.query_raw_text_mut(ParsedField::new(FieldName::$field_name))
                         .map(value::$value_type::new)
                 }
