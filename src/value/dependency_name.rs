@@ -1,6 +1,6 @@
 use super::DependencyName;
 
-impl<'a> DependencyName<&'a str> {
+impl<'a> DependencyName<'a> {
     /// Extract a valid dependency name from an input string.
     ///
     /// > Package names should only consist of lowercase alphanumerics and

@@ -64,7 +64,7 @@ macro_rules! def_query_single_no_arch {
         $name:ident = $field_name:ident -> $value_type:ident;
     )*) => {$(
         $(#[$attrs])*
-        fn $name(&self) -> Option<value::$value_type<&'a str>> {
+        fn $name(&self) -> Option<value::$value_type<'a>> {
             self.query_raw_text(FieldName::$field_name)
                 .pipe(query_single_no_arch)
                 .map(value::$value_type::new)
@@ -78,7 +78,7 @@ macro_rules! def_query_single_no_arch_mut {
         $name:ident = $field_name:ident -> $value_type:ident;
     )*) => {$(
         $(#[$attrs])*
-        fn $name(&mut self) -> Option<value::$value_type<&'a str>> {
+        fn $name(&mut self) -> Option<value::$value_type<'a>> {
             self.query_raw_text_mut(FieldName::$field_name)
                 .pipe(query_single_no_arch)
                 .map(value::$value_type::new)
@@ -99,7 +99,7 @@ macro_rules! def_query_multi_no_arch {
         $(#[$attrs:meta])*
         $name:ident = $field_name:ident -> $item_type:ident;
     )*) => {$(
-        fn $name(&self) -> impl Iterator<Item = value::$item_type<&'a str>> {
+        fn $name(&self) -> impl Iterator<Item = value::$item_type<'a>> {
             self.query_raw_text(FieldName::$field_name)
                 .pipe(query_multi_no_arch)
                 .map(value::$item_type::new)
@@ -112,7 +112,7 @@ macro_rules! def_query_multi_no_arch_mut {
         $(#[$attrs:meta])*
         $name:ident = $field_name:ident -> $item_type:ident;
     )*) => {$(
-        fn $name(&mut self) -> impl Iterator<Item = value::$item_type<&'a str>> {
+        fn $name(&mut self) -> impl Iterator<Item = value::$item_type<'a>> {
             self.query_raw_text_mut(FieldName::$field_name)
                 .pipe(query_multi_no_arch)
                 .map(value::$item_type::new)
@@ -135,14 +135,14 @@ macro_rules! def_query_multi_arch {
             $field_name:ident -> $item_type:ident;
     )*) => {$(
         $(#[$all_attrs])*
-        fn $name_all(&self) -> impl Iterator<Item = QueryArchitectureItem<'a, value::$item_type<&'a str>>> {
+        fn $name_all(&self) -> impl Iterator<Item = QueryArchitectureItem<'a, value::$item_type<'a>>> {
             self.query_raw_text(FieldName::$field_name)
                 .into_iter()
                 .map(move |item| item.into_query_architecture_item(value::$item_type::new))
         }
 
         $(#[$some_attrs])*
-        fn $name_some(&self, architecture: Option<&'a str>) -> impl Iterator<Item = value::$item_type<&'a str>> {
+        fn $name_some(&self, architecture: Option<&'a str>) -> impl Iterator<Item = value::$item_type<'a>> {
             query_multi_arch_some(self.query_raw_text(FieldName::$field_name), architecture)
                 .map(value::$item_type::new)
 
@@ -156,14 +156,14 @@ macro_rules! def_query_multi_arch_mut {
             $field_name:ident -> $item_type:ident;
     )*) => {$(
         $(#[$all_attrs])*
-        fn $name_all(&mut self) -> impl Iterator<Item = QueryArchitectureItem<'a, value::$item_type<&'a str>>> {
+        fn $name_all(&mut self) -> impl Iterator<Item = QueryArchitectureItem<'a, value::$item_type<'a>>> {
             self.query_raw_text_mut(FieldName::$field_name)
                 .into_iter()
                 .map(|item| item.into_query_architecture_item(value::$item_type::new))
         }
 
         $(#[$some_attrs])*
-        fn $name_some(&mut self, architecture: Option<&'a str>) -> impl Iterator<Item = value::$item_type<&'a str>> {
+        fn $name_some(&mut self, architecture: Option<&'a str>) -> impl Iterator<Item = value::$item_type<'a>> {
             query_multi_arch_some(self.query_raw_text_mut(FieldName::$field_name), architecture)
                 .map(value::$item_type::new)
         }

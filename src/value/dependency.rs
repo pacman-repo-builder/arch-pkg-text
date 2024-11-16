@@ -1,6 +1,6 @@
 use super::{Dependency, DependencyName, DependencySpecification};
 
-impl<'a> Dependency<&'a str> {
+impl<'a> Dependency<'a> {
     /// Extract [`DependencyName`] and [`DependencySpecification`].
     ///
     /// ```
@@ -11,7 +11,7 @@ impl<'a> Dependency<&'a str> {
     /// assert_eq!(name, DependencyName("rustup"));
     /// assert_eq!(spec, DependencySpecification(">=1.27.0-1"));
     /// ```
-    pub fn components(&self) -> (DependencyName<&'a str>, DependencySpecification<&'a str>) {
+    pub fn components(&self) -> (DependencyName<'a>, DependencySpecification<'a>) {
         let (name, spec) = DependencyName::parse(self);
         let spec = DependencySpecification(spec);
         (name, spec)
