@@ -331,7 +331,7 @@ def_traits! {
     }
 }
 
-/// [Iterator item](Iterator::Item) of [`QueryFieldMut::QueryRawTextReturn`].
+/// [Iterator item](Iterator::Item) of [`QueryFieldAssoc::QueryRawTextReturn`].
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryRawTextItem<'a> {
     /// Architecture of the field.
