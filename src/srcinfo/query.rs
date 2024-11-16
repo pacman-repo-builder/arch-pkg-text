@@ -2,15 +2,10 @@ use crate::{srcinfo::field::FieldName, value};
 use pipe_trait::Pipe;
 
 /// Associated types for [`QuerySection`] and [`QuerySectionMut`].
-pub trait QuerySectionAssoc<'a> {
-    type BaseSection: QueryFieldAssoc<'a>;
-    type DerivativeSection: QueryFieldAssoc<'a>;
+pub trait QuerySectionAssoc {
+    type BaseSection;
+    type DerivativeSection;
     type DerivativeContainer: IntoIterator<Item = Self::DerivativeSection>;
-}
-
-/// Associated types for [`QueryField`] and [`QueryFieldMut`].
-pub trait QueryFieldAssoc<'a> {
-    type QueryRawTextReturn: IntoIterator<Item = QueryRawTextItem<'a>>;
 }
 
 /// Query a section from a `.SRCINFO` file.
@@ -30,7 +25,7 @@ where
 }
 
 /// Query a section from a `.SRCINFO` file.
-pub trait QuerySectionMut<'a, Base, Derivative>: QuerySectionAssoc<'a>
+pub trait QuerySectionMut<'a, Base, Derivative>: QuerySectionAssoc
 where
     Self::BaseSection: QueryBaseFieldMut<'a, Base>,
     Self::DerivativeSection: QueryDerivativeFieldMut<'a, Derivative>,
@@ -243,8 +238,8 @@ macro_rules! def_traits {
         }
 
         /// Query a field of either a `pkgbase` or `pkgname` section of a `.SRCINFO` file.
-        pub trait QueryField<'a>: QueryFieldAssoc<'a> + QueryFieldMut<'a> {
-            fn query_raw_text(&self, field_name: FieldName) -> Self::QueryRawTextReturn;
+        pub trait QueryField<'a>: QueryFieldMut<'a> {
+            fn query_raw_text(&self, field_name: FieldName) -> impl IntoIterator<Item = QueryRawTextItem<'a>>;
 
             def_query_single_no_arch! {$(
                 $(#[$shared_single_attrs])*
@@ -264,8 +259,8 @@ macro_rules! def_traits {
         }
 
         /// Query a field of either a `pkgbase` or `pkgname` section of a `.SRCINFO` file.
-        pub trait QueryFieldMut<'a>: QueryFieldAssoc<'a> {
-            fn query_raw_text_mut(&mut self, field_name: FieldName) -> Self::QueryRawTextReturn;
+        pub trait QueryFieldMut<'a> {
+            fn query_raw_text_mut(&mut self, field_name: FieldName) -> impl IntoIterator<Item = QueryRawTextItem<'a>>;
 
             def_query_single_no_arch_mut! {$(
                 $(#[$shared_single_attrs])*
@@ -331,7 +326,8 @@ def_traits! {
     }
 }
 
-/// [Iterator item](Iterator::Item) of [`QueryFieldAssoc::QueryRawTextReturn`].
+/// [Iterator item](Iterator::Item) of [`query_raw_text`](QueryField::query_raw_text)
+/// and [`query_raw_text_mut`](QueryFieldMut::query_raw_text_mut).
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryRawTextItem<'a> {
     /// Architecture of the field.
