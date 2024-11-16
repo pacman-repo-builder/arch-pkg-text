@@ -5,7 +5,6 @@ use pipe_trait::Pipe;
 pub trait QuerySectionAssoc {
     type BaseSection;
     type DerivativeSection;
-    type DerivativeContainer: IntoIterator<Item = Self::DerivativeSection>;
 }
 
 /// Query a section from a `.SRCINFO` file.
@@ -18,7 +17,7 @@ where
     fn base(&self) -> Self::BaseSection;
 
     /// Get all the sections under `pkgname`.
-    fn derivatives(&self) -> Self::DerivativeContainer;
+    fn derivatives(&self) -> impl IntoIterator<Item = Self::DerivativeSection>;
 
     /// Get a section whose `pkgname` matches `name`.
     fn derivative(&self, name: Derivative) -> Option<Self::DerivativeSection>;
@@ -34,7 +33,7 @@ where
     fn base_mut(&mut self) -> Self::BaseSection;
 
     /// Get all the sections under `pkgname`.
-    fn derivatives_mut(&mut self) -> Self::DerivativeContainer;
+    fn derivatives_mut(&mut self) -> impl IntoIterator<Item = Self::DerivativeSection>;
 
     /// Get a section whose `pkgname` matches `name`.
     fn derivative_mut(&mut self, name: Derivative) -> Option<Self::DerivativeSection>;
