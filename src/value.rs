@@ -15,9 +15,7 @@ macro_rules! impl_str {
             pub fn new(text: &'a str) -> Self {
                 $container(text)
             }
-        }
 
-        impl<'a> $container<'a> {
             /// Get an immutable reference to the raw string underneath.
             pub fn as_str(&self) -> &'a str {
                 &self.0.as_ref()
