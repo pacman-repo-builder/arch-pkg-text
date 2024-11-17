@@ -17,7 +17,7 @@ where
     fn base(&self) -> Self::BaseSection;
 
     /// Get all the sections under `pkgname`.
-    fn derivatives(&self) -> impl IntoIterator<Item = Self::DerivativeSection>;
+    fn all_derivatives(&self) -> impl IntoIterator<Item = Self::DerivativeSection>;
 
     /// Get a section whose `pkgname` matches `name`.
     fn derivative(&self, name: value::Name) -> Option<Self::DerivativeSection>;
@@ -33,7 +33,7 @@ where
     fn base_mut(&mut self) -> Self::BaseSection;
 
     /// Get all the sections under `pkgname`.
-    fn derivatives_mut(&mut self) -> impl IntoIterator<Item = Self::DerivativeSection>;
+    fn all_derivatives_mut(&mut self) -> impl IntoIterator<Item = Self::DerivativeSection>;
 
     /// Get a section whose `pkgname` matches `name`.
     fn derivative_mut(&mut self, name: value::Name) -> Option<Self::DerivativeSection>;

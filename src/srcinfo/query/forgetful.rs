@@ -51,7 +51,7 @@ impl<'a> QuerySection<'a> for ForgetfulSectionQuerier<'a> {
         Some(ForgetfulDerivativeSection { name, under_header })
     }
 
-    fn derivatives(&self) -> impl IntoIterator<Item = Self::DerivativeSection> {
+    fn all_derivatives(&self) -> impl IntoIterator<Item = Self::DerivativeSection> {
         self.under_base_header
             .pipe(derivative_headers)
             .map(|(name, header_line)| {
@@ -73,8 +73,8 @@ impl<'a> QuerySectionMut<'a> for ForgetfulSectionQuerier<'a> {
         self.derivative(name)
     }
 
-    fn derivatives_mut(&mut self) -> impl IntoIterator<Item = Self::DerivativeSection> {
-        self.derivatives()
+    fn all_derivatives_mut(&mut self) -> impl IntoIterator<Item = Self::DerivativeSection> {
+        self.all_derivatives()
     }
 }
 
