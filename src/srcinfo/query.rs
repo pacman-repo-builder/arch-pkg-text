@@ -16,11 +16,11 @@ where
     /// Get the section under `pkgbase`.
     fn base(&self) -> Self::BaseSection;
 
-    /// Get all the sections under `pkgname`.
-    fn all_derivatives(&self) -> impl IntoIterator<Item = Self::DerivativeSection>;
-
     /// Get a section whose `pkgname` matches `name`.
     fn derivative(&self, name: value::Name) -> Option<Self::DerivativeSection>;
+
+    /// Get all the sections under `pkgname`.
+    fn all_derivatives(&self) -> impl IntoIterator<Item = Self::DerivativeSection>;
 }
 
 /// Query a section from a `.SRCINFO` file.
@@ -32,11 +32,11 @@ where
     /// Get the section under `pkgbase`.
     fn base_mut(&mut self) -> Self::BaseSection;
 
-    /// Get all the sections under `pkgname`.
-    fn all_derivatives_mut(&mut self) -> impl IntoIterator<Item = Self::DerivativeSection>;
-
     /// Get a section whose `pkgname` matches `name`.
     fn derivative_mut(&mut self, name: value::Name) -> Option<Self::DerivativeSection>;
+
+    /// Get all the sections under `pkgname`.
+    fn all_derivatives_mut(&mut self) -> impl IntoIterator<Item = Self::DerivativeSection>;
 }
 
 fn query_single_no_arch<'a>(
