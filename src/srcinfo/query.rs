@@ -353,6 +353,13 @@ impl<'a> QueryRawTextItem<'a> {
             value,
         }
     }
+
+    fn from_tuple((architecture, value): (Option<&'a str>, &'a str)) -> Self {
+        QueryRawTextItem {
+            architecture,
+            value,
+        }
+    }
 }
 
 /// [Iterator item](Iterator::Item) of query functions that return architectures.
@@ -363,3 +370,7 @@ pub struct QueryArchitectureItem<'a, Value> {
     /// Value of the field.
     pub value: Value,
 }
+
+mod forgetful;
+
+pub use forgetful::{ForgetfulBaseSection, ForgetfulDerivativeSection, ForgetfulSectionQuerier};
