@@ -8,10 +8,10 @@ pub trait QuerySectionAssoc {
 }
 
 /// Query a section from a `.SRCINFO` file.
-pub trait QuerySection<'a, Base, Derivative>: QuerySectionMut<'a, Base, Derivative>
+pub trait QuerySection<'a>: QuerySectionMut<'a>
 where
-    Self::BaseSection: QueryBaseField<'a, Base>,
-    Self::DerivativeSection: QueryDerivativeField<'a, Derivative>,
+    Self::BaseSection: QueryBaseField<'a>,
+    Self::DerivativeSection: QueryDerivativeField<'a>,
 {
     /// Get the section under `pkgbase`.
     fn base(&self) -> Self::BaseSection;
@@ -20,14 +20,14 @@ where
     fn derivatives(&self) -> impl IntoIterator<Item = Self::DerivativeSection>;
 
     /// Get a section whose `pkgname` matches `name`.
-    fn derivative(&self, name: Derivative) -> Option<Self::DerivativeSection>;
+    fn derivative(&self, name: value::Name) -> Option<Self::DerivativeSection>;
 }
 
 /// Query a section from a `.SRCINFO` file.
-pub trait QuerySectionMut<'a, Base, Derivative>: QuerySectionAssoc
+pub trait QuerySectionMut<'a>: QuerySectionAssoc
 where
-    Self::BaseSection: QueryBaseFieldMut<'a, Base>,
-    Self::DerivativeSection: QueryDerivativeFieldMut<'a, Derivative>,
+    Self::BaseSection: QueryBaseFieldMut<'a>,
+    Self::DerivativeSection: QueryDerivativeFieldMut<'a>,
 {
     /// Get the section under `pkgbase`.
     fn base_mut(&mut self) -> Self::BaseSection;
@@ -36,7 +36,7 @@ where
     fn derivatives_mut(&mut self) -> impl IntoIterator<Item = Self::DerivativeSection>;
 
     /// Get a section whose `pkgname` matches `name`.
-    fn derivative_mut(&mut self, name: Derivative) -> Option<Self::DerivativeSection>;
+    fn derivative_mut(&mut self, name: value::Name) -> Option<Self::DerivativeSection>;
 }
 
 fn query_single_no_arch<'a>(
@@ -192,9 +192,9 @@ macro_rules! def_traits {
         )*}
     ) => {
         /// Query a field of the `pkgbase` section of a `.SRCINFO` file.
-        pub trait QueryBaseField<'a, Base>: QueryField<'a> + QueryBaseFieldMut<'a, Base> {
+        pub trait QueryBaseField<'a>: QueryField<'a> + QueryBaseFieldMut<'a> {
             /// Get the value of the `pkgbase` field of the `.SRCINFO` file.
-            fn name(&self) -> Base;
+            fn name(&self) -> value::Base<'a>;
 
             def_query_single_no_arch! {$(
                 $(#[$base_single_attrs])*
@@ -208,16 +208,16 @@ macro_rules! def_traits {
         }
 
         /// Query a field of a `pkgname` section of a `.SRCINFO` file.
-        pub trait QueryDerivativeField<'a, Derivative>: QueryField<'a> + QueryDerivativeFieldMut<'a, Derivative>
+        pub trait QueryDerivativeField<'a>: QueryField<'a> + QueryDerivativeFieldMut<'a>
         {
             /// Get the value of the `pkgname` field of the section.
-            fn name(&self) -> Derivative;
+            fn name(&self) -> value::Name<'a>;
         }
 
         /// Query a field of the `pkgbase` section of a `.SRCINFO` file.
-        pub trait QueryBaseFieldMut<'a, Base>: QueryFieldMut<'a> {
+        pub trait QueryBaseFieldMut<'a>: QueryFieldMut<'a> {
             /// Get the value of the `pkgbase` field of the `.SRCINFO` file.
-            fn name_mut(&mut self) -> Base;
+            fn name_mut(&mut self) -> value::Base<'a>;
 
             def_query_single_no_arch_mut! {$(
                 $(#[$base_single_attrs])*
@@ -231,9 +231,9 @@ macro_rules! def_traits {
         }
 
         /// Query a field of a `pkgname` section of a `.SRCINFO` file.
-        pub trait QueryDerivativeFieldMut<'a, Derivative>: QueryFieldMut<'a> {
+        pub trait QueryDerivativeFieldMut<'a>: QueryFieldMut<'a> {
             /// Get the value of the `pkgname` field of the section.
-            fn name_mut(&mut self) -> Derivative;
+            fn name_mut(&mut self) -> value::Name<'a>;
         }
 
         /// Query a field of either a `pkgbase` or `pkgname` section of a `.SRCINFO` file.

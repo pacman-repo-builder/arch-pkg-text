@@ -33,7 +33,7 @@ impl<'a> QuerySectionAssoc for ForgetfulSectionQuerier<'a> {
     type DerivativeSection = ForgetfulDerivativeSection<'a>;
 }
 
-impl<'a> QuerySection<'a, Base<'a>, Name<'a>> for ForgetfulSectionQuerier<'a> {
+impl<'a> QuerySection<'a> for ForgetfulSectionQuerier<'a> {
     fn base(&self) -> Self::BaseSection {
         ForgetfulBaseSection {
             name: self.base_name,
@@ -41,11 +41,12 @@ impl<'a> QuerySection<'a, Base<'a>, Name<'a>> for ForgetfulSectionQuerier<'a> {
         }
     }
 
-    fn derivative(&self, name: Name<'a>) -> Option<Self::DerivativeSection> {
-        let (_, header_line) = self
+    fn derivative(&self, name: Name) -> Option<Self::DerivativeSection> {
+        let (name, header_line) = self
             .under_base_header
             .pipe(derivative_headers)
             .find(|(value, _)| *value == name.as_str())?;
+        let name = Name(name);
         let under_header = derivative_under_header(self.under_base_header, header_line);
         Some(ForgetfulDerivativeSection { name, under_header })
     }
@@ -63,12 +64,12 @@ impl<'a> QuerySection<'a, Base<'a>, Name<'a>> for ForgetfulSectionQuerier<'a> {
     }
 }
 
-impl<'a> QuerySectionMut<'a, Base<'a>, Name<'a>> for ForgetfulSectionQuerier<'a> {
+impl<'a> QuerySectionMut<'a> for ForgetfulSectionQuerier<'a> {
     fn base_mut(&mut self) -> Self::BaseSection {
         self.base()
     }
 
-    fn derivative_mut(&mut self, name: Name<'a>) -> Option<Self::DerivativeSection> {
+    fn derivative_mut(&mut self, name: Name) -> Option<Self::DerivativeSection> {
         self.derivative(name)
     }
 
@@ -96,13 +97,13 @@ macro_rules! def_section {
             under_header: &'a str,
         }
 
-        impl<'a> $query<'a, $header<'a>> for $name<'a> {
+        impl<'a> $query<'a> for $name<'a> {
             fn name(&self) -> $header<'a> {
                 self.name
             }
         }
 
-        impl<'a> $query_mut<'a, $header<'a>> for $name<'a> {
+        impl<'a> $query_mut<'a> for $name<'a> {
             fn name_mut(&mut self) -> $header<'a> {
                 self.name()
             }
