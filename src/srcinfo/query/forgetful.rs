@@ -3,7 +3,7 @@ use super::{
     QueryFieldMut, QueryRawTextItem, QuerySection, QuerySectionAssoc, QuerySectionMut,
 };
 use crate::{
-    srcinfo::field::{FieldName, ParsedField},
+    srcinfo::field::{FieldName, ParsedField, RawField},
     value::{Base, Name},
 };
 use pipe_trait::Pipe;
@@ -148,9 +148,9 @@ def_section! {
     }
 }
 
-fn parse_line(line: &str) -> Option<(ParsedField<&'_ str>, &'_ str)> {
+fn parse_line(line: &str) -> Option<(RawField<'_>, &'_ str)> {
     let (field, value) = line.split_once('=')?;
-    let field = field.trim_end().pipe(ParsedField::parse).ok()?;
+    let field = field.trim_end().pipe(RawField::parse_raw);
     let value = value.trim_start();
     Some((field, value))
 }
@@ -167,6 +167,7 @@ where
     let header = text.lines().next()?;
     let content = text[header.len()..].trim();
     let (field, value) = parse_line(header)?;
+    let field: ParsedField<&str> = field.to_parsed().ok()?;
     (*field.name() == header_field_name).then_some(())?;
     field.architecture().is_none().then_some(())?;
     let name = value.trim_start().pipe(create_name);
@@ -183,10 +184,11 @@ fn derivative_headers(under_base_header: &str) -> impl Iterator<Item = (&'_ str,
         .map(|line| (line.trim(), line))
         .filter(|(trimmed_line, _)| !trimmed_line_is_blank(trimmed_line))
         .map_while(|(trimmed_line, line)| {
-            parse_line(trimmed_line).map(|(field, value)| (field, value, line))
+            parse_line(trimmed_line).map(|(field, value)| (field, (value, line)))
         })
-        .filter(|(field, _, _)| *field.name() == FieldName::Name)
-        .map(|(_, value, line)| (value, line))
+        .filter_map(known_field::<&str, _>)
+        .filter(|(field, _)| *field.name() == FieldName::Name)
+        .map(|(_, tuple)| tuple)
 }
 
 /// Get the section of `under_base_header` under the `header_line`,
@@ -207,6 +209,7 @@ fn query_raw_text(text: &str, field_name: FieldName) -> impl Iterator<Item = Que
         .map(str::trim)
         .filter(|line| !trimmed_line_is_blank(line))
         .map_while(parse_line)
+        .filter_map(known_field)
         .take_while(|(field, _)| *field.name() != FieldName::Name)
         .filter(move |(field, _)| *field.name() == field_name)
         .map(|(field, value)| (field.architecture().copied(), value))
@@ -216,4 +219,17 @@ fn query_raw_text(text: &str, field_name: FieldName) -> impl Iterator<Item = Que
 /// This function is intended for use in `.filter` to filter out lines to parse.
 fn trimmed_line_is_blank(trimmed_line: &str) -> bool {
     trimmed_line.is_empty() || trimmed_line.starts_with('#')
+}
+
+/// Callback function to pass to `.filter_map` to filter out unknown fields.
+fn known_field<'a, Architecture, Acquaintance>(
+    (field, acquaintance): (RawField<'a>, Acquaintance),
+) -> Option<(ParsedField<Architecture>, Acquaintance)>
+where
+    &'a str: TryInto<Architecture>,
+{
+    field
+        .to_parsed::<FieldName, Architecture>()
+        .map(|field| (field, acquaintance))
+        .ok()
 }
