@@ -30,7 +30,7 @@ impl<'a> ForgetfulSectionQuerier<'a> {
 
 impl<'a> QuerySectionAssoc for ForgetfulSectionQuerier<'a> {
     type BaseSection = ForgetfulBaseSection<'a>;
-    type DerivativeSectionExclusive = ForgetfulDerivativeSectionExclusive<'a>;
+    type DerivativeExclusiveSection = ForgetfulDerivativeExclusiveSection<'a>;
 }
 
 impl<'a> QuerySection<'a> for ForgetfulSectionQuerier<'a> {
@@ -41,19 +41,19 @@ impl<'a> QuerySection<'a> for ForgetfulSectionQuerier<'a> {
         }
     }
 
-    fn derivative_exclusive(&self, name: Name) -> Option<Self::DerivativeSectionExclusive> {
+    fn derivative_exclusive(&self, name: Name) -> Option<Self::DerivativeExclusiveSection> {
         let (name, header_line) = self
             .under_base_header
             .pipe(derivative_headers)
             .find(|(value, _)| *value == name.as_str())?;
         let name = Name(name);
         let under_header = derivative_under_header(self.under_base_header, header_line);
-        Some(ForgetfulDerivativeSectionExclusive { name, under_header })
+        Some(ForgetfulDerivativeExclusiveSection { name, under_header })
     }
 
     fn all_derivative_exclusives(
         &self,
-    ) -> impl IntoIterator<Item = Self::DerivativeSectionExclusive> {
+    ) -> impl IntoIterator<Item = Self::DerivativeExclusiveSection> {
         self.under_base_header
             .pipe(derivative_headers)
             .map(|(name, header_line)| {
@@ -62,7 +62,7 @@ impl<'a> QuerySection<'a> for ForgetfulSectionQuerier<'a> {
                     derivative_under_header(self.under_base_header, header_line),
                 )
             })
-            .map(|(name, under_header)| ForgetfulDerivativeSectionExclusive { name, under_header })
+            .map(|(name, under_header)| ForgetfulDerivativeExclusiveSection { name, under_header })
     }
 }
 
@@ -71,13 +71,13 @@ impl<'a> QuerySectionMut<'a> for ForgetfulSectionQuerier<'a> {
         self.base()
     }
 
-    fn derivative_exclusive_mut(&mut self, name: Name) -> Option<Self::DerivativeSectionExclusive> {
+    fn derivative_exclusive_mut(&mut self, name: Name) -> Option<Self::DerivativeExclusiveSection> {
         self.derivative_exclusive(name)
     }
 
     fn all_derivative_exclusives_mut(
         &mut self,
-    ) -> impl IntoIterator<Item = Self::DerivativeSectionExclusive> {
+    ) -> impl IntoIterator<Item = Self::DerivativeExclusiveSection> {
         self.all_derivative_exclusives()
     }
 }
@@ -144,7 +144,7 @@ def_section! {
     }
 
     /// Query information under a `pkgname` section of a `.SRCINFO` file.
-    ForgetfulDerivativeSectionExclusive {
+    ForgetfulDerivativeExclusiveSection {
         field = Name,
         header = Name,
         query = QueryDerivativeField,

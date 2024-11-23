@@ -7,31 +7,31 @@ use pipe_trait::Pipe;
 /// Associated types for [`QuerySection`] and [`QuerySectionMut`].
 pub trait QuerySectionAssoc {
     type BaseSection;
-    type DerivativeSectionExclusive;
+    type DerivativeExclusiveSection;
 }
 
 /// Query a section from a `.SRCINFO` file.
 pub trait QuerySection<'a>: QuerySectionMut<'a>
 where
     Self::BaseSection: QueryBaseField<'a>,
-    Self::DerivativeSectionExclusive: QueryDerivativeField<'a>,
+    Self::DerivativeExclusiveSection: QueryDerivativeField<'a>,
 {
     /// Get the section under `pkgbase`.
     fn base(&self) -> Self::BaseSection;
 
     /// Get an exclusive section whose `pkgname` matches `name`.
-    fn derivative_exclusive(&self, name: Name) -> Option<Self::DerivativeSectionExclusive>;
+    fn derivative_exclusive(&self, name: Name) -> Option<Self::DerivativeExclusiveSection>;
 
     /// Get all exclusive sections under `pkgname`.
     fn all_derivative_exclusives(
         &self,
-    ) -> impl IntoIterator<Item = Self::DerivativeSectionExclusive>;
+    ) -> impl IntoIterator<Item = Self::DerivativeExclusiveSection>;
 
     /// Get a inheriting derivative section whose `pkgname` matches `name`.
     fn derivative(
         &self,
         name: Name,
-    ) -> Option<JoinedSection<Self::BaseSection, Self::DerivativeSectionExclusive>> {
+    ) -> Option<JoinedSection<Self::BaseSection, Self::DerivativeExclusiveSection>> {
         let base = self.base();
         self.derivative_exclusive(name)
             .map(|derivative_exclusive| JoinedSection::new(base, derivative_exclusive))
@@ -42,24 +42,24 @@ where
 pub trait QuerySectionMut<'a>: QuerySectionAssoc
 where
     Self::BaseSection: QueryBaseFieldMut<'a>,
-    Self::DerivativeSectionExclusive: QueryDerivativeFieldMut<'a>,
+    Self::DerivativeExclusiveSection: QueryDerivativeFieldMut<'a>,
 {
     /// Get the section under `pkgbase`.
     fn base_mut(&mut self) -> Self::BaseSection;
 
     /// Get an exclusive section whose `pkgname` matches `name`.
-    fn derivative_exclusive_mut(&mut self, name: Name) -> Option<Self::DerivativeSectionExclusive>;
+    fn derivative_exclusive_mut(&mut self, name: Name) -> Option<Self::DerivativeExclusiveSection>;
 
     /// Get all exclusive sections under `pkgname`.
     fn all_derivative_exclusives_mut(
         &mut self,
-    ) -> impl IntoIterator<Item = Self::DerivativeSectionExclusive>;
+    ) -> impl IntoIterator<Item = Self::DerivativeExclusiveSection>;
 
     /// Get a inheriting derivative section whose `pkgname` matches `name`.
     fn derivative_mut(
         &mut self,
         name: Name,
-    ) -> Option<JoinedMutSection<Self::BaseSection, Self::DerivativeSectionExclusive>> {
+    ) -> Option<JoinedMutSection<Self::BaseSection, Self::DerivativeExclusiveSection>> {
         let base = self.base_mut();
         self.derivative_exclusive_mut(name)
             .map(|derivative_exclusive| JoinedMutSection::new(base, derivative_exclusive))
@@ -403,5 +403,5 @@ mod forgetful;
 
 pub use derivative::{JoinedMutSection, JoinedSection};
 pub use forgetful::{
-    ForgetfulBaseSection, ForgetfulDerivativeSectionExclusive, ForgetfulSectionQuerier,
+    ForgetfulBaseSection, ForgetfulDerivativeExclusiveSection, ForgetfulSectionQuerier,
 };
