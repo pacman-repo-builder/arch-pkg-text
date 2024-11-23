@@ -7,39 +7,43 @@ use pipe_trait::Pipe;
 /// Associated types for [`QuerySection`] and [`QuerySectionMut`].
 pub trait QuerySectionAssoc {
     type BaseSection;
-    type DerivativeSection;
+    type DerivativeSectionExclusive;
 }
 
 /// Query a section from a `.SRCINFO` file.
 pub trait QuerySection<'a>: QuerySectionMut<'a>
 where
     Self::BaseSection: QueryBaseField<'a>,
-    Self::DerivativeSection: QueryDerivativeField<'a>,
+    Self::DerivativeSectionExclusive: QueryDerivativeField<'a>,
 {
     /// Get the section under `pkgbase`.
     fn base(&self) -> Self::BaseSection;
 
-    /// Get a section whose `pkgname` matches `name`.
-    fn derivative(&self, name: Name) -> Option<Self::DerivativeSection>;
+    /// Get an exclusive section whose `pkgname` matches `name`.
+    fn derivative_exclusive(&self, name: Name) -> Option<Self::DerivativeSectionExclusive>;
 
-    /// Get all the sections under `pkgname`.
-    fn all_derivatives(&self) -> impl IntoIterator<Item = Self::DerivativeSection>;
+    /// Get all exclusive sections under `pkgname`.
+    fn all_derivative_exclusives(
+        &self,
+    ) -> impl IntoIterator<Item = Self::DerivativeSectionExclusive>;
 }
 
 /// Query a section from a `.SRCINFO` file.
 pub trait QuerySectionMut<'a>: QuerySectionAssoc
 where
     Self::BaseSection: QueryBaseFieldMut<'a>,
-    Self::DerivativeSection: QueryDerivativeFieldMut<'a>,
+    Self::DerivativeSectionExclusive: QueryDerivativeFieldMut<'a>,
 {
     /// Get the section under `pkgbase`.
     fn base_mut(&mut self) -> Self::BaseSection;
 
-    /// Get a section whose `pkgname` matches `name`.
-    fn derivative_mut(&mut self, name: Name) -> Option<Self::DerivativeSection>;
+    /// Get an exclusive section whose `pkgname` matches `name`.
+    fn derivative_exclusive_mut(&mut self, name: Name) -> Option<Self::DerivativeSectionExclusive>;
 
-    /// Get all the sections under `pkgname`.
-    fn all_derivatives_mut(&mut self) -> impl IntoIterator<Item = Self::DerivativeSection>;
+    /// Get all exclusive sections under `pkgname`.
+    fn all_derivative_exclusives_mut(
+        &mut self,
+    ) -> impl IntoIterator<Item = Self::DerivativeSectionExclusive>;
 }
 
 fn query_single_no_arch<'a>(
@@ -376,4 +380,6 @@ pub struct QueryArchitectureItem<'a, Value> {
 
 mod forgetful;
 
-pub use forgetful::{ForgetfulBaseSection, ForgetfulDerivativeSection, ForgetfulSectionQuerier};
+pub use forgetful::{
+    ForgetfulBaseSection, ForgetfulDerivativeSectionExclusive, ForgetfulSectionQuerier,
+};
