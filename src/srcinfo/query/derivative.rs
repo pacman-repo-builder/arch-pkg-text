@@ -8,6 +8,8 @@ use crate::{
 };
 
 /// Query the fields of a derivative section with inheritance from the `pkgbase` section.
+///
+/// This is the return type of [`QuerySection::derivative`](super::QuerySection::derivative).
 #[derive(Debug, Clone, Copy)]
 pub struct JoinedSection<BaseSection, DerivativeExclusiveSection> {
     base: BaseSection,
@@ -73,6 +75,9 @@ where
     }
 }
 
+/// Query the fields of a derivative section with inheritance from the `pkgbase` section.
+///
+/// This is the return type of [`QuerySectionMut::derivative_mut`](super::QuerySectionMut::derivative_mut).
 #[derive(Debug, Clone, Copy)]
 pub struct JoinedMutSection<BaseSection, DerivativeExclusiveSection> {
     base: BaseSection,
