@@ -26,6 +26,16 @@ where
     fn all_derivative_exclusives(
         &self,
     ) -> impl IntoIterator<Item = Self::DerivativeSectionExclusive>;
+
+    /// Get a inheriting derivative section whose `pkgname` matches `name`.
+    fn derivative(
+        &self,
+        name: Name,
+    ) -> Option<JoinedSection<Self::BaseSection, Self::DerivativeSectionExclusive>> {
+        let base = self.base();
+        self.derivative_exclusive(name)
+            .map(|derivative_exclusive| JoinedSection::new(base, derivative_exclusive))
+    }
 }
 
 /// Query a section from a `.SRCINFO` file.
@@ -44,6 +54,16 @@ where
     fn all_derivative_exclusives_mut(
         &mut self,
     ) -> impl IntoIterator<Item = Self::DerivativeSectionExclusive>;
+
+    /// Get a inheriting derivative section whose `pkgname` matches `name`.
+    fn derivative_mut(
+        &mut self,
+        name: Name,
+    ) -> Option<JoinedMutSection<Self::BaseSection, Self::DerivativeSectionExclusive>> {
+        let base = self.base_mut();
+        self.derivative_exclusive_mut(name)
+            .map(|derivative_exclusive| JoinedMutSection::new(base, derivative_exclusive))
+    }
 }
 
 fn query_single_no_arch<'a>(
@@ -378,8 +398,10 @@ pub struct QueryArchitectureItem<'a, Value> {
     pub value: Value,
 }
 
+mod derivative;
 mod forgetful;
 
+pub use derivative::{JoinedMutSection, JoinedSection};
 pub use forgetful::{
     ForgetfulBaseSection, ForgetfulDerivativeSectionExclusive, ForgetfulSectionQuerier,
 };
