@@ -181,7 +181,7 @@ fn derivative_headers(under_base_header: &str) -> impl Iterator<Item = (&'_ str,
     under_base_header
         .lines()
         .map(|line| (line.trim(), line))
-        .filter(|(trimmed_line, _)| !trimmed_line.is_empty())
+        .filter(|(trimmed_line, _)| !trimmed_line_is_blank(trimmed_line))
         .map_while(|(trimmed_line, line)| {
             parse_line(trimmed_line).map(|(field, value)| (field, value, line))
         })
@@ -205,10 +205,15 @@ fn derivative_under_header<'a>(under_base_header: &'a str, header_line: &'a str)
 fn query_raw_text(text: &str, field_name: FieldName) -> impl Iterator<Item = QueryRawTextItem<'_>> {
     text.lines()
         .map(str::trim)
-        .filter(|line| !line.is_empty())
+        .filter(|line| !trimmed_line_is_blank(line))
         .map_while(parse_line)
         .take_while(|(field, _)| *field.name() != FieldName::Name)
         .filter(move |(field, _)| *field.name() == field_name)
         .map(|(field, value)| (field.architecture().copied(), value))
         .map(QueryRawTextItem::from_tuple)
+}
+
+/// This function is intended for use in `.filter` to filter out lines to parse.
+fn trimmed_line_is_blank(trimmed_line: &str) -> bool {
+    trimmed_line.is_empty() || trimmed_line.starts_with('#')
 }
