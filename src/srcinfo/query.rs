@@ -399,9 +399,9 @@ pub struct QueryArchitectureItem<'a, Value> {
 }
 
 mod derivative;
-mod forgetful;
-
 pub use derivative::{JoinedMutSection, JoinedSection};
+
+mod forgetful;
 pub use forgetful::{
     ForgetfulBaseSection, ForgetfulDerivativeExclusiveSection, ForgetfulSectionQuerier,
 };
