@@ -65,7 +65,7 @@ impl<'a, Architecture> Field<&'a str, Architecture> {
 
 impl<'a, Name> Field<Name, &'a str> {
     /// Get the name of the field as a string slice.
-    pub fn architecture_str(&self) -> Option<&'_ str> {
+    pub fn architecture_str(&self) -> Option<&'a str> {
         self.architecture().copied()
     }
 }
