@@ -405,3 +405,8 @@ mod forgetful;
 pub use forgetful::{
     ForgetfulBaseSection, ForgetfulDerivativeExclusiveSection, ForgetfulSectionQuerier,
 };
+
+#[cfg(feature = "std")]
+mod memo;
+
+mod utils;

@@ -1,4 +1,5 @@
 use super::{
+    utils::{parse_line, trimmed_line_is_blank},
     QueryBaseField, QueryBaseFieldMut, QueryDerivativeField, QueryDerivativeFieldMut, QueryField,
     QueryFieldMut, QueryRawTextItem, QuerySection, QuerySectionAssoc, QuerySectionMut,
 };
@@ -152,13 +153,6 @@ def_section! {
     }
 }
 
-fn parse_line(line: &str) -> Option<(RawField<'_>, &'_ str)> {
-    let (field, value) = line.split_once('=')?;
-    let field = field.trim_end().pipe(RawField::parse_raw);
-    let value = value.trim_start();
-    Some((field, value))
-}
-
 /// Extract a header.
 fn create_section<'a, Name, CreateName>(
     text: &'a str,
@@ -218,11 +212,6 @@ fn query_raw_text(text: &str, field_name: FieldName) -> impl Iterator<Item = Que
         .filter(move |(field, _)| *field.name() == field_name)
         .map(|(field, value)| (field.architecture().copied(), value))
         .map(QueryRawTextItem::from_tuple)
-}
-
-/// This function is intended for use in `.filter` to filter out lines to parse.
-fn trimmed_line_is_blank(trimmed_line: &str) -> bool {
-    trimmed_line.is_empty() || trimmed_line.starts_with('#')
 }
 
 /// Callback function to pass to `.filter_map` to filter out unknown fields.
