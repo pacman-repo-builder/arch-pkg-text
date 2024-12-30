@@ -1,314 +1,222 @@
-use crate::{
-    srcinfo::field::FieldName,
-    value::{self, Base, Name},
-};
+use crate::{srcinfo::field::FieldName, value};
 use pipe_trait::Pipe;
 
-/// Associated types for [`QuerySection`] and [`QuerySectionMut`].
-pub trait QuerySectionAssoc {
-    type BaseSection;
-    type DerivativeExclusiveSection;
+/// Location of a given [`QueryItem`].
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum Section<'a> {
+    /// The item belongs to a section under `pkgbase`.
+    Base,
+    /// The item belongs to a section under `pkgname`.
+    Derivative(value::Name<'a>),
 }
 
-/// Query a section from a `.SRCINFO` file.
-pub trait QuerySection<'a>: QuerySectionMut<'a>
-where
-    Self::BaseSection: QueryBaseField<'a>,
-    Self::DerivativeExclusiveSection: QueryDerivativeField<'a>,
-{
-    /// Get the section under `pkgbase`.
-    fn base(&self) -> Self::BaseSection;
+/// Return type of methods in [`Query`] and [`QueryMut`].
+#[derive(Debug, Clone, Copy)]
+pub struct QueryItem<'a, Value, Architecture> {
+    /// Value of the item.
+    pub value: Value,
+    /// Location of the item.
+    pub section: Section<'a>,
+    /// Architecture suffix of the corresponding field.
+    pub architecture: Architecture,
+}
 
-    /// Get an exclusive section whose `pkgname` matches `name`.
-    fn derivative_exclusive(&self, name: Name) -> Option<Self::DerivativeExclusiveSection>;
+impl<'a, Value, Architecture> QueryItem<'a, Value, Architecture> {
+    /// Construct an item from a tuple of `value`, `section`, and `architecture`.
+    pub fn from_tuple3((value, section, architecture): (Value, Section<'a>, Architecture)) -> Self {
+        QueryItem {
+            section,
+            architecture,
+            value,
+        }
+    }
 
-    /// Get all exclusive sections under `pkgname`.
-    fn all_derivative_exclusives(
-        &self,
-    ) -> impl IntoIterator<Item = Self::DerivativeExclusiveSection>;
+    /// Dissolve the item into a tuple of `value`, `section`, and `architecture`.
+    pub fn into_tuple3(self) -> (Value, Section<'a>, Architecture) {
+        (self.value, self.section, self.architecture)
+    }
 
-    /// Get a inheriting derivative section whose `pkgname` matches `name`.
-    fn derivative(
-        &self,
-        name: Name,
-    ) -> Option<JoinedSection<Self::BaseSection, Self::DerivativeExclusiveSection>> {
-        let base = self.base();
-        self.derivative_exclusive(name)
-            .map(|derivative_exclusive| JoinedSection::new(base, derivative_exclusive))
+    /// Discard [`Self::architecture`].
+    fn without_architecture(self) -> QueryItem<'a, Value, ()> {
+        let (value, section, _) = self.into_tuple3();
+        QueryItem::from_tuple3((value, section, ()))
+    }
+
+    /// Transform `value`.
+    fn map<NewValue>(
+        self,
+        f: impl Fn(Value) -> NewValue + 'static,
+    ) -> QueryItem<'a, NewValue, Architecture> {
+        let (value, section, architecture) = self.into_tuple3();
+        QueryItem::from_tuple3((f(value), section, architecture))
     }
 }
 
-/// Query a section from a `.SRCINFO` file.
-pub trait QuerySectionMut<'a>: QuerySectionAssoc
-where
-    Self::BaseSection: QueryBaseFieldMut<'a>,
-    Self::DerivativeExclusiveSection: QueryDerivativeFieldMut<'a>,
-{
-    /// Get the section under `pkgbase`.
-    fn base_mut(&mut self) -> Self::BaseSection;
+impl<'a, Value> QueryItem<'a, Value, ()> {
+    /// Construct an item from a tuple of `value` and `section`.
+    pub fn from_tuple2((value, section): (Value, Section<'a>)) -> Self {
+        QueryItem::from_tuple3((value, section, ()))
+    }
 
-    /// Get an exclusive section whose `pkgname` matches `name`.
-    fn derivative_exclusive_mut(&mut self, name: Name) -> Option<Self::DerivativeExclusiveSection>;
-
-    /// Get all exclusive sections under `pkgname`.
-    fn all_derivative_exclusives_mut(
-        &mut self,
-    ) -> impl IntoIterator<Item = Self::DerivativeExclusiveSection>;
-
-    /// Get a inheriting derivative section whose `pkgname` matches `name`.
-    fn derivative_mut(
-        &mut self,
-        name: Name,
-    ) -> Option<JoinedMutSection<Self::BaseSection, Self::DerivativeExclusiveSection>> {
-        let base = self.base_mut();
-        self.derivative_exclusive_mut(name)
-            .map(|derivative_exclusive| JoinedMutSection::new(base, derivative_exclusive))
+    /// Dissolve the item into a tuple of `value` and `section`.
+    pub fn into_tuple2(self) -> (Value, Section<'a>) {
+        let (value, section, ()) = self.into_tuple3();
+        (value, section)
     }
 }
 
-fn query_single_no_arch<'a>(
-    iter: impl IntoIterator<Item = QueryRawTextItem<'a>>,
-) -> Option<&'a str> {
-    let QueryRawTextItem {
-        architecture,
-        value,
-    } = iter.into_iter().next()?;
-    if architecture.is_some() {
-        return None;
+/// Return type of [`Query::query_raw_text`] and [`QueryMut::query_raw_text_mut`].
+pub type QueryRawTextItem<'a> = QueryItem<'a, &'a str, Option<value::Architecture<'a>>>;
+
+impl<'a> QueryRawTextItem<'a> {
+    /// Get a single value from the `pkgbase` section.
+    fn single_base_value(query_iter: impl Iterator<Item = Self>) -> Option<&'a str> {
+        Self::multi_base_values(query_iter).next()
     }
-    Some(value)
-}
 
-macro_rules! def_query_single_no_arch {
-    ($(
-        $(#[$attrs:meta])*
-        $name:ident = $field_name:ident -> $value_type:ident;
-    )*) => {$(
-        $(#[$attrs])*
-        fn $name(&self) -> Option<value::$value_type<'a>> {
-            self.query_raw_text(FieldName::$field_name)
-                .pipe(query_single_no_arch)
-                .map(value::$value_type::new)
-        }
-    )*};
-}
+    /// Get all values from the `pkgbase` section.
+    fn multi_base_values(query_iter: impl Iterator<Item = Self>) -> impl Iterator<Item = &'a str> {
+        query_iter
+            .take_while(|item| item.section == Section::Base)
+            .filter(|item| item.architecture.is_none())
+            .map(|item| item.value)
+    }
 
-macro_rules! def_query_single_no_arch_mut {
-    ($(
-        $(#[$attrs:meta])*
-        $name:ident = $field_name:ident -> $value_type:ident;
-    )*) => {$(
-        $(#[$attrs])*
-        fn $name(&mut self) -> Option<value::$value_type<'a>> {
-            self.query_raw_text_mut(FieldName::$field_name)
-                .pipe(query_single_no_arch)
-                .map(value::$value_type::new)
-        }
-    )*};
-}
+    /// Get a single value from each section.
+    fn shared_single_values(
+        query_iter: impl Iterator<Item = Self>,
+    ) -> impl Iterator<Item = QueryItem<'a, &'a str, ()>> {
+        query_iter
+            .filter(|item| item.architecture.is_none())
+            .scan(None, move |state, item| {
+                if *state == Some(item.section) {
+                    None
+                } else {
+                    *state = Some(item.section);
+                    Some(item.without_architecture())
+                }
+            })
+    }
 
-fn query_multi_no_arch<'a>(
-    iter: impl IntoIterator<Item = QueryRawTextItem<'a>>,
-) -> impl Iterator<Item = &'a str> {
-    iter.into_iter()
-        .filter(|item| item.architecture.is_none())
-        .map(|item| item.value)
-}
-
-macro_rules! def_query_multi_no_arch {
-    ($(
-        $(#[$attrs:meta])*
-        $name:ident = $field_name:ident -> $item_type:ident;
-    )*) => {$(
-        fn $name(&self) -> impl Iterator<Item = value::$item_type<'a>> {
-            self.query_raw_text(FieldName::$field_name)
-                .pipe(query_multi_no_arch)
-                .map(value::$item_type::new)
-        }
-    )*};
-}
-
-macro_rules! def_query_multi_no_arch_mut {
-    ($(
-        $(#[$attrs:meta])*
-        $name:ident = $field_name:ident -> $item_type:ident;
-    )*) => {$(
-        fn $name(&mut self) -> impl Iterator<Item = value::$item_type<'a>> {
-            self.query_raw_text_mut(FieldName::$field_name)
-                .pipe(query_multi_no_arch)
-                .map(value::$item_type::new)
-        }
-    )*};
-}
-
-fn query_multi_arch_some<'a>(
-    iter: impl IntoIterator<Item = QueryRawTextItem<'a>>,
-    architecture: Option<&'a str>,
-) -> impl Iterator<Item = &'a str> {
-    iter.into_iter()
-        .filter(move |item| item.architecture == architecture)
-        .map(|item| item.value)
-}
-
-macro_rules! def_query_multi_arch {
-    ($(
-        $(#[$all_attrs:meta])* $name_all:ident, $(#[$some_attrs:meta])* $name_some:ident =
-            $field_name:ident -> $item_type:ident;
-    )*) => {$(
-        $(#[$all_attrs])*
-        fn $name_all(&self) -> impl Iterator<Item = QueryArchitectureItem<'a, value::$item_type<'a>>> {
-            self.query_raw_text(FieldName::$field_name)
-                .into_iter()
-                .map(move |item| item.into_query_architecture_item(value::$item_type::new))
-        }
-
-        $(#[$some_attrs])*
-        fn $name_some(&self, architecture: Option<&'a str>) -> impl Iterator<Item = value::$item_type<'a>> {
-            query_multi_arch_some(self.query_raw_text(FieldName::$field_name), architecture)
-                .map(value::$item_type::new)
-
-        }
-    )*};
-}
-
-macro_rules! def_query_multi_arch_mut {
-    ($(
-        $(#[$all_attrs:meta])* $name_all:ident, $(#[$some_attrs:meta])* $name_some:ident =
-            $field_name:ident -> $item_type:ident;
-    )*) => {$(
-        $(#[$all_attrs])*
-        fn $name_all(&mut self) -> impl Iterator<Item = QueryArchitectureItem<'a, value::$item_type<'a>>> {
-            self.query_raw_text_mut(FieldName::$field_name)
-                .into_iter()
-                .map(|item| item.into_query_architecture_item(value::$item_type::new))
-        }
-
-        $(#[$some_attrs])*
-        fn $name_some(&mut self, architecture: Option<&'a str>) -> impl Iterator<Item = value::$item_type<'a>> {
-            query_multi_arch_some(self.query_raw_text_mut(FieldName::$field_name), architecture)
-                .map(value::$item_type::new)
-        }
-    )*};
+    /// Get all values without architecture from all sections.
+    fn shared_multi_no_arch_values(
+        query_iter: impl Iterator<Item = Self>,
+    ) -> impl Iterator<Item = QueryItem<'a, &'a str, ()>> {
+        query_iter
+            .filter(|item| item.architecture.is_none())
+            .map(QueryItem::without_architecture)
+    }
 }
 
 macro_rules! def_traits {
     (
         base single {$(
-            $(#[$base_single_attrs:meta])*
-            $base_single_name:ident, $base_single_name_mut:ident = $base_single_field_name:ident -> $base_single_value_type:ident;
+            $base_single_name:ident, $base_single_name_mut:ident = $base_single_field:ident -> $base_single_type:ident;
         )*}
         base multi {$(
-            $(#[$base_multi_attrs:meta])*
-            $base_multi_name:ident, $base_multi_name_mut:ident = $base_multi_field_name:ident -> $base_multi_value_type:ident;
+            $base_multi_name:ident, $base_multi_name_mut:ident = $base_multi_field:ident -> $base_multi_type:ident;
         )*}
         shared single {$(
-            $(#[$shared_single_attrs:meta])*
-            $shared_single_name:ident, $shared_single_name_mut:ident = $shared_single_field_name:ident -> $shared_single_value_type:ident;
+            $shared_single_name:ident, $shared_single_name_mut:ident = $shared_single_field:ident -> $shared_single_type:ident;
         )*}
         shared multi no_arch {$(
-            $(#[$shared_multi_no_arch_attrs:meta])*
-            $shared_multi_no_arch_name:ident, $shared_multi_no_arch_name_mut:ident =
-                $shared_multi_no_arch_field_name:ident -> $shared_multi_no_arch_value_type:ident;
+            $shared_multi_no_arch_name:ident, $shared_multi_no_arch_name_mut:ident = $shared_multi_no_arch_field:ident -> $shared_multi_no_arch_type:ident;
         )*}
         shared multi arch {$(
-            $(#[$shared_multi_arch_all_attrs:meta])*
-            $shared_multi_arch_name_all:ident, $shared_multi_arch_name_some:ident,
-            $(#[$shared_multi_arch_some_attrs:meta])*
-            $shared_multi_arch_name_all_mut:ident, $shared_multi_arch_name_some_mut:ident =
-                $shared_multi_arch_field_name:ident -> $shared_multi_arch_value_type:ident;
+            $shared_multi_arch_name:ident, $shared_multi_arch_name_mut:ident = $shared_multi_arch_field:ident -> $shared_multi_arch_type:ident;
         )*}
     ) => {
-        /// Query a field of the `pkgbase` section of a `.SRCINFO` file.
-        pub trait QueryBaseField<'a>: QueryField<'a> + QueryBaseFieldMut<'a> {
-            /// Get the value of the `pkgbase` field of the `.SRCINFO` file.
-            fn name(&self) -> Base<'a>;
+        /// Get information from a querier of `.SRCINFO`.
+        pub trait Query<'a>: QueryMut<'a> {
+            fn query_raw_text(&self, field_name: FieldName) -> impl Iterator<Item = QueryRawTextItem<'a>>;
 
-            def_query_single_no_arch! {$(
-                $(#[$base_single_attrs])*
-                $base_single_name = $base_single_field_name -> $base_single_value_type;
-            )*}
+            $(fn $base_single_name(&self) -> Option<value::$base_single_type<'a>> {
+                self.query_raw_text(FieldName::$base_single_field)
+                    .pipe(QueryRawTextItem::single_base_value)
+                    .map(value::$base_single_type::new)
+            })*
 
-            def_query_multi_no_arch! {$(
-                $(#[$base_multi_attrs])*
-                $base_multi_name = $base_multi_field_name -> $base_multi_value_type;
-            )*}
+            $(fn $base_multi_name(&self) -> impl Iterator<Item = value::$base_multi_type<'a>> {
+                self.query_raw_text(FieldName::$base_multi_field)
+                    .pipe(QueryRawTextItem::multi_base_values)
+                    .map(value::$base_multi_type::new)
+            })*
+
+            fn derivative_names(&self) -> impl Iterator<Item = value::Name<'a>> {
+                self.query_raw_text(FieldName::Name)
+                    .filter(|item| item.architecture.is_none())
+                    .map(|item| item.value)
+                    .map(value::Name::new)
+            }
+
+            $(fn $shared_single_name(&self) -> impl Iterator<Item = QueryItem<'a, value::$shared_single_type<'a>, ()>> {
+                self.query_raw_text(FieldName::$shared_single_field)
+                    .pipe(QueryRawTextItem::shared_single_values)
+                    .map(|item| item.map(value::$shared_single_type::new))
+            })*
+
+            $(fn $shared_multi_no_arch_name(&self) -> impl Iterator<Item = QueryItem<'a, value::$shared_multi_no_arch_type<'a>, ()>> {
+                self.query_raw_text(FieldName::$shared_multi_no_arch_field)
+                    .pipe(QueryRawTextItem::shared_multi_no_arch_values)
+                    .map(|item| item.map(value::$shared_multi_no_arch_type::new))
+            })*
+
+            $(fn $shared_multi_arch_name(
+                &self,
+            ) -> impl Iterator<Item = QueryItem<'a, value::$shared_multi_arch_type<'a>, Option<value::Architecture<'a>>>> {
+                self.query_raw_text(FieldName::$shared_multi_arch_field)
+                    .map(|item| item.map(value::$shared_multi_arch_type::new))
+            })*
         }
 
-        /// Query a field of a `pkgname` section of a `.SRCINFO` file.
-        pub trait QueryDerivativeField<'a>: QueryField<'a> + QueryDerivativeFieldMut<'a>
-        {
-            /// Get the value of the `pkgname` field of the section.
-            fn name(&self) -> Name<'a>;
-        }
+        /// Get information from a querier of `.SRCINFO`, mutability required.
+        pub trait QueryMut<'a> {
+            fn query_raw_text_mut(&mut self, field_name: FieldName) -> impl Iterator<Item = QueryRawTextItem<'a>>;
 
-        /// Query a field of the `pkgbase` section of a `.SRCINFO` file.
-        pub trait QueryBaseFieldMut<'a>: QueryFieldMut<'a> {
-            /// Get the value of the `pkgbase` field of the `.SRCINFO` file.
-            fn name_mut(&mut self) -> Base<'a>;
+            $(fn $base_single_name_mut(&mut self) -> Option<value::$base_single_type<'a>> {
+                self.query_raw_text_mut(FieldName::$base_single_field)
+                    .pipe(QueryRawTextItem::single_base_value)
+                    .map(value::$base_single_type::new)
+            })*
 
-            def_query_single_no_arch_mut! {$(
-                $(#[$base_single_attrs])*
-                $base_single_name_mut = $base_single_field_name -> $base_single_value_type;
-            )*}
+            $(fn $base_multi_name_mut(&mut self) -> impl Iterator<Item = value::$base_multi_type<'a>> {
+                self.query_raw_text_mut(FieldName::$base_multi_field)
+                    .pipe(QueryRawTextItem::multi_base_values)
+                    .map(value::$base_multi_type::new)
+            })*
 
-            def_query_multi_no_arch_mut! {$(
-                $(#[$base_multi_attrs])*
-                $base_multi_name_mut = $base_multi_field_name -> $base_multi_value_type;
-            )*}
-        }
+            fn derivative_names_mut(&mut self) -> impl Iterator<Item = value::Name<'a>> {
+                self.query_raw_text_mut(FieldName::Name)
+                    .filter(|item| item.architecture.is_none())
+                    .map(|item| item.value)
+                    .map(value::Name::new)
+            }
 
-        /// Query a field of a `pkgname` section of a `.SRCINFO` file.
-        pub trait QueryDerivativeFieldMut<'a>: QueryFieldMut<'a> {
-            /// Get the value of the `pkgname` field of the section.
-            fn name_mut(&mut self) -> Name<'a>;
-        }
+            $(fn $shared_single_name_mut(&mut self) -> impl Iterator<Item = QueryItem<'a, value::$shared_single_type<'a>, ()>> {
+                self.query_raw_text_mut(FieldName::$shared_single_field)
+                    .pipe(QueryRawTextItem::shared_single_values)
+                    .map(|item| item.map(value::$shared_single_type::new))
+            })*
 
-        /// Query a field of either a `pkgbase` or `pkgname` section of a `.SRCINFO` file.
-        pub trait QueryField<'a>: QueryFieldMut<'a> {
-            fn query_raw_text(&self, field_name: FieldName) -> impl IntoIterator<Item = QueryRawTextItem<'a>>;
+            $(fn $shared_multi_no_arch_name_mut(&mut self) -> impl Iterator<Item = QueryItem<'a, value::$shared_multi_no_arch_type<'a>,()>> {
+                self.query_raw_text_mut(FieldName::$shared_multi_no_arch_field)
+                    .pipe(QueryRawTextItem::shared_multi_no_arch_values)
+                    .map(|item| item.map(value::$shared_multi_no_arch_type::new))
+            })*
 
-            def_query_single_no_arch! {$(
-                $(#[$shared_single_attrs])*
-                $shared_single_name = $shared_single_field_name -> $shared_single_value_type;
-            )*}
-
-            def_query_multi_no_arch! {$(
-                $(#[$shared_multi_no_arch_attrs])*
-                $shared_multi_no_arch_name = $shared_multi_no_arch_field_name -> $shared_multi_no_arch_value_type;
-            )*}
-
-            def_query_multi_arch! {$(
-                $(#[$shared_multi_arch_all_attrs])* $shared_multi_arch_name_all,
-                $(#[$shared_multi_arch_some_attrs])* $shared_multi_arch_name_some =
-                    $shared_multi_arch_field_name -> $shared_multi_arch_value_type;
-            )*}
-        }
-
-        /// Query a field of either a `pkgbase` or `pkgname` section of a `.SRCINFO` file.
-        pub trait QueryFieldMut<'a> {
-            fn query_raw_text_mut(&mut self, field_name: FieldName) -> impl IntoIterator<Item = QueryRawTextItem<'a>>;
-
-            def_query_single_no_arch_mut! {$(
-                $(#[$shared_single_attrs])*
-                $shared_single_name_mut = $shared_single_field_name -> $shared_single_value_type;
-            )*}
-
-            def_query_multi_no_arch_mut! {$(
-                $(#[$shared_multi_no_arch_attrs])*
-                $shared_multi_no_arch_name_mut = $shared_multi_no_arch_field_name -> $shared_multi_no_arch_value_type;
-            )*}
-
-            def_query_multi_arch_mut! {$(
-                $(#[$shared_multi_arch_all_attrs])* $shared_multi_arch_name_all_mut,
-                $(#[$shared_multi_arch_some_attrs])* $shared_multi_arch_name_some_mut =
-                    $shared_multi_arch_field_name -> $shared_multi_arch_value_type;
-            )*}
+            $(fn $shared_multi_arch_name_mut(
+                &mut self,
+            ) -> impl Iterator<Item = QueryItem<'a, value::$shared_multi_arch_type<'a>, Option<value::Architecture<'a>>>> {
+                self.query_raw_text_mut(FieldName::$shared_multi_arch_field)
+                    .map(|item| item.map(value::$shared_multi_arch_type::new))
+            })*
         }
     };
 }
 
 def_traits! {
     base single {
+        base_name, base_name_mut = Base -> Base;
         epoch, epoch_mut = Epoch -> Epoch;
         release, release_mut = Release -> Release;
         version, version_mut = Version -> UpstreamVersion;
@@ -332,76 +240,22 @@ def_traits! {
     }
     shared multi arch {
         /* MISC */
-        source, source_architecture, source_mut, source_architecture_mut = Source -> Source;
+        source, source_mut = Source -> Source;
 
         /* DEPENDENCIES */
-        dependencies, dependencies_architecture, dependencies_mut, dependencies_architecture_mut = Dependencies -> Dependency;
-        make_dependencies, make_dependencies_architecture, make_dependencies_mut, make_dependencies_architecture_mut = MakeDependencies -> Dependency;
-        check_dependencies, check_dependencies_architecture, check_dependencies_mut, check_dependencies_architecture_mut = CheckDependencies -> Dependency;
-        opt_dependencies, opt_dependencies_architecture, opt_dependencies_mut, opt_dependencies_architecture_mut = OptionalDependencies -> DependencyAndReason;
-        provides, provides_architecture, provides_mut, provides_architecture_mut = Provides -> Dependency;
-        conflicts, conflicts_architecture, conflicts_mut, conflicts_architecture_mut = Conflicts -> Dependency;
-        replaces, replaces_architecture, replaces_mut, replaces_architecture_mut = Replaces -> Dependency;
+        dependencies, dependencies_mut = Dependencies -> Dependency;
+        make_dependencies, make_dependencies_mut = MakeDependencies -> Dependency;
+        check_dependencies, check_dependencies_mut = CheckDependencies -> Dependency;
+        opt_dependencies, opt_dependencies_mut = OptionalDependencies -> DependencyAndReason;
+        provides, provides_mut = Provides -> Dependency;
+        conflicts, conflicts_mut = Conflicts -> Dependency;
+        replaces, replaces_mut = Replaces -> Dependency;
 
         /* CHECKSUMS */
-        md5_checksums, md5_checksums_architecture, md5_checksums_mut, md5_checksums_architecture_mut = Md5Checksums -> Hex128;
-        sha1_checksums, sha1_checksums_architecture, sha1_checksums_mut, sha1_checksums_architecture_mut = Sha1Checksums -> Hex160;
-        sha224_checksums, sha224_checksums_architecture, sha224_checksums_mut, sha224_checksums_architecture_mut = Sha224Checksums -> Hex224;
-        sha256_checksums, sha256_checksums_architecture, sha256_checksums_mut, sha256_checksums_architecture_mut = Sha256Checksums -> Hex256;
-        sha512_checksums, sha512_checksums_architecture, sha512_checksums_mut, sha512_checksums_architecture_mut = Sha512Checksums -> Hex512;
+        md5_checksums, md5_checksums_mut = Md5Checksums -> Hex128;
+        sha1_checksums, sha1_checksums_mut = Sha1Checksums -> Hex160;
+        sha224_checksums, sha224_checksums_mut = Sha224Checksums -> Hex224;
+        sha256_checksums, sha256_checksums_mut = Sha256Checksums -> Hex256;
+        sha512_checksums, sha512_checksums_mut = Sha512Checksums -> Hex512;
     }
 }
-
-/// [Iterator item](Iterator::Item) of [`query_raw_text`](QueryField::query_raw_text)
-/// and [`query_raw_text_mut`](QueryFieldMut::query_raw_text_mut).
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct QueryRawTextItem<'a> {
-    /// Architecture of the field.
-    pub architecture: Option<&'a str>,
-    /// Value of the field.
-    pub value: &'a str,
-}
-
-impl<'a> QueryRawTextItem<'a> {
-    fn into_query_architecture_item<Value, MakeValue>(
-        self,
-        make_value: MakeValue,
-    ) -> QueryArchitectureItem<'a, Value>
-    where
-        MakeValue: FnOnce(&'a str) -> Value,
-    {
-        let QueryRawTextItem {
-            architecture,
-            value,
-        } = self;
-        let value = make_value(value);
-        QueryArchitectureItem {
-            architecture,
-            value,
-        }
-    }
-
-    fn from_tuple((architecture, value): (Option<&'a str>, &'a str)) -> Self {
-        QueryRawTextItem {
-            architecture,
-            value,
-        }
-    }
-}
-
-/// [Iterator item](Iterator::Item) of query functions that return architectures.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct QueryArchitectureItem<'a, Value> {
-    /// Architecture of the field.
-    pub architecture: Option<&'a str>,
-    /// Value of the field.
-    pub value: Value,
-}
-
-mod derivative;
-pub use derivative::{JoinedMutSection, JoinedSection};
-
-mod forgetful;
-pub use forgetful::{
-    ForgetfulBaseSection, ForgetfulDerivativeExclusiveSection, ForgetfulSectionQuerier,
-};
