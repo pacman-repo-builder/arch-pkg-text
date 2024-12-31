@@ -259,3 +259,8 @@ def_traits! {
         sha512_checksums, sha512_checksums_mut = Sha512Checksums -> Hex512;
     }
 }
+
+mod utils; // TODO: remove this if it turns out not to be reused
+
+mod forgetful;
+pub use forgetful::*;
