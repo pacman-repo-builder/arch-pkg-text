@@ -90,12 +90,13 @@ impl<'a> QueryRawTextItem<'a> {
             .filter(|item| item.architecture.is_none())
             .scan(None, move |state, item| {
                 if *state == Some(item.section) {
-                    None
+                    Some(None)
                 } else {
                     *state = Some(item.section);
-                    Some(item.without_architecture())
+                    Some(Some(item.without_architecture()))
                 }
             })
+            .flatten()
     }
 
     /// Get all values without architecture from all sections.
