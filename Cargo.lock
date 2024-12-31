@@ -71,6 +71,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2304e00983f87ffb38b55b444b5e3b60a884b5d30c0fca7d82fe33449bbe55ea"
 
 [[package]]
+name = "iter-scanb"
+version = "0.3.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ed55b4e1e3c43e3e1238eafcf926a781d2e6ee39507c04c29833c01ea78309eb"
+
+[[package]]
 name = "libc"
 version = "0.2.159"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -114,6 +120,7 @@ name = "parse-arch-pkg-desc"
 version = "0.0.0"
 dependencies = [
  "derive_more",
+ "iter-scanb",
  "parking_lot",
  "pipe-trait",
  "pretty_assertions",

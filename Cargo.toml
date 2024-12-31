@@ -25,6 +25,7 @@ std = ["strum/std"]
 
 [dependencies]
 derive_more = { version = "1.0.0", default-features = false, features = ["as_ref", "deref", "display", "error"] }
+iter-scanb = "0.3.1"
 parking_lot = { version = "0.12.3", optional = true }
 pipe-trait = "0.4.0"
 strum = { version = "0.26.3", default-features = false, features = ["derive", "phf"] }
