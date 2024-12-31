@@ -37,12 +37,6 @@ impl<'a, Value, Architecture> QueryItem<'a, Value, Architecture> {
         (self.value, self.section, self.architecture)
     }
 
-    /// Discard [`Self::architecture`].
-    fn without_architecture(self) -> QueryItem<'a, Value, ()> {
-        let (value, section, _) = self.into_tuple3();
-        QueryItem::from_tuple3((value, section, ()))
-    }
-
     /// Transform `value`.
     fn map<NewValue>(
         self,
@@ -50,6 +44,16 @@ impl<'a, Value, Architecture> QueryItem<'a, Value, Architecture> {
     ) -> QueryItem<'a, NewValue, Architecture> {
         let (value, section, architecture) = self.into_tuple3();
         QueryItem::from_tuple3((f(value), section, architecture))
+    }
+}
+
+impl<'a, Value, Architecture> QueryItem<'a, Value, Option<Architecture>> {
+    /// Turns [`Self::architecture`] into `()` if it was `None`.
+    fn into_without_architecture(self) -> Option<QueryItem<'a, Value, ()>> {
+        let (value, section, architecture) = self.into_tuple3();
+        architecture
+            .is_none()
+            .then_some(QueryItem::from_tuple3((value, section, ())))
     }
 }
 
@@ -88,8 +92,7 @@ impl<'a> QueryRawTextItem<'a> {
         query_iter: impl Iterator<Item = Self>,
     ) -> impl Iterator<Item = QueryItem<'a, &'a str, ()>> {
         query_iter
-            .filter(|item| item.architecture.is_none())
-            .map(QueryItem::without_architecture)
+            .filter_map(QueryItem::into_without_architecture)
             .scanb(None, move |state, item| {
                 if *state == Some(item.section) {
                     None
@@ -105,9 +108,7 @@ impl<'a> QueryRawTextItem<'a> {
     fn shared_multi_no_arch_values(
         query_iter: impl Iterator<Item = Self>,
     ) -> impl Iterator<Item = QueryItem<'a, &'a str, ()>> {
-        query_iter
-            .filter(|item| item.architecture.is_none())
-            .map(QueryItem::without_architecture)
+        query_iter.filter_map(QueryItem::into_without_architecture)
     }
 }
 
@@ -147,7 +148,7 @@ macro_rules! def_traits {
 
             fn derivative_names(&self) -> impl Iterator<Item = value::Name<'a>> {
                 self.query_raw_text(FieldName::Name)
-                    .filter(|item| item.architecture.is_none())
+                    .filter_map(QueryItem::into_without_architecture)
                     .map(|item| item.value)
                     .map(value::Name::new)
             }
@@ -190,7 +191,7 @@ macro_rules! def_traits {
 
             fn derivative_names_mut(&mut self) -> impl Iterator<Item = value::Name<'a>> {
                 self.query_raw_text_mut(FieldName::Name)
-                    .filter(|item| item.architecture.is_none())
+                    .filter_map(QueryItem::into_without_architecture)
                     .map(|item| item.value)
                     .map(value::Name::new)
             }
