@@ -1,5 +1,5 @@
 use crate::{srcinfo::field::FieldName, value};
-use iter_scanb::IterScanB;
+use iter_scan::IterScan;
 use pipe_trait::Pipe;
 
 /// Location of a given [`QueryItem`].
@@ -93,12 +93,12 @@ impl<'a> QueryRawTextItem<'a> {
     ) -> impl Iterator<Item = QueryItem<'a, &'a str, ()>> {
         query_iter
             .filter_map(QueryItem::into_without_architecture)
-            .scanb(None, move |state, item| {
-                if *state == Some(item.section) {
-                    None
+            .scan_with_tuple(None, move |section, item| {
+                // each section should emit only 1 value
+                if section == Some(item.section) {
+                    (section, None)
                 } else {
-                    *state = Some(item.section);
-                    Some(item)
+                    (Some(item.section), Some(item))
                 }
             })
             .flatten()

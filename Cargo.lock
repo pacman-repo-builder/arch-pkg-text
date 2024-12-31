@@ -71,10 +71,13 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2304e00983f87ffb38b55b444b5e3b60a884b5d30c0fca7d82fe33449bbe55ea"
 
 [[package]]
-name = "iter-scanb"
-version = "0.3.1"
+name = "iter-scan"
+version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ed55b4e1e3c43e3e1238eafcf926a781d2e6ee39507c04c29833c01ea78309eb"
+checksum = "767e178e700fa5886bbdedc401e042e81c025d46d9a56f8dbf1edc0cef268657"
+dependencies = [
+ "replace_with",
+]
 
 [[package]]
 name = "libc"
@@ -120,7 +123,7 @@ name = "parse-arch-pkg-desc"
 version = "0.0.0"
 dependencies = [
  "derive_more",
- "iter-scanb",
+ "iter-scan",
  "parking_lot",
  "pipe-trait",
  "pretty_assertions",
@@ -258,6 +261,12 @@ checksum = "9b6dfecf2c74bce2466cabf93f6664d6998a69eb21e39f4207930065b27b771f"
 dependencies = [
  "bitflags",
 ]
+
+[[package]]
+name = "replace_with"
+version = "0.1.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e3a8614ee435691de62bcffcf4a66d91b3594bf1428a5722e79103249a095690"
 
 [[package]]
 name = "rustversion"

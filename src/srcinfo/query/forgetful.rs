@@ -6,7 +6,7 @@ use crate::{
     srcinfo::field::{FieldName, ParsedField, RawField},
     value::{Architecture, Name},
 };
-use iter_scanb::IterScanB;
+use iter_scan::IterScan;
 
 /// [Query] without a cache.
 #[derive(Debug, Clone, Copy)]
@@ -27,14 +27,14 @@ impl<'a> Query<'a> for ForgetfulQuerier<'a> {
             .filter(|line| !trimmed_line_is_blank(line))
             .map_while(parse_line)
             .filter_map(known_field)
-            .scanb(Section::Base, |section, (field, value)| {
-                if *field.name() == FieldName::Name {
-                    *section = Section::Derivative(Name(value));
+            .scan_state_copy(Section::Base, |section, (field, value)| {
+                match field.name() {
+                    FieldName::Name => (Section::Derivative(Name(value)), (field, value)),
+                    _ => (section, (field, value)),
                 }
-                (*section, field, value)
             })
-            .filter(move |(_, field, _)| *field.name() == field_name)
-            .map(|(section, field, value)| {
+            .filter(move |(_, (field, _))| *field.name() == field_name)
+            .map(|(section, (field, value))| {
                 QueryRawTextItem::from_tuple3((
                     value,
                     section,
