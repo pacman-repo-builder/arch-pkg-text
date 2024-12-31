@@ -89,12 +89,13 @@ impl<'a> QueryRawTextItem<'a> {
     ) -> impl Iterator<Item = QueryItem<'a, &'a str, ()>> {
         query_iter
             .filter(|item| item.architecture.is_none())
+            .map(QueryItem::without_architecture)
             .scanb(None, move |state, item| {
                 if *state == Some(item.section) {
                     None
                 } else {
                     *state = Some(item.section);
-                    Some(item.without_architecture())
+                    Some(item)
                 }
             })
             .flatten()
