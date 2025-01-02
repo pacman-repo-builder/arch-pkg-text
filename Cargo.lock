@@ -72,9 +72,9 @@ checksum = "2304e00983f87ffb38b55b444b5e3b60a884b5d30c0fca7d82fe33449bbe55ea"
 
 [[package]]
 name = "iter-scan"
-version = "0.3.0"
+version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "767e178e700fa5886bbdedc401e042e81c025d46d9a56f8dbf1edc0cef268657"
+checksum = "bf94816cab7e66bfab45d2237f5feb708f75c1db64f1405d76049d782113cfed"
 dependencies = [
  "replace_with",
 ]
