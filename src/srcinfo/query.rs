@@ -264,7 +264,7 @@ def_traits! {
     }
 }
 
-mod utils; // TODO: remove this if it turns out not to be reused
+mod utils;
 
 mod forgetful;
 pub use forgetful::*;
