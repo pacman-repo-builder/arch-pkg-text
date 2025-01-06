@@ -26,6 +26,8 @@ macro_rules! def_cache {
             fn add(&mut self, value: &'a str) {
                 self.0 = Some(value);
             }
+
+            fn shrink_to_fit(&mut self) {}
         }
 
         #[derive(Debug, Clone)]
@@ -38,6 +40,10 @@ macro_rules! def_cache {
 
             fn add(&mut self, value: Value) {
                 self.0.push(value);
+            }
+
+            fn shrink_to_fit(&mut self) {
+                self.0.shrink_to_fit();
             }
         }
 
@@ -111,6 +117,15 @@ macro_rules! def_cache {
                 let (value, section, architecture) = item.into_tuple3();
                 debug_assert_eq!((section, architecture), (value.pipe(Name).pipe(Section::Derivative), None));
                 value
+            }
+
+            pub fn shrink_to_fit(&mut self) {
+                $(self.$base_single_field.shrink_to_fit();)*
+                $(self.$base_multi_field.shrink_to_fit();)*
+                $(self.$shared_single_field.shrink_to_fit();)*
+                $(self.$shared_multi_no_arch_field.shrink_to_fit();)*
+                $(self.$shared_multi_arch_field.shrink_to_fit();)*
+                self.derivative_names.shrink_to_fit();
             }
         }
     };

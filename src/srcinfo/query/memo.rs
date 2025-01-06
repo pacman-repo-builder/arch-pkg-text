@@ -30,6 +30,11 @@ impl<'a> MemoQuerier<'a> {
         }
     }
 
+    /// Shrink the cache's capacity to fit its length.
+    pub fn shrink_cache_to_fit(&mut self) {
+        self.cache.shrink_to_fit();
+    }
+
     /// Parse the next key-value pair, save it the cache and return it.
     fn next_entry(&mut self) -> Option<(FieldName, QueryRawTextItem<'a>)> {
         let line = self.remaining_lines.next()?.trim();
