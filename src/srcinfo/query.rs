@@ -268,3 +268,8 @@ mod utils; // TODO: remove this if it turns out not to be reused
 
 mod forgetful;
 pub use forgetful::*;
+
+#[cfg(feature = "std")]
+mod memo;
+#[cfg(feature = "std")]
+pub use memo::*;
