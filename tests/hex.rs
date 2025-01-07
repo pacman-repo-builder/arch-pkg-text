@@ -3,7 +3,7 @@ use pretty_assertions::assert_eq;
 
 #[test]
 fn hex128() {
-    let hex128 = Hex128("165f04122017ec76579594b17f15f8eb");
+    let hex128 = Hex128("165F04122017EC76579594B17F15F8EB");
     assert_eq!(
         hex128.u8_array(),
         Some([
@@ -16,7 +16,7 @@ fn hex128() {
 
 #[test]
 fn hex256() {
-    let hex256 = Hex256("37cba20b05b899dcbe2e565b1c20b7cfc6411ffcb014b977edb2d8afbc3a530b");
+    let hex256 = Hex256("37CBA20B05B899DCBE2E565B1C20B7CFC6411FFCB014B977EDB2D8AFBC3A530B");
     assert_eq!(
         hex256.u8_array(),
         Some([
