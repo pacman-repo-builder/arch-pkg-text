@@ -27,6 +27,7 @@ impl<'a> Query<'a> for ForgetfulQuerier<'a> {
             .filter(|line| !trimmed_line_is_blank(line))
             .map_while(parse_line)
             .filter_map(known_field)
+            .filter(|(_, value)| !value.is_empty())
             .scan_state_copy(Section::Base, |section, (field, value)| {
                 match field.name() {
                     FieldName::Name => (Section::Derivative(Name(value)), (field, value)),

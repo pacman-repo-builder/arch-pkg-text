@@ -45,6 +45,9 @@ impl<'a> MemoQuerier<'a> {
         let Ok(field) = raw_field.to_parsed::<FieldName, &str>() else {
             return self.next_entry();
         };
+        if value.is_empty() {
+            return self.next_entry();
+        }
         let architecture = field.architecture_str().map(Architecture);
         if *field.name() == FieldName::Name && architecture.is_none() {
             self.current_section = value.pipe(Name).pipe(Section::Derivative);
