@@ -138,6 +138,6 @@ def_cache! {
     shared multi no_arch (Architecture Backup Groups License NoExtract Options)
     shared multi arch (
         Source Dependencies MakeDependencies CheckDependencies OptionalDependencies Provides Conflicts Replaces
-        Md5Checksums Sha1Checksums Sha224Checksums Sha256Checksums Sha384Checksums Sha512Checksums
+        Md5Checksums Sha1Checksums Sha224Checksums Sha256Checksums Sha384Checksums Sha512Checksums Blake2bChecksums
     )
 }

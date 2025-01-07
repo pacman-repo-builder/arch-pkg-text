@@ -261,6 +261,7 @@ def_traits! {
         sha224_checksums, sha224_checksums_mut = Sha224Checksums -> SkipOrHex224;
         sha256_checksums, sha256_checksums_mut = Sha256Checksums -> SkipOrHex256;
         sha512_checksums, sha512_checksums_mut = Sha512Checksums -> SkipOrHex512;
+        blake2b_checksums, blake2b_checksums_mut = Blake2bChecksums -> SkipOrHex512;
     }
 }
 

@@ -164,6 +164,8 @@ pub enum FieldName {
     Sha384Checksums,
     #[strum(serialize = "sha512sums")]
     Sha512Checksums,
+    #[strum(serialize = "b2sums")]
+    Blake2bChecksums,
 }
 
 mod parse;
