@@ -36,6 +36,21 @@ macro_rules! impl_hex {
     };
 }
 
+macro_rules! impl_srcinfo_checksum {
+    ($container:ident, $size:literal) => {
+        impl<'a> $container<'a> {
+            /// Convert the hex string into an array of 8-bit unsigned integers.
+            pub fn u8_array(self) -> Option<SkipOrArray<$size>> {
+                if self.as_str() == "SKIP" {
+                    return Some(SkipOrArray::Skip);
+                }
+                let (invalid, array) = ParseHex::parse_hex(self.0);
+                invalid.is_empty().then_some(SkipOrArray::Array(array))
+            }
+        }
+    };
+}
+
 macro_rules! impl_num {
     ($container:ident, $num:ty) => {
         impl_str!($container);
@@ -72,6 +87,21 @@ macro_rules! def_hex_wrappers {
         pub struct $name<'a>(pub &'a str);
         impl_str!($name);
         impl_hex!($name, $size);
+    )*};
+}
+
+macro_rules! def_srcinfo_checksum_wrappers {
+    ($(
+        $(#[$attrs:meta])*
+        $name:ident {
+            size = $size:literal;
+        }
+    )*) => {$(
+        $(#[$attrs])*
+        #[derive(Debug, Display, Clone, Copy, AsRef, Deref)]
+        pub struct $name<'a>(pub &'a str);
+        impl_str!($name);
+        impl_srcinfo_checksum!($name, $size);
     )*};
 }
 
@@ -196,24 +226,35 @@ def_hex_wrappers! {
     Hex128 {
         size = 16;
     }
-    /// Type of value of `sha1sums`.
-    Hex160 {
-        size = 20;
-    }
-    /// Type of value of `sha224sums`.
-    Hex224 {
-        size = 28;
-    }
     /// Type of value of `SHA256SUM` and `sha256sums`.
     Hex256 {
         size = 32;
     }
+}
+
+def_srcinfo_checksum_wrappers! {
+    /// Type of value of `md5sums`.
+    SkipOrHex128 {
+        size = 16;
+    }
+    /// Type of value of `sha1sums`.
+    SkipOrHex160 {
+        size = 20;
+    }
+    /// Type of value of `sha224sums`.
+    SkipOrHex224 {
+        size = 28;
+    }
+    /// Type of value of `sha256sums`.
+    SkipOrHex256 {
+        size = 32;
+    }
     /// Type of value of `sha384sums`.
-    Hex384 {
+    SkipOrHex384 {
         size = 48;
     }
     /// Type of value of `sha512sums`.
-    Hex512 {
+    SkipOrHex512 {
         size = 64;
     }
 }
@@ -291,5 +332,7 @@ mod dependency_name;
 mod dependency_specification;
 mod dependency_specification_operator;
 mod hex128;
+mod skip_or_array;
 
 pub use dependency_specification_operator::DependencySpecificationOperator;
+pub use skip_or_array::SkipOrArray;

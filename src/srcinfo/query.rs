@@ -256,11 +256,11 @@ def_traits! {
         replaces, replaces_mut = Replaces -> Dependency;
 
         /* CHECKSUMS */
-        md5_checksums, md5_checksums_mut = Md5Checksums -> Hex128;
-        sha1_checksums, sha1_checksums_mut = Sha1Checksums -> Hex160;
-        sha224_checksums, sha224_checksums_mut = Sha224Checksums -> Hex224;
-        sha256_checksums, sha256_checksums_mut = Sha256Checksums -> Hex256;
-        sha512_checksums, sha512_checksums_mut = Sha512Checksums -> Hex512;
+        md5_checksums, md5_checksums_mut = Md5Checksums -> SkipOrHex128;
+        sha1_checksums, sha1_checksums_mut = Sha1Checksums -> SkipOrHex160;
+        sha224_checksums, sha224_checksums_mut = Sha224Checksums -> SkipOrHex224;
+        sha256_checksums, sha256_checksums_mut = Sha256Checksums -> SkipOrHex256;
+        sha512_checksums, sha512_checksums_mut = Sha512Checksums -> SkipOrHex512;
     }
 }
 
