@@ -12,7 +12,7 @@ pub enum Section<'a> {
 }
 
 /// Return type of methods in [`Query`] and [`QueryMut`].
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct QueryItem<'a, Value, Architecture> {
     /// Value of the item.
     pub value: Value,
