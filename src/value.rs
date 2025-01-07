@@ -222,11 +222,11 @@ def_str_wrappers! {
 }
 
 def_hex_wrappers! {
-    /// Type of value of `MD5SUM` and `md5sums`.
+    /// Type of value of `MD5SUM`.
     Hex128 {
         size = 16;
     }
-    /// Type of value of `SHA256SUM` and `sha256sums`.
+    /// Type of value of `SHA256SUM`.
     Hex256 {
         size = 32;
     }
