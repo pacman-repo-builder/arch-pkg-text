@@ -1,0 +1,22 @@
+pkgbase = simple-example-bin
+  pkgdesc = Simple .SRCINFO example
+  pkgver = 12.34.56.r789
+  pkgrel = 1
+  url = https://apps.example.com/simple/
+  arch = any
+  license = MIT
+  license = ISC
+  license = Apache-2.0
+  depends = glibc>=2.0
+  depends = coreutils
+  depends = linux
+  makedepends = bash
+  optdepends = example-plugins: Plugins for simple-example
+  source = https://src.apps.example.com/simple.tgz
+  source = build-x86_64.bash
+  source = build-aarch64.bash
+  sha1sums = 4808c01d2da9ba8a1f0da603d20d515e3e7a67e6
+  sha1sums = SKIP
+  sha1sums = SKIP
+
+pkgname = simple-example-bin

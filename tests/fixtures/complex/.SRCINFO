@@ -1,0 +1,52 @@
+pkgbase = complex-example-bin
+  pkgdesc = Description under pkgbase
+  pkgver = 12.34.56.r789
+  pkgrel = 2
+  epoch = 3
+  url = https://apps.example.com/complex/
+
+  # shared architectures
+  arch = x86_64
+  arch = aarch64
+
+  # shared licenses
+  license = MIT
+  license = ISC
+  license = Apache-2.0
+
+  # dependencies
+  depends = glibc>=2.0
+  depends = coreutils
+  depends = linux
+  depends_aarch64 = aarch64-compatibility
+
+  makedepends = bash
+  optdepends = example-plugins: Plugins for complex-example
+
+  # sources and checksums
+  source = https://src.apps.example.com/complex.tgz
+  sha1sums = 4808c01d2da9ba8a1f0da603d20d515e3e7a67e6
+  source_x86_64 = build-x86_64.bash
+  sha1sums_x86_64 = SKIP
+  source_aarch64 = build-aarch64.bash
+  sha1sums_aarch64 = SKIP
+
+pkgname = foo-bin
+  pkgdesc = Description under foo-bin
+  arch = i686
+  install = foo-bin.install
+  depends_x86_64 = x86_64-compatibility-for-foo
+  depends_i686 = i686-compatibility-for-foo
+  depends = extra-depend-for-foo
+  provides = foo
+  source = build-foo.bash
+  sha1sums = SKIP
+
+pkgname = bar-bin
+  pkgdesc = Description under bar-bin
+  install = bar-bin.install
+  depends_x86_64 = x86_64-compatibility-for-bar
+  depends = extra-depend-for-bar
+  provides = bar
+  source = build-bar.bash
+  sha1sums = SKIP
