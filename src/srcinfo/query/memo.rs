@@ -35,6 +35,12 @@ impl<'a> MemoQuerier<'a> {
         self.cache.shrink_to_fit();
     }
 
+    /// Private function for testing the internal cache.
+    #[doc(hidden)]
+    pub fn __has_cache(&self, field_name: FieldName, index: usize) -> bool {
+        self.cache.get(field_name, index).is_some()
+    }
+
     /// Parse the next key-value pair, save it the cache and return it.
     fn next_entry(&mut self) -> Option<(FieldName, QueryRawTextItem<'a>)> {
         let line = self.remaining_lines.next()?.trim();
