@@ -1,3 +1,5 @@
+#![cfg(feature = "std")]
+
 pub mod _utils;
 pub use _utils::*;
 
