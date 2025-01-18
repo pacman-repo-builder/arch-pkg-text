@@ -26,9 +26,9 @@ impl<'a, Value, Architecture> QueryItem<'a, Value, Architecture> {
     /// Construct an item from a tuple of `value`, `section`, and `architecture`.
     pub fn from_tuple3((value, section, architecture): (Value, Section<'a>, Architecture)) -> Self {
         QueryItem {
+            value,
             section,
             architecture,
-            value,
         }
     }
 
