@@ -253,7 +253,7 @@ def_srcinfo_checksum_wrappers! {
     SkipOrHex384 {
         size = 48;
     }
-    /// Type of value of `sha512sums`.
+    /// Type of value of `sha512sums` and `b2sums`.
     SkipOrHex512 {
         size = 64;
     }
