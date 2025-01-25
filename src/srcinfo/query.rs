@@ -40,7 +40,7 @@ impl<'a, Value, Architecture> QueryItem<'a, Value, Architecture> {
     /// Transform `value`.
     fn map<NewValue>(
         self,
-        f: impl Fn(Value) -> NewValue + 'static,
+        mut f: impl FnMut(Value) -> NewValue + 'static,
     ) -> QueryItem<'a, NewValue, Architecture> {
         let (value, section, architecture) = self.into_tuple3();
         QueryItem::from_tuple3((f(value), section, architecture))
@@ -111,6 +111,9 @@ impl<'a> QueryRawTextItem<'a> {
         query_iter.filter_map(QueryItem::into_without_architecture)
     }
 }
+
+/// Return type of [`Checksums::checksums`] and [`ChecksumsMut::checksums_mut`].
+pub type QueryChecksumItem<'a> = QueryItem<'a, ChecksumValue<'a>, Option<value::Architecture<'a>>>;
 
 macro_rules! def_traits {
     (
@@ -266,7 +269,20 @@ def_traits! {
     }
 }
 
+/// Get checksums information from a querier of `.SRCINFO`.
+pub trait Checksums<'a>: ChecksumsMut<'a> {
+    fn checksums(&self) -> impl Iterator<Item = QueryChecksumItem<'a>>;
+}
+
+/// Get checksums information from a querier of `.SRCINFO`, mutability required.
+pub trait ChecksumsMut<'a> {
+    fn checksums_mut(&mut self) -> impl Iterator<Item = QueryChecksumItem<'a>>;
+}
+
 mod utils;
+
+mod checksums;
+pub use checksums::*;
 
 mod forgetful;
 pub use forgetful::*;

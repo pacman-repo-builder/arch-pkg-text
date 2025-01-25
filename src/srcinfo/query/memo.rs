@@ -2,7 +2,8 @@ mod cache;
 
 use super::{
     utils::{parse_line, trimmed_line_is_blank},
-    QueryMut, QueryRawTextItem, Section,
+    ChecksumType, ChecksumValue, ChecksumsMut, QueryChecksumItem, QueryMut, QueryRawTextItem,
+    Section,
 };
 use crate::{
     srcinfo::field::FieldName,
@@ -65,16 +66,16 @@ impl<'a> MemoQuerier<'a> {
 }
 
 /// Return type of [`QueryMut::query_raw_text_mut`] on an instance of [`MemoQuerier`].
-struct Iter<'a, 'r> {
+struct QueryIter<'a, 'r> {
     querier: &'r mut MemoQuerier<'a>,
     field_name: FieldName,
     index: usize,
 }
 
-impl<'a, 'r> Iter<'a, 'r> {
+impl<'a, 'r> QueryIter<'a, 'r> {
     /// Create an iterator that queries `field_name` from `querier`.
     fn new(querier: &'r mut MemoQuerier<'a>, field_name: FieldName) -> Self {
-        Iter {
+        QueryIter {
             querier,
             field_name,
             index: 0,
@@ -82,10 +83,10 @@ impl<'a, 'r> Iter<'a, 'r> {
     }
 }
 
-impl<'a, 'r> Iterator for Iter<'a, 'r> {
+impl<'a, 'r> Iterator for QueryIter<'a, 'r> {
     type Item = QueryRawTextItem<'a>;
     fn next(&mut self) -> Option<Self::Item> {
-        let Iter {
+        let QueryIter {
             querier,
             field_name,
             index,
@@ -107,6 +108,54 @@ impl<'a> QueryMut<'a> for MemoQuerier<'a> {
         &mut self,
         field_name: FieldName,
     ) -> impl Iterator<Item = QueryRawTextItem<'a>> {
-        Iter::new(self, field_name)
+        QueryIter::new(self, field_name)
+    }
+}
+
+/// Return type of [`ChecksumsMut::checksums_mut`] on an instance of [`MemoQuerier`].
+struct ChecksumIter<'a, 'r> {
+    querier: &'r mut MemoQuerier<'a>,
+    checksum_type_id: usize,
+    checksum_index: usize,
+}
+
+impl<'a, 'r> ChecksumIter<'a, 'r> {
+    /// Create an iterator that queries all checksums from `querier`.
+    fn new(querier: &'r mut MemoQuerier<'a>) -> Self {
+        ChecksumIter {
+            querier,
+            checksum_type_id: 0,
+            checksum_index: 0,
+        }
+    }
+}
+
+impl<'a, 'r> Iterator for ChecksumIter<'a, 'r> {
+    type Item = QueryChecksumItem<'a>;
+    fn next(&mut self) -> Option<Self::Item> {
+        let ChecksumIter {
+            querier,
+            checksum_type_id,
+            checksum_index,
+        } = self;
+        loop {
+            let checksum_type = *ChecksumType::TYPES.get(*checksum_type_id)?;
+            let field_name = checksum_type.into_field_name();
+            if let Some(item) = querier.cache.get(field_name, *checksum_index) {
+                *checksum_index += 1;
+                return item
+                    .map(move |value| ChecksumValue::new(checksum_type, value))
+                    .pipe(Some);
+            } else if querier.next_entry().is_none() {
+                *checksum_type_id += 1;
+                *checksum_index = 0;
+            }
+        }
+    }
+}
+
+impl<'a> ChecksumsMut<'a> for MemoQuerier<'a> {
+    fn checksums_mut(&mut self) -> impl Iterator<Item = QueryChecksumItem<'a>> {
+        ChecksumIter::new(self)
     }
 }

@@ -1,6 +1,7 @@
 use super::{
     utils::{parse_line, trimmed_line_is_blank},
-    Query, QueryMut, QueryRawTextItem, Section,
+    ChecksumValue, Checksums, ChecksumsMut, Query, QueryChecksumItem, QueryMut, QueryRawTextItem,
+    Section,
 };
 use crate::{
     srcinfo::field::{FieldName, ParsedField, RawField},
@@ -17,10 +18,11 @@ impl<'a> ForgetfulQuerier<'a> {
     pub const fn new(text: &'a str) -> Self {
         ForgetfulQuerier(text)
     }
-}
 
-impl<'a> Query<'a> for ForgetfulQuerier<'a> {
-    fn query_raw_text(&self, field_name: FieldName) -> impl Iterator<Item = QueryRawTextItem<'a>> {
+    /// List all items of known fields.
+    fn all_known_items(
+        &self,
+    ) -> impl Iterator<Item = (Section<'a>, (ParsedField<&'a str>, &'a str))> {
         self.0
             .lines()
             .map(str::trim)
@@ -28,12 +30,13 @@ impl<'a> Query<'a> for ForgetfulQuerier<'a> {
             .map_while(parse_line)
             .filter_map(known_field)
             .filter(|(_, value)| !value.is_empty())
-            .scan_state_copy(Section::Base, |section, (field, value)| {
-                match field.name() {
-                    FieldName::Name => (Section::Derivative(Name(value)), (field, value)),
-                    _ => (section, (field, value)),
-                }
-            })
+            .scan_state_copy(Section::Base, scan_section)
+    }
+}
+
+impl<'a> Query<'a> for ForgetfulQuerier<'a> {
+    fn query_raw_text(&self, field_name: FieldName) -> impl Iterator<Item = QueryRawTextItem<'a>> {
+        self.all_known_items()
             .filter(move |(_, (field, _))| *field.name() == field_name)
             .map(|(section, (field, value))| {
                 QueryRawTextItem::from_tuple3((
@@ -54,6 +57,23 @@ impl<'a> QueryMut<'a> for ForgetfulQuerier<'a> {
     }
 }
 
+impl<'a> Checksums<'a> for ForgetfulQuerier<'a> {
+    fn checksums(&self) -> impl Iterator<Item = QueryChecksumItem<'a>> {
+        self.all_known_items()
+            .filter_map(|(section, (field, value))| {
+                ChecksumValue::try_from_field_name(*field.name(), value)
+                    .map(|value| (value, section, field.architecture_str().map(Architecture)))
+            })
+            .map(QueryChecksumItem::from_tuple3)
+    }
+}
+
+impl<'a> ChecksumsMut<'a> for ForgetfulQuerier<'a> {
+    fn checksums_mut(&mut self) -> impl Iterator<Item = QueryChecksumItem<'a>> {
+        self.checksums()
+    }
+}
+
 /// Callback function to pass to `.filter_map` to filter out unknown fields.
 fn known_field<'a, Architecture, Acquaintance>(
     (field, acquaintance): (RawField<'a>, Acquaintance),
@@ -65,4 +85,15 @@ where
         .to_parsed::<FieldName, Architecture>()
         .map(|field| (field, acquaintance))
         .ok()
+}
+
+/// Callback function to pass to `.scan_state_*` to attach sections to items.
+fn scan_section<'a>(
+    section: Section<'a>,
+    (field, value): (ParsedField<&'a str>, &'a str),
+) -> (Section<'a>, (ParsedField<&'a str>, &'a str)) {
+    match field.name() {
+        FieldName::Name => (Section::Derivative(Name(value)), (field, value)),
+        _ => (section, (field, value)),
+    }
 }
