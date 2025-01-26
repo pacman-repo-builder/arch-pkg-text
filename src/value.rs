@@ -4,7 +4,7 @@ use core::{
     str::Split,
 };
 use derive_more::{AsRef, Deref, Display};
-use hex::ParseHex;
+use parse_hex::ParseHex;
 
 macro_rules! impl_str {
     ($container:ident) => {
@@ -329,8 +329,8 @@ mod dependency_and_reason;
 mod dependency_name;
 mod dependency_specification;
 mod dependency_specification_operator;
-mod hex;
 mod hex128;
+mod parse_hex;
 mod skip_or_array;
 
 pub use dependency_specification_operator::DependencySpecificationOperator;

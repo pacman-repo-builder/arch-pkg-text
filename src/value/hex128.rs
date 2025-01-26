@@ -1,4 +1,4 @@
-use super::{hex::ParseHex, Hex128, SkipOrHex128};
+use super::{parse_hex::ParseHex, Hex128, SkipOrHex128};
 
 impl<'a> Hex128<'a> {
     /// Convert the hex string into a 128-bit unsigned integer.
