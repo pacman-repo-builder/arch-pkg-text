@@ -80,6 +80,16 @@ macro_rules! def_enum {
                 )*})
             }
         }
+
+        impl ChecksumArray {
+            /// Get a slice of the internal array if it wasn't [`ChecksumArray::Skip`].
+            pub fn try_as_slice(&self) -> Option<&'_ [u8]> {
+                match self {
+                    ChecksumArray::Skip => None,
+                    $(ChecksumArray::$checksum_variant(array) => Some(array),)*
+                }
+            }
+        }
     };
 }
 
