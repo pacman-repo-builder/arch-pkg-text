@@ -1,5 +1,3 @@
-mod hex;
-
 use core::{
     iter::{DoubleEndedIterator, FusedIterator},
     num::ParseIntError,
@@ -331,6 +329,7 @@ mod dependency_and_reason;
 mod dependency_name;
 mod dependency_specification;
 mod dependency_specification_operator;
+mod hex;
 mod hex128;
 mod skip_or_array;
 
