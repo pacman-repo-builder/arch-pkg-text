@@ -1,9 +1,12 @@
-use crate::{srcinfo::field::FieldName, value};
+use crate::{
+    srcinfo::field::FieldName,
+    value::{self, ParseArray, SkipOrArray},
+};
 use pipe_trait::Pipe;
 
 macro_rules! def_enum {
     ($(
-        $checksum_variant:ident($checksum_content:ident) = $field_variant:ident,
+        $checksum_variant:ident($checksum_content:ident, $size:literal) = $field_variant:ident,
     )*) => {
         /// Type of checksum.
         #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -58,17 +61,36 @@ macro_rules! def_enum {
                 Some(ChecksumValue::new(checksum_type, raw_value))
             }
         }
+
+        /// [Array type](ParseArray::Array) of [`ChecksumValue`].
+        #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+        pub enum ChecksumArray {
+            Skip,
+            $($checksum_variant([u8; $size]),)*
+        }
+
+        impl<'a> ChecksumValue<'a> {
+            /// Convert the hex string into an array of 8-bit unsigned integers.
+            pub fn u8_array(self) -> Option<ChecksumArray> {
+                Some(match self {$(
+                    ChecksumValue::$checksum_variant(hex_string) => match hex_string.u8_array()? {
+                        SkipOrArray::Skip => ChecksumArray::Skip,
+                        SkipOrArray::Array(array) => ChecksumArray::$checksum_variant(array),
+                    }
+                )*})
+            }
+        }
     };
 }
 
 def_enum! {
-    Md5(SkipOrHex128) = Md5Checksums,
-    Sha1(SkipOrHex160) = Sha1Checksums,
-    Sha224(SkipOrHex224) = Sha224Checksums,
-    Sha256(SkipOrHex256) = Sha256Checksums,
-    Sha384(SkipOrHex384) = Sha384Checksums,
-    Sha512(SkipOrHex512) = Sha512Checksums,
-    Blake2b(SkipOrHex512) = Blake2bChecksums,
+    Md5(SkipOrHex128, 16) = Md5Checksums,
+    Sha1(SkipOrHex160, 20) = Sha1Checksums,
+    Sha224(SkipOrHex224, 28) = Sha224Checksums,
+    Sha256(SkipOrHex256, 32) = Sha256Checksums,
+    Sha384(SkipOrHex384, 48) = Sha384Checksums,
+    Sha512(SkipOrHex512, 64) = Sha512Checksums,
+    Blake2b(SkipOrHex512, 64) = Blake2bChecksums,
 }
 
 impl From<ChecksumType> for FieldName {
@@ -81,5 +103,13 @@ impl TryFrom<FieldName> for ChecksumType {
     type Error = ();
     fn try_from(value: FieldName) -> Result<Self, Self::Error> {
         ChecksumType::try_from_field_name(value).ok_or(())
+    }
+}
+
+impl<'a> ParseArray for ChecksumValue<'a> {
+    type Array = ChecksumArray;
+    type Error = ();
+    fn parse_array(&self) -> Result<Self::Array, Self::Error> {
+        self.u8_array().ok_or(())
     }
 }
