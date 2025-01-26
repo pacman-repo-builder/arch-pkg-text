@@ -2,7 +2,7 @@ pub mod _utils;
 pub use _utils::*;
 
 use parse_arch_pkg_desc::{
-    srcinfo::query::{ForgetfulQuerier, Query, QueryItem, Section},
+    srcinfo::query::{ChecksumArray, Checksums, ForgetfulQuerier, Query, QueryItem, Section},
     value::{
         Architecture, Base, Dependency, Description, License, Name, SkipOrArray, Source,
         UpstreamVersion,
@@ -126,7 +126,44 @@ fn assert_complex(querier: &ForgetfulQuerier) {
                 None,
             ),
         ],
-    )
+    );
+    assert_eq!(
+        querier
+            .checksums()
+            .map(QueryItem::into_tuple3)
+            .map(|(value, section, architecture)| (value.u8_array(), section, architecture))
+            .collect::<Vec<_>>(),
+        [
+            (
+                Some(ChecksumArray::Sha1([
+                    72, 8, 192, 29, 45, 169, 186, 138, 31, 13, 166, 3, 210, 13, 81, 94, 62, 122,
+                    103, 230,
+                ])),
+                Section::Base,
+                None,
+            ),
+            (
+                Some(ChecksumArray::Skip),
+                Section::Base,
+                Some(Architecture("x86_64")),
+            ),
+            (
+                Some(ChecksumArray::Skip),
+                Section::Base,
+                Some(Architecture("aarch64")),
+            ),
+            (
+                Some(ChecksumArray::Skip),
+                Section::Derivative(Name("foo-bin")),
+                None,
+            ),
+            (
+                Some(ChecksumArray::Skip),
+                Section::Derivative(Name("bar-bin")),
+                None,
+            ),
+        ],
+    );
 }
 
 /// Run assertions for srcinfo similar to [`SIMPLE`].
@@ -178,7 +215,26 @@ fn assert_simple(querier: &ForgetfulQuerier) {
             (Some(SkipOrArray::Skip), Section::Base, None),
             (Some(SkipOrArray::Skip), Section::Base, None),
         ],
-    )
+    );
+    assert_eq!(
+        querier
+            .checksums()
+            .map(QueryItem::into_tuple3)
+            .map(|(value, section, architecture)| (value.u8_array(), section, architecture))
+            .collect::<Vec<_>>(),
+        [
+            (
+                Some(ChecksumArray::Sha1([
+                    72, 8, 192, 29, 45, 169, 186, 138, 31, 13, 166, 3, 210, 13, 81, 94, 62, 122,
+                    103, 230,
+                ])),
+                Section::Base,
+                None,
+            ),
+            (Some(ChecksumArray::Skip), Section::Base, None),
+            (Some(ChecksumArray::Skip), Section::Base, None),
+        ],
+    );
 }
 
 #[test]
