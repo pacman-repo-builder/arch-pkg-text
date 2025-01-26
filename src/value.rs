@@ -31,6 +31,14 @@ macro_rules! impl_hex {
                 invalid.is_empty().then_some(array)
             }
         }
+
+        impl<'a> ParseArray for $container<'a> {
+            type Array = [u8; $size];
+            type Error = ();
+            fn parse_array(&self) -> Result<Self::Array, Self::Error> {
+                self.u8_array().ok_or(())
+            }
+        }
     };
 }
 
@@ -44,6 +52,14 @@ macro_rules! impl_srcinfo_checksum {
                 }
                 let (invalid, array) = ParseHex::parse_hex(self.0);
                 invalid.is_empty().then_some(SkipOrArray::Array(array))
+            }
+        }
+
+        impl<'a> ParseArray for $container<'a> {
+            type Array = SkipOrArray<$size>;
+            type Error = ();
+            fn parse_array(&self) -> Result<Self::Array, Self::Error> {
+                self.u8_array().ok_or(())
             }
         }
     };
@@ -330,8 +346,10 @@ mod dependency_name;
 mod dependency_specification;
 mod dependency_specification_operator;
 mod hex128;
+mod parse_array;
 mod parse_hex;
 mod skip_or_array;
 
 pub use dependency_specification_operator::DependencySpecificationOperator;
+pub use parse_array::ParseArray;
 pub use skip_or_array::SkipOrArray;
