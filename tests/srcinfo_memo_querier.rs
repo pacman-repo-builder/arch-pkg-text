@@ -7,7 +7,7 @@ use hex_literal::hex;
 use parse_arch_pkg_desc::{
     srcinfo::{
         field::FieldName,
-        query::{MemoQuerier, QueryItem, QueryMut, Section},
+        query::{ChecksumArray, ChecksumsMut, MemoQuerier, QueryItem, QueryMut, Section},
     },
     value::{
         Architecture, Base, Dependency, Description, License, Name, SkipOrArray, Source,
@@ -20,6 +20,7 @@ use pretty_assertions::assert_eq;
 const COMPLEX: &str = include_str!("fixtures/complex/.SRCINFO");
 const SIMPLE: &str = include_str!("fixtures/simple/.SRCINFO");
 const HAS_EMPTY_VALUES: &str = include_str!("fixtures/has-empty-values/.SRCINFO");
+const MULTIPLE_CHECKSUM_TYPES: &str = include_str!("fixtures/multiple-checksum-types/.SRCINFO");
 
 /// Run assertions for srcinfo similar to [`COMPLEX`].
 fn assert_complex(querier: &mut MemoQuerier, cache_state: bool) {
@@ -159,7 +160,44 @@ fn assert_complex(querier: &mut MemoQuerier, cache_state: bool) {
                 None,
             ),
         ],
-    )
+    );
+
+    assert_eq!(
+        querier
+            .checksums_mut()
+            .map(QueryItem::into_tuple3)
+            .map(|(value, section, architecture)| (value.u8_array(), section, architecture))
+            .collect::<Vec<_>>(),
+        [
+            (
+                Some(ChecksumArray::Sha1(hex!(
+                    "4808c01d2da9ba8a1f0da603d20d515e3e7a67e6"
+                ))),
+                Section::Base,
+                None,
+            ),
+            (
+                Some(ChecksumArray::Skip),
+                Section::Base,
+                Some(Architecture("x86_64")),
+            ),
+            (
+                Some(ChecksumArray::Skip),
+                Section::Base,
+                Some(Architecture("aarch64")),
+            ),
+            (
+                Some(ChecksumArray::Skip),
+                Section::Derivative(Name("foo-bin")),
+                None,
+            ),
+            (
+                Some(ChecksumArray::Skip),
+                Section::Derivative(Name("bar-bin")),
+                None,
+            ),
+        ],
+    );
 }
 
 /// Run assertions for srcinfo similar to [`SIMPLE`].
@@ -225,7 +263,25 @@ fn assert_simple(querier: &mut MemoQuerier, cache_state: bool) {
             (Some(SkipOrArray::Skip), Section::Base, None),
             (Some(SkipOrArray::Skip), Section::Base, None),
         ],
-    )
+    );
+    assert_eq!(
+        querier
+            .checksums_mut()
+            .map(QueryItem::into_tuple3)
+            .map(|(value, section, architecture)| (value.u8_array(), section, architecture))
+            .collect::<Vec<_>>(),
+        [
+            (
+                Some(ChecksumArray::Sha1(hex!(
+                    "4808c01d2da9ba8a1f0da603d20d515e3e7a67e6"
+                ))),
+                Section::Base,
+                None,
+            ),
+            (Some(ChecksumArray::Skip), Section::Base, None),
+            (Some(ChecksumArray::Skip), Section::Base, None),
+        ],
+    );
 }
 
 #[test]
@@ -317,4 +373,42 @@ fn filter_out_empty_values() {
         .pipe(trailing_whitespaces)
         .pipe_as_ref(MemoQuerier::new)
         .pipe_mut(run_assertions);
+}
+
+#[test]
+fn multiple_checksum_types() {
+    let mut querier = MemoQuerier::new(MULTIPLE_CHECKSUM_TYPES);
+    assert_eq!(
+        querier
+            .checksums_mut()
+            .map(QueryItem::into_tuple3)
+            .map(|(value, section, architecture)| (value.u8_array(), section, architecture))
+            .collect::<Vec<_>>(),
+        [
+            (
+                Some(ChecksumArray::Md5(hex!("55e46a9fde34babc87ff29cefec7fa87"))),
+                Section::Base,
+                None,
+            ),
+            (
+                Some(ChecksumArray::Md5(hex!("3daf117a8bc1700d997ca044bbb386cc"))),
+                Section::Base,
+                None,
+            ),
+            (
+                Some(ChecksumArray::Sha1(hex!(
+                    "ee15d4c86f91b296327ac552c5b214e1e2102a38"
+                ))),
+                Section::Base,
+                None,
+            ),
+            (
+                Some(ChecksumArray::Sha1(hex!(
+                    "e33a9949d6206a799a25daf21056761119c8227e"
+                ))),
+                Section::Base,
+                None,
+            ),
+        ],
+    );
 }
