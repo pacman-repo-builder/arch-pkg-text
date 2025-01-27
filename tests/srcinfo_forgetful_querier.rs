@@ -1,6 +1,7 @@
 pub mod _utils;
 pub use _utils::*;
 
+use hex_literal::hex;
 use parse_arch_pkg_desc::{
     srcinfo::query::{ChecksumArray, Checksums, ForgetfulQuerier, Query, QueryItem, Section},
     value::{
@@ -99,10 +100,9 @@ fn assert_complex(querier: &ForgetfulQuerier) {
             .collect::<Vec<_>>(),
         [
             (
-                Some(SkipOrArray::Array([
-                    72, 8, 192, 29, 45, 169, 186, 138, 31, 13, 166, 3, 210, 13, 81, 94, 62, 122,
-                    103, 230,
-                ])),
+                Some(SkipOrArray::Array(hex!(
+                    "4808c01d2da9ba8a1f0da603d20d515e3e7a67e6"
+                ))),
                 Section::Base,
                 None,
             ),
@@ -136,10 +136,9 @@ fn assert_complex(querier: &ForgetfulQuerier) {
             .collect::<Vec<_>>(),
         [
             (
-                Some(ChecksumArray::Sha1([
-                    72, 8, 192, 29, 45, 169, 186, 138, 31, 13, 166, 3, 210, 13, 81, 94, 62, 122,
-                    103, 230,
-                ])),
+                Some(ChecksumArray::Sha1(hex!(
+                    "4808c01d2da9ba8a1f0da603d20d515e3e7a67e6"
+                ))),
                 Section::Base,
                 None,
             ),
@@ -206,10 +205,9 @@ fn assert_simple(querier: &ForgetfulQuerier) {
             .collect::<Vec<_>>(),
         [
             (
-                Some(SkipOrArray::Array([
-                    72, 8, 192, 29, 45, 169, 186, 138, 31, 13, 166, 3, 210, 13, 81, 94, 62, 122,
-                    103, 230,
-                ])),
+                Some(SkipOrArray::Array(hex!(
+                    "4808c01d2da9ba8a1f0da603d20d515e3e7a67e6"
+                ))),
                 Section::Base,
                 None,
             ),
@@ -225,10 +223,9 @@ fn assert_simple(querier: &ForgetfulQuerier) {
             .collect::<Vec<_>>(),
         [
             (
-                Some(ChecksumArray::Sha1([
-                    72, 8, 192, 29, 45, 169, 186, 138, 31, 13, 166, 3, 210, 13, 81, 94, 62, 122,
-                    103, 230,
-                ])),
+                Some(ChecksumArray::Sha1(hex!(
+                    "4808c01d2da9ba8a1f0da603d20d515e3e7a67e6"
+                ))),
                 Section::Base,
                 None,
             ),
@@ -328,32 +325,26 @@ fn multiple_checksum_types() {
             .collect::<Vec<_>>(),
         [
             (
-                Some(ChecksumArray::Sha1([
-                    238, 21, 212, 200, 111, 145, 178, 150, 50, 122, 197, 82, 197, 178, 20, 225,
-                    226, 16, 42, 56,
-                ])),
+                Some(ChecksumArray::Sha1(hex!(
+                    "ee15d4c86f91b296327ac552c5b214e1e2102a38"
+                ))),
                 Section::Base,
                 None,
             ),
             (
-                Some(ChecksumArray::Sha1([
-                    227, 58, 153, 73, 214, 32, 106, 121, 154, 37, 218, 242, 16, 86, 118, 17, 25,
-                    200, 34, 126,
-                ])),
+                Some(ChecksumArray::Sha1(hex!(
+                    "e33a9949d6206a799a25daf21056761119c8227e"
+                ))),
                 Section::Base,
                 None,
             ),
             (
-                Some(ChecksumArray::Md5([
-                    85, 228, 106, 159, 222, 52, 186, 188, 135, 255, 41, 206, 254, 199, 250, 135,
-                ])),
+                Some(ChecksumArray::Md5(hex!("55e46a9fde34babc87ff29cefec7fa87"))),
                 Section::Base,
                 None,
             ),
             (
-                Some(ChecksumArray::Md5([
-                    61, 175, 17, 122, 139, 193, 112, 13, 153, 124, 160, 68, 187, 179, 134, 204,
-                ])),
+                Some(ChecksumArray::Md5(hex!("3daf117a8bc1700d997ca044bbb386cc"))),
                 Section::Base,
                 None,
             ),

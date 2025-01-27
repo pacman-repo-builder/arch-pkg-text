@@ -3,6 +3,7 @@
 pub mod _utils;
 pub use _utils::*;
 
+use hex_literal::hex;
 use parse_arch_pkg_desc::{
     srcinfo::{
         field::FieldName,
@@ -131,10 +132,9 @@ fn assert_complex(querier: &mut MemoQuerier, cache_state: bool) {
             .collect::<Vec<_>>(),
         [
             (
-                Some(SkipOrArray::Array([
-                    72, 8, 192, 29, 45, 169, 186, 138, 31, 13, 166, 3, 210, 13, 81, 94, 62, 122,
-                    103, 230,
-                ])),
+                Some(SkipOrArray::Array(hex!(
+                    "4808c01d2da9ba8a1f0da603d20d515e3e7a67e6"
+                ))),
                 Section::Base,
                 None,
             ),
@@ -216,10 +216,9 @@ fn assert_simple(querier: &mut MemoQuerier, cache_state: bool) {
             .collect::<Vec<_>>(),
         [
             (
-                Some(SkipOrArray::Array([
-                    72, 8, 192, 29, 45, 169, 186, 138, 31, 13, 166, 3, 210, 13, 81, 94, 62, 122,
-                    103, 230,
-                ])),
+                Some(SkipOrArray::Array(hex!(
+                    "4808c01d2da9ba8a1f0da603d20d515e3e7a67e6"
+                ))),
                 Section::Base,
                 None,
             ),
