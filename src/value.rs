@@ -1,12 +1,10 @@
-mod hex;
-
 use core::{
     iter::{DoubleEndedIterator, FusedIterator},
     num::ParseIntError,
     str::Split,
 };
 use derive_more::{AsRef, Deref, Display};
-use hex::ParseHex;
+use parse_hex::ParseHex;
 
 macro_rules! impl_str {
     ($container:ident) => {
@@ -31,6 +29,37 @@ macro_rules! impl_hex {
             pub fn u8_array(self) -> Option<[u8; $size]> {
                 let (invalid, array) = ParseHex::parse_hex(self.0);
                 invalid.is_empty().then_some(array)
+            }
+        }
+
+        impl<'a> ParseArray for $container<'a> {
+            type Array = [u8; $size];
+            type Error = ();
+            fn parse_array(&self) -> Result<Self::Array, Self::Error> {
+                self.u8_array().ok_or(())
+            }
+        }
+    };
+}
+
+macro_rules! impl_srcinfo_checksum {
+    ($container:ident, $size:literal) => {
+        impl<'a> $container<'a> {
+            /// Convert the hex string into an array of 8-bit unsigned integers.
+            pub fn u8_array(self) -> Option<SkipOrArray<$size>> {
+                if self.as_str() == "SKIP" {
+                    return Some(SkipOrArray::Skip);
+                }
+                let (invalid, array) = ParseHex::parse_hex(self.0);
+                invalid.is_empty().then_some(SkipOrArray::Array(array))
+            }
+        }
+
+        impl<'a> ParseArray for $container<'a> {
+            type Array = SkipOrArray<$size>;
+            type Error = ();
+            fn parse_array(&self) -> Result<Self::Array, Self::Error> {
+                self.u8_array().ok_or(())
             }
         }
     };
@@ -72,6 +101,21 @@ macro_rules! def_hex_wrappers {
         pub struct $name<'a>(pub &'a str);
         impl_str!($name);
         impl_hex!($name, $size);
+    )*};
+}
+
+macro_rules! def_srcinfo_checksum_wrappers {
+    ($(
+        $(#[$attrs:meta])*
+        $name:ident {
+            size = $size:literal;
+        }
+    )*) => {$(
+        $(#[$attrs])*
+        #[derive(Debug, Display, Clone, Copy, AsRef, Deref)]
+        pub struct $name<'a>(pub &'a str);
+        impl_str!($name);
+        impl_srcinfo_checksum!($name, $size);
     )*};
 }
 
@@ -163,20 +207,32 @@ macro_rules! def_list_wrappers {
 }
 
 def_str_wrappers! {
-    /// Type of value of `FILENAME`.
+    /// Type of value of `FILENAME`, `noextract`, and `install`.
     FileName;
-    /// Type of value of `NAME`.
+    /// Type of value of `NAME` and `pkgname`.
     Name;
-    /// Type of value of `BASE`.
+    /// Type of value of `BASE` and `pkgbase`.
     Base;
     /// Type of value of `VERSION`.
     Version;
-    /// Type of value of `DESC`.
+    /// Type of value of `pkgver`.
+    UpstreamVersion;
+    /// Type of value of `DESC` and `pkgdesc`.
     Description;
     /// Type of value of `URL`.
     Url;
     /// Type of value of `PACKAGER`.
     Packager;
+    /// Type of value of `changelog`.
+    ChangeLog;
+    /// Type of value of `options`.
+    BuildOption;
+    /// Type of value of `backup`.
+    FilePath;
+    /// Type of value of `source`.
+    Source;
+    /// Type of value of `validpgpkeys`.
+    PgpKey;
 }
 
 def_hex_wrappers! {
@@ -190,6 +246,33 @@ def_hex_wrappers! {
     }
 }
 
+def_srcinfo_checksum_wrappers! {
+    /// Type of value of `md5sums`.
+    SkipOrHex128 {
+        size = 16;
+    }
+    /// Type of value of `sha1sums`.
+    SkipOrHex160 {
+        size = 20;
+    }
+    /// Type of value of `sha224sums`.
+    SkipOrHex224 {
+        size = 28;
+    }
+    /// Type of value of `sha256sums`.
+    SkipOrHex256 {
+        size = 32;
+    }
+    /// Type of value of `sha384sums`.
+    SkipOrHex384 {
+        size = 48;
+    }
+    /// Type of value of `sha512sums` and `b2sums`.
+    SkipOrHex512 {
+        size = 64;
+    }
+}
+
 def_b64_wrappers! {
     /// Type of value of `PGPSIG`.
     PgpSignature;
@@ -200,6 +283,10 @@ def_num_wrappers! {
     Size = u64;
     /// Type of value of `BUILDDATE`.
     Timestamp = u64;
+    /// Type of value of `epoch`.
+    Epoch = u64;
+    /// Type of value of `pkgrel`.
+    Release = u64; // TODO: change this to allow `a.b` syntax
 }
 
 def_list_wrappers! {
@@ -207,7 +294,7 @@ def_list_wrappers! {
     GroupList {
         /// [Iterator] type of [`GroupList`].
         Iter = GroupIterator;
-        /// Type of [iterator item](Iterator::Item) of [`GroupList`].
+        /// Type of [iterator item](Iterator::Item) of [`GroupList`] and value of `groups`.
         Item = Group;
     }
 
@@ -215,7 +302,7 @@ def_list_wrappers! {
     LicenseList {
         /// [Iterator] type of [`LicenseList`].
         Iter = LicenseIterator;
-        /// Type of [iterator item](Iterator::Item) of [`LicenseList`].
+        /// Type of [iterator item](Iterator::Item) of [`LicenseList`] and value of `license`.
         Item = License;
     }
 
@@ -223,7 +310,7 @@ def_list_wrappers! {
     ArchitectureList {
         /// [Iterator] type of [`ArchitectureList`].
         Iter = ArchitectureIterator;
-        /// Type of [iterator item](Iterator::Item) of [`ArchitectureList`].
+        /// Type of [iterator item](Iterator::Item) of [`ArchitectureList`] and value of `arch`.
         Item = Architecture;
     }
 
@@ -259,5 +346,10 @@ mod dependency_name;
 mod dependency_specification;
 mod dependency_specification_operator;
 mod hex128;
+mod parse_array;
+mod parse_hex;
+mod skip_or_array;
 
 pub use dependency_specification_operator::DependencySpecificationOperator;
+pub use parse_array::ParseArray;
+pub use skip_or_array::SkipOrArray;
