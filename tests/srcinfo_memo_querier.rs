@@ -373,12 +373,15 @@ fn filter_out_empty_values() {
 #[test]
 fn multiple_checksum_types() {
     let mut querier = MemoQuerier::new(MULTIPLE_CHECKSUM_TYPES);
+    let checksums: Vec<_> = querier
+        .checksums_mut()
+        .map(QueryItem::into_tuple3)
+        .map(|(value, section, architecture)| (value.u8_array(), section, architecture))
+        .collect();
+
+    eprintln!("ASSERT: checksum variants");
     assert_eq!(
-        querier
-            .checksums_mut()
-            .map(QueryItem::into_tuple3)
-            .map(|(value, section, architecture)| (value.u8_array(), section, architecture))
-            .collect::<Vec<_>>(),
+        checksums,
         [
             (
                 Some(ChecksumArray::Md5(hex!("55e46a9fde34babc87ff29cefec7fa87"))),
@@ -404,6 +407,23 @@ fn multiple_checksum_types() {
                 Section::Base,
                 None,
             ),
+        ],
+    );
+
+    eprintln!("ASSERT: checksum slices");
+    let slices: Vec<&[u8]> = checksums
+        .as_slice()
+        .iter()
+        .flat_map(|(value, _, _)| value.as_ref())
+        .flat_map(|value| value.try_as_slice())
+        .collect();
+    assert_eq!(
+        slices,
+        [
+            hex!("55e46a9fde34babc87ff29cefec7fa87").as_slice(),
+            hex!("3daf117a8bc1700d997ca044bbb386cc").as_slice(),
+            hex!("ee15d4c86f91b296327ac552c5b214e1e2102a38").as_slice(),
+            hex!("e33a9949d6206a799a25daf21056761119c8227e").as_slice(),
         ],
     );
 }
