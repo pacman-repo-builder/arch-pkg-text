@@ -6,15 +6,16 @@ use pipe_trait::Pipe;
 macro_rules! def_struct {
     ($(
         $(#[$attrs:meta])*
-        $name:ident, $name_mut:ident = $field_name:ident;
+        $field:ident $(,)? $(;)?
     )*) => {
         /// Parsed data of a package description text.
         ///
         /// Every function call in [`Query`] and [`QueryMut`] is constant time.
         #[derive(Debug, Default, Clone, Copy)]
+        #[allow(non_snake_case, reason = "We don't access the field names directly, keep it simple.")]
         pub struct EagerQuerier<'a> {$(
             $(#[$attrs])*
-            $name: Option<&'a str>,
+            $field: Option<&'a str>,
         )*}
 
         impl<'a> EagerQuerier<'a> {
@@ -75,45 +76,27 @@ macro_rules! def_struct {
             /// Get a raw value from the querier.
             fn get_raw_value(&self, field_name: FieldName) -> Option<&'a str> {
                 match field_name {$(
-                    FieldName::$field_name => self.$name,
+                    FieldName::$field => self.$field,
                 )*}
             }
 
             /// Add a raw value into the querier.
             fn set_raw_value(&mut self, field_name: FieldName, raw_value: &'a str) {
                 match field_name {$(
-                    FieldName::$field_name => self.$name = Some(raw_value),
+                    FieldName::$field => self.$field = Some(raw_value),
                 )*}
             }
         }
     };
 }
 
-def_struct! {
-    file_name, file_name_mut = FileName;
-    name, name_mut = Name;
-    base, base_mut = Base;
-    version, version_mut = Version;
-    description, description_mut = Description;
-    groups, groups_mut = Groups;
-    compressed_size, compressed_size_mut = CompressedSize;
-    installed_size, installed_size_mut = InstalledSize;
-    md5_checksum, md5_checksum_mut = Md5Checksum;
-    sha256_checksum, sha256_checksum_mut = Sha256Checksum;
-    pgp_signature, pgp_signature_mut = PgpSignature;
-    url, url_mut = Url;
-    license, license_mut = License;
-    architecture, architecture_mut = Architecture;
-    build_date, build_date_mut = BuildDate;
-    packager, packager_mut = Packager;
-    dependencies, dependencies_mut = Dependencies;
-    make_dependencies, make_dependencies_mut = MakeDependencies;
-    check_dependencies, check_dependencies_mut = CheckDependencies;
-    opt_dependencies, opt_dependencies_mut = OptionalDependencies;
-    provides, provides_mut = Provides;
-    conflicts, conflicts_mut = Conflicts;
-    replaces, replaces_mut = Replaces;
-}
+def_struct!(
+    FileName Name Base Version Description Groups
+    CompressedSize InstalledSize Md5Checksum Sha256Checksum
+    PgpSignature Url License Architecture BuildDate Packager
+    Dependencies CheckDependencies MakeDependencies OptionalDependencies
+    Provides Conflicts Replaces
+);
 
 impl<'a> Query<'a> for EagerQuerier<'a> {
     fn query_raw_text(&self, field: ParsedField) -> Option<&'a str> {
