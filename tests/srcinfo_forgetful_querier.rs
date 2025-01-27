@@ -14,6 +14,7 @@ use pretty_assertions::assert_eq;
 const COMPLEX: &str = include_str!("fixtures/complex/.SRCINFO");
 const SIMPLE: &str = include_str!("fixtures/simple/.SRCINFO");
 const HAS_EMPTY_VALUES: &str = include_str!("fixtures/has-empty-values/.SRCINFO");
+const MULTIPLE_CHECKSUM_TYPES: &str = include_str!("fixtures/multiple-checksum-types/.SRCINFO");
 
 /// Run assertions for srcinfo similar to [`COMPLEX`].
 fn assert_complex(querier: &ForgetfulQuerier) {
@@ -314,4 +315,48 @@ fn filter_out_empty_values() {
         .pipe(trailing_whitespaces)
         .pipe_as_ref(ForgetfulQuerier::new)
         .pipe_ref(run_assertions);
+}
+
+#[test]
+fn multiple_checksum_types() {
+    assert_eq!(
+        MULTIPLE_CHECKSUM_TYPES
+            .pipe(ForgetfulQuerier::new)
+            .checksums()
+            .map(QueryItem::into_tuple3)
+            .map(|(value, section, architecture)| (value.u8_array(), section, architecture))
+            .collect::<Vec<_>>(),
+        [
+            (
+                Some(ChecksumArray::Sha1([
+                    238, 21, 212, 200, 111, 145, 178, 150, 50, 122, 197, 82, 197, 178, 20, 225,
+                    226, 16, 42, 56,
+                ])),
+                Section::Base,
+                None,
+            ),
+            (
+                Some(ChecksumArray::Sha1([
+                    227, 58, 153, 73, 214, 32, 106, 121, 154, 37, 218, 242, 16, 86, 118, 17, 25,
+                    200, 34, 126,
+                ])),
+                Section::Base,
+                None,
+            ),
+            (
+                Some(ChecksumArray::Md5([
+                    85, 228, 106, 159, 222, 52, 186, 188, 135, 255, 41, 206, 254, 199, 250, 135,
+                ])),
+                Section::Base,
+                None,
+            ),
+            (
+                Some(ChecksumArray::Md5([
+                    61, 175, 17, 122, 139, 193, 112, 13, 153, 124, 160, 68, 187, 179, 134, 204,
+                ])),
+                Section::Base,
+                None,
+            ),
+        ],
+    );
 }

@@ -1,0 +1,12 @@
+pkgbase = multiple-checksum-types
+  pkgdesc = Demonstrate multiple checksum types
+  pkgver = 0.1.2
+  pkgrel = 1
+  source = foo.txt
+  source = bar.txt
+  sha1sums = ee15d4c86f91b296327ac552c5b214e1e2102a38
+  sha1sums = e33a9949d6206a799a25daf21056761119c8227e
+  md5sums = 55e46a9fde34babc87ff29cefec7fa87
+  md5sums = 3daf117a8bc1700d997ca044bbb386cc
+
+pkgname = multiple-checksum-types
