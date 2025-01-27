@@ -30,7 +30,7 @@ macro_rules! def_struct {
             /// Parse lines of package description text.
             ///
             /// This function returns a tuple of the resulting querier and the length of processed input.
-            fn parse(text: &'a str) -> Option<(Self, usize)> {
+            pub fn parse(text: &'a str) -> Option<(Self, usize)> {
                 let mut lines = text.lines();
                 let mut processed_length = 0;
 
