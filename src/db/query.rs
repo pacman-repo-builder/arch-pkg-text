@@ -8,6 +8,7 @@ macro_rules! def_traits {
         $(#[$attrs:meta])*
         $name:ident, $name_mut:ident = $field_name:ident -> $value_type:ident;
     )*) => {
+        /// Get information from a pacman package description text.
         pub trait Query<'a>: QueryMut<'a> {
             fn query_raw_text(&self, field: ParsedField) -> Option<&'a str>;
             $(
@@ -19,6 +20,7 @@ macro_rules! def_traits {
             )*
         }
 
+        /// Get information from a pacman package description text, mutability required.
         pub trait QueryMut<'a> {
             fn query_raw_text_mut(&mut self, field: ParsedField) -> Option<&'a str>;
             $(
