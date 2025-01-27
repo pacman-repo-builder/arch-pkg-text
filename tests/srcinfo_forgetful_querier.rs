@@ -12,11 +12,6 @@ use parse_arch_pkg_desc::{
 use pipe_trait::Pipe;
 use pretty_assertions::assert_eq;
 
-const COMPLEX: &str = include_str!("fixtures/complex/.SRCINFO");
-const SIMPLE: &str = include_str!("fixtures/simple/.SRCINFO");
-const HAS_EMPTY_VALUES: &str = include_str!("fixtures/has-empty-values/.SRCINFO");
-const MULTIPLE_CHECKSUM_TYPES: &str = include_str!("fixtures/multiple-checksum-types/.SRCINFO");
-
 /// Run assertions for srcinfo similar to [`COMPLEX`].
 fn assert_complex(querier: &ForgetfulQuerier) {
     assert_eq!(querier.base_name(), Some(Base("complex-example-bin")));

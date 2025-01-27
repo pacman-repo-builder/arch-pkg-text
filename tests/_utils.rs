@@ -1,3 +1,8 @@
+pub const COMPLEX: &str = include_str!("fixtures/complex/.SRCINFO");
+pub const SIMPLE: &str = include_str!("fixtures/simple/.SRCINFO");
+pub const HAS_EMPTY_VALUES: &str = include_str!("fixtures/has-empty-values/.SRCINFO");
+pub const MULTIPLE_CHECKSUM_TYPES: &str = include_str!("fixtures/multiple-checksum-types/.SRCINFO");
+
 pub fn remove_indent(input: &str) -> String {
     let mut output = String::with_capacity(input.len());
 
