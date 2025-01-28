@@ -64,11 +64,10 @@ macro_rules! def_struct {
                 let mut value_length = 0;
 
                 while let Some(line) = remaining_lines.next() {
-                    let current_value_length = value_length;
-                    value_length += line.len();
                     if let Ok(field) = line.trim().pipe(RawField::parse_raw) {
-                        return (current_value_length, Some((field, line)));
+                        return (value_length, Some((field, line)));
                     }
+                    value_length += line.len();
                 }
 
                 (value_length, None)
