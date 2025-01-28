@@ -36,12 +36,11 @@ macro_rules! def_struct {
 
                 // parse the first field
                 let first_line = lines.next()?;
-                processed_length += first_line.len();
                 let first_field = first_line.trim().pipe(RawField::parse_raw).ok()?;
 
                 // parse the remaining values and fields.
                 let mut querier = EagerQuerier::default();
-                let mut current_field = Some((first_field, ""));
+                let mut current_field = Some((first_field, first_line));
                 while let Some((field, field_line)) = current_field {
                     let (value_length, next_field) = EagerQuerier::parse_next(&mut lines);
                     let value_start_offset = processed_length + field_line.len();
