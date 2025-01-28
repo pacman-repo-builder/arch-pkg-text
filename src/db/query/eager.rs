@@ -1,6 +1,6 @@
 use super::{Query, QueryMut};
 use crate::db::field::{FieldName, ParsedField, RawField};
-use core::str::Lines;
+use lines_inclusive::{LinesInclusive, LinesInclusiveIter};
 use pipe_trait::Pipe;
 
 macro_rules! def_struct {
@@ -31,7 +31,7 @@ macro_rules! def_struct {
             ///
             /// This function returns a tuple of the resulting querier and the length of processed input.
             pub fn parse(text: &'a str) -> Option<(Self, usize)> {
-                let mut lines = text.lines();
+                let mut lines = text.lines_inclusive();
                 let mut processed_length = 0;
 
                 // parse the first field
@@ -41,10 +41,10 @@ macro_rules! def_struct {
 
                 // parse the remaining values and fields.
                 let mut querier = EagerQuerier::default();
-                let mut current_field = Some(first_field);
-                while let Some(field) = current_field {
+                let mut current_field = Some((first_field, ""));
+                while let Some((field, field_line)) = current_field {
                     let (value_length, next_field) = EagerQuerier::parse_next(&mut lines);
-                    let value_start_offset = processed_length;
+                    let value_start_offset = processed_length + field_line.len();
                     let value_end_offset = value_start_offset + value_length;
                     if let Ok(field) = field.to_parsed::<FieldName>() {
                         let value = text[value_start_offset..value_end_offset].trim();
@@ -60,14 +60,15 @@ macro_rules! def_struct {
             /// Parse a value until the end of input or when a [`RawField`] is found.
             ///
             /// This function returns a tuple of the length of the value and the next field.
-            fn parse_next(remaining_lines: &mut Lines<'a>) -> (usize, Option<RawField<'a>>) {
+            fn parse_next(remaining_lines: &mut LinesInclusiveIter<'a>) -> (usize, Option<(RawField<'a>, &'a str)>) {
                 let mut value_length = 0;
 
                 while let Some(line) = remaining_lines.next() {
-                    if let Ok(field) = line.trim().pipe(RawField::parse_raw) {
-                        return (value_length, Some(field));
-                    }
+                    let current_value_length = value_length;
                     value_length += line.len();
+                    if let Ok(field) = line.trim().pipe(RawField::parse_raw) {
+                        return (current_value_length, Some((field, line)));
+                    }
                 }
 
                 (value_length, None)

@@ -92,6 +92,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "561d97a539a36e26a9a5fad1ea11a3039a67714694aaa379433e580854bc3dc5"
 
 [[package]]
+name = "lines-inclusive"
+version = "0.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0c3278f78a52e7ba36539c04266d00f6766a3ecbc4397d3b22467308fda5433c"
+
+[[package]]
 name = "lock_api"
 version = "0.4.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -131,6 +137,7 @@ dependencies = [
  "derive_more",
  "hex-literal",
  "iter-scan",
+ "lines-inclusive",
  "parking_lot",
  "pipe-trait",
  "pretty_assertions",
