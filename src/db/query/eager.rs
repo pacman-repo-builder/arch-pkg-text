@@ -21,16 +21,13 @@ macro_rules! def_struct {
         impl<'a> EagerQuerier<'a> {
             /// Parse a package description text.
             pub fn new(text: &'a str) -> Self {
-                match EagerQuerier::parse(text) {
-                    Some((querier, _)) => querier,
-                    None => EagerQuerier::default(),
-                }
+                EagerQuerier::parse(text).unwrap_or_default()
             }
 
             /// Parse lines of package description text.
             ///
             /// This function returns a tuple of the resulting querier and the length of processed input.
-            pub fn parse(text: &'a str) -> Option<(Self, usize)> {
+            pub fn parse(text: &'a str) -> Option<Self> {
                 let mut lines = text.lines_inclusive();
                 let mut processed_length = 0;
 
@@ -53,7 +50,7 @@ macro_rules! def_struct {
                     current_field = next_field;
                 }
 
-                Some((querier, processed_length))
+                Some(querier)
             }
 
             /// Parse a value until the end of input or when a [`RawField`] is found.
