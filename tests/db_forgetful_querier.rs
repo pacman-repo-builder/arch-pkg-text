@@ -1,6 +1,6 @@
 use parse_arch_pkg_desc::{
     db::query::{ForgetfulQuerier, Query},
-    value::{Architecture, Description, FileName, Name},
+    value::{Architecture, Dependency, Description, FileName, Name},
 };
 use pretty_assertions::assert_eq;
 
@@ -25,4 +25,28 @@ fn query() {
         querier.description(),
         Some(Description("Next generation desktop shell")),
     );
+
+    let mut make_dependencies = querier.make_dependencies().unwrap().into_iter();
+    assert_eq!(make_dependencies.next(), Some(Dependency("asciidoc")));
+    assert_eq!(
+        make_dependencies.next(),
+        Some(Dependency("bash-completion")),
+    );
+    assert_eq!(
+        make_dependencies.next(),
+        Some(Dependency("evolution-data-server")),
+    );
+    assert_eq!(make_dependencies.next(), Some(Dependency("gi-docgen")));
+    assert_eq!(make_dependencies.next().map(|x| x.as_str()), Some("git"));
+    assert_eq!(
+        make_dependencies.next(),
+        Some(Dependency("gnome-keybindings")),
+    );
+    assert_eq!(
+        make_dependencies.next(),
+        Some(Dependency("gobject-introspection")),
+    );
+    assert_eq!(make_dependencies.next(), Some(Dependency("meson")));
+    assert_eq!(make_dependencies.next(), Some(Dependency("sassc")));
+    assert_eq!(make_dependencies.next(), None);
 }
