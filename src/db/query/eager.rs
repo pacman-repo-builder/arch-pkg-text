@@ -25,8 +25,6 @@ macro_rules! def_struct {
             }
 
             /// Parse lines of package description text.
-            ///
-            /// This function returns a tuple of the resulting querier and the length of processed input.
             pub fn parse(text: &'a str) -> Option<Self> {
                 let mut lines = text.lines_inclusive();
                 let mut processed_length = 0;
