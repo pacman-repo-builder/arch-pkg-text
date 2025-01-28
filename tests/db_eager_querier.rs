@@ -51,3 +51,10 @@ fn query() {
     assert_eq!(make_dependencies.next(), Some(Dependency("sassc")));
     assert_eq!(make_dependencies.next(), None);
 }
+
+#[test]
+fn invalid() {
+    assert!(dbg!(EagerQuerier::parse("not a package description text")).is_none());
+    assert!(dbg!(EagerQuerier::parse("\nnot a package description text")).is_none());
+    assert!(dbg!(EagerQuerier::parse("")).is_none());
+}
