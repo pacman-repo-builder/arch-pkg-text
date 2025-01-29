@@ -13,3 +13,10 @@ pub fn parse_line(line: &str) -> Option<(RawField<'_>, &'_ str)> {
 pub fn trimmed_line_is_blank(trimmed_line: &str) -> bool {
     trimmed_line.is_empty() || trimmed_line.starts_with('#')
 }
+
+/// List all trimmed lines that aren't blank.
+pub fn non_blank_trimmed_lines(text: &str) -> impl Iterator<Item = &'_ str> {
+    text.lines()
+        .map(str::trim)
+        .filter(|line| !trimmed_line_is_blank(line))
+}
