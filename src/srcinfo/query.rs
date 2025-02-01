@@ -291,3 +291,8 @@ pub use forgetful::*;
 mod memo;
 #[cfg(feature = "std")]
 pub use memo::*;
+
+#[cfg(feature = "std")]
+mod eager;
+#[cfg(feature = "std")]
+pub use eager::*;
