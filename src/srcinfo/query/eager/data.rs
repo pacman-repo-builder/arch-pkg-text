@@ -409,7 +409,7 @@ macro_rules! def_struct {
 
 def_struct! {
     base single {
-        base_name, base_name_mut = Base -> Base; // TODO: make this always exist
+        base_name, base_name_mut = Base -> Base;
         epoch, epoch_mut = Epoch -> Epoch;
         release, release_mut = Release -> Release;
         version, version_mut = Version -> UpstreamVersion;
