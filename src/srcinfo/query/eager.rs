@@ -10,8 +10,8 @@ use crate::{
 };
 use data::EagerDerivativeSectionEntry;
 use derive_more::{Display, Error};
+use indexmap::IndexMap;
 use pipe_trait::Pipe;
-use std::collections::HashMap;
 
 pub use data::{
     EagerBaseAlreadySetError, EagerBaseSection, EagerDerivativeAlreadySetError,
@@ -21,7 +21,7 @@ pub use data::{
 #[derive(Debug, Default, Clone)]
 pub struct EagerQuerier<'a> {
     pub base: EagerBaseSection<'a>,
-    pub derivatives: HashMap<value::Name<'a>, EagerDerivativeSection<'a>>,
+    pub derivatives: IndexMap<value::Name<'a>, EagerDerivativeSection<'a>>,
 }
 
 enum EagerSectionMut<'a, 'r> {
