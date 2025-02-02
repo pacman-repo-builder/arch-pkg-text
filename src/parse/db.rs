@@ -106,6 +106,13 @@ impl<'a> ParsedDb<'a> {
     }
 }
 
+impl<'a> TryFrom<&'a str> for ParsedDb<'a> {
+    type Error = DbParseError<'a>;
+    fn try_from(text: &'a str) -> Result<Self, Self::Error> {
+        ParsedDb::parse(text)
+    }
+}
+
 impl<'a> Query<'a> for ParsedDb<'a> {
     fn query_raw_text(&self, field: ParsedField) -> Option<&'a str> {
         self.get_raw_value(*field.name())
