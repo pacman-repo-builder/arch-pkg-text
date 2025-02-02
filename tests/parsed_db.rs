@@ -1,5 +1,6 @@
 use parse_arch_pkg_desc::{
-    db::query::{EagerQuerier, Query},
+    db::query::Query,
+    parse::ParsedDb,
     value::{Architecture, Dependency, Description, FileName, Name},
 };
 use pretty_assertions::assert_eq;
@@ -8,7 +9,7 @@ const TEXT: &str = include_str!("fixtures/gnome-shell.desc");
 
 #[test]
 fn query() {
-    let querier = EagerQuerier::new(TEXT);
+    let querier = ParsedDb::new(TEXT);
     dbg!(&querier);
 
     assert_eq!(querier.name(), Some(Name("gnome-shell")));
@@ -54,7 +55,7 @@ fn query() {
 
 #[test]
 fn invalid() {
-    assert!(dbg!(EagerQuerier::parse("not a package description text")).is_none());
-    assert!(dbg!(EagerQuerier::parse("\nnot a package description text")).is_none());
-    assert!(dbg!(EagerQuerier::parse("")).is_none());
+    assert!(dbg!(ParsedDb::parse("not a package description text")).is_none());
+    assert!(dbg!(ParsedDb::parse("\nnot a package description text")).is_none());
+    assert!(dbg!(ParsedDb::parse("")).is_none());
 }

@@ -1,5 +1,7 @@
-use super::{Query, QueryMut};
-use crate::db::field::{FieldName, ParsedField, RawField};
+use crate::db::{
+    field::{FieldName, ParsedField, RawField},
+    query::{Query, QueryMut},
+};
 use lines_inclusive::{LinesInclusive, LinesInclusiveIter};
 use pipe_trait::Pipe;
 
@@ -13,12 +15,12 @@ macro_rules! def_struct {
         /// Every function call in [`Query`] and [`QueryMut`] is constant time.
         #[derive(Debug, Default, Clone, Copy)]
         #[allow(non_snake_case, reason = "We don't access the field names directly, keep it simple.")]
-        pub struct EagerQuerier<'a> {$(
+        pub struct ParsedDb<'a> {$(
             $(#[$attrs])*
             $field: Option<&'a str>,
         )*}
 
-        impl<'a> EagerQuerier<'a> {
+        impl<'a> ParsedDb<'a> {
             /// Get a raw value from the querier.
             fn get_raw_value(&self, field_name: FieldName) -> Option<&'a str> {
                 match field_name {$(
@@ -44,10 +46,10 @@ def_struct!(
     Provides Conflicts Replaces
 );
 
-impl<'a> EagerQuerier<'a> {
+impl<'a> ParsedDb<'a> {
     /// Parse a package description text.
     pub fn new(text: &'a str) -> Self {
-        EagerQuerier::parse(text).unwrap_or_default()
+        ParsedDb::parse(text).unwrap_or_default()
     }
 
     /// Parse lines of package description text.
@@ -60,10 +62,10 @@ impl<'a> EagerQuerier<'a> {
         let first_field = first_line.trim().pipe(RawField::parse_raw).ok()?;
 
         // parse the remaining values and fields.
-        let mut querier = EagerQuerier::default();
+        let mut querier = ParsedDb::default();
         let mut current_field = Some((first_field, first_line));
         while let Some((field, field_line)) = current_field {
-            let (value_length, next_field) = EagerQuerier::parse_next(&mut lines);
+            let (value_length, next_field) = ParsedDb::parse_next(&mut lines);
             let value_start_offset = processed_length + field_line.len();
             let value_end_offset = value_start_offset + value_length;
             if let Ok(field) = field.to_parsed::<FieldName>() {
@@ -96,13 +98,13 @@ impl<'a> EagerQuerier<'a> {
     }
 }
 
-impl<'a> Query<'a> for EagerQuerier<'a> {
+impl<'a> Query<'a> for ParsedDb<'a> {
     fn query_raw_text(&self, field: ParsedField) -> Option<&'a str> {
         self.get_raw_value(*field.name())
     }
 }
 
-impl<'a> QueryMut<'a> for EagerQuerier<'a> {
+impl<'a> QueryMut<'a> for ParsedDb<'a> {
     fn query_raw_text_mut(&mut self, field: ParsedField) -> Option<&'a str> {
         self.query_raw_text(field)
     }

@@ -60,10 +60,8 @@ def_traits! {
     replaces, replaces_mut = Replaces -> DependencyList;
 }
 
-mod eager;
 mod forgetful;
 mod memo;
 
-pub use eager::EagerQuerier;
 pub use forgetful::ForgetfulQuerier;
 pub use memo::MemoQuerier;
