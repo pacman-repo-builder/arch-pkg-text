@@ -57,11 +57,6 @@ pub enum DbParseError<'a> {
 
 impl<'a> ParsedDb<'a> {
     /// Parse a package description text.
-    pub fn new(text: &'a str) -> Self {
-        ParsedDb::parse(text).unwrap_or_default()
-    }
-
-    /// Parse lines of package description text.
     pub fn parse(text: &'a str) -> Result<Self, DbParseError<'a>> {
         let mut lines = text.lines_inclusive();
         let mut processed_length = 0;

@@ -82,10 +82,6 @@ pub enum SrcinfoParseError<'a> {
 pub type SrcinfoParseReturn<'a> = PartialParseResult<ParsedSrcinfo<'a>, SrcinfoParseError<'a>>;
 
 impl<'a> ParsedSrcinfo<'a> {
-    pub fn new(text: &'a str) -> Self {
-        text.pipe(ParsedSrcinfo::parse).into_partial().0
-    }
-
     pub fn parse(text: &'a str) -> SrcinfoParseReturn<'a> {
         let mut parsed = ParsedSrcinfo::default();
         let lines = non_blank_trimmed_lines(text);

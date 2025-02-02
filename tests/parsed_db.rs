@@ -9,7 +9,7 @@ const TEXT: &str = include_str!("fixtures/gnome-shell.desc");
 
 #[test]
 fn query() {
-    let querier = ParsedDb::new(TEXT);
+    let querier = ParsedDb::parse(TEXT).unwrap();
     dbg!(&querier);
 
     assert_eq!(querier.name(), Some(Name("gnome-shell")));
