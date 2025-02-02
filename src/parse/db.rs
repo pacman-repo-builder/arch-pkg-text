@@ -2,6 +2,7 @@ use crate::db::{
     field::{FieldName, ParsedField, RawField},
     query::{Query, QueryMut},
 };
+use derive_more::{Display, Error};
 use lines_inclusive::{LinesInclusive, LinesInclusiveIter};
 use pipe_trait::Pipe;
 
@@ -46,6 +47,14 @@ def_struct!(
     Provides Conflicts Replaces
 );
 
+#[derive(Debug, Display, Error, Clone, Copy)]
+pub enum DbParseError<'a> {
+    #[display("Input is empty")]
+    EmptyInput,
+    #[display("Receive a value without field: {_0:?}")]
+    ValueWithoutField(#[error(not(source))] &'a str),
+}
+
 impl<'a> ParsedDb<'a> {
     /// Parse a package description text.
     pub fn new(text: &'a str) -> Self {
@@ -53,13 +62,17 @@ impl<'a> ParsedDb<'a> {
     }
 
     /// Parse lines of package description text.
-    pub fn parse(text: &'a str) -> Option<Self> {
+    pub fn parse(text: &'a str) -> Result<Self, DbParseError<'a>> {
         let mut lines = text.lines_inclusive();
         let mut processed_length = 0;
 
         // parse the first field
-        let first_line = lines.next()?;
-        let first_field = first_line.trim().pipe(RawField::parse_raw).ok()?;
+        let first_line = lines.next().ok_or(DbParseError::EmptyInput)?;
+        let first_field = first_line
+            .trim()
+            .pipe(RawField::parse_raw)
+            .ok()
+            .ok_or(DbParseError::ValueWithoutField(first_line))?;
 
         // parse the remaining values and fields.
         let mut querier = ParsedDb::default();
@@ -76,7 +89,7 @@ impl<'a> ParsedDb<'a> {
             current_field = next_field;
         }
 
-        Some(querier)
+        Ok(querier)
     }
 
     /// Parse a value until the end of input or when a [`RawField`] is found.

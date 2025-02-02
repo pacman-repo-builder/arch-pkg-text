@@ -1,6 +1,6 @@
 use parse_arch_pkg_desc::{
     db::query::Query,
-    parse::ParsedDb,
+    parse::{DbParseError, ParsedDb},
     value::{Architecture, Dependency, Description, FileName, Name},
 };
 use pretty_assertions::assert_eq;
@@ -55,7 +55,16 @@ fn query() {
 
 #[test]
 fn invalid() {
-    assert!(dbg!(ParsedDb::parse("not a package description text")).is_none());
-    assert!(dbg!(ParsedDb::parse("\nnot a package description text")).is_none());
-    assert!(dbg!(ParsedDb::parse("")).is_none());
+    assert!(matches!(
+        dbg!(ParsedDb::parse("not a package description text")).unwrap_err(),
+        DbParseError::ValueWithoutField("not a package description text"),
+    ));
+    assert!(matches!(
+        dbg!(ParsedDb::parse("\nnot a package description text")).unwrap_err(),
+        DbParseError::ValueWithoutField("\n"),
+    ));
+    assert!(matches!(
+        dbg!(ParsedDb::parse("")).unwrap_err(),
+        DbParseError::EmptyInput,
+    ));
 }
