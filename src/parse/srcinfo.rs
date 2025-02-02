@@ -12,7 +12,6 @@ use crate::{
     },
     value,
 };
-use data::ParsedSrcinfoDerivativeSectionEntry;
 use derive_more::{Display, Error};
 use indexmap::IndexMap;
 use pipe_trait::Pipe;
@@ -77,6 +76,63 @@ impl<'a, 'r> ParsedSrcinfoSectionMut<'a, 'r> {
             ParsedSrcinfoSectionMut::Base(section) => section.shrink_to_fit(),
             ParsedSrcinfoSectionMut::Derivative(section) => section.shrink_to_fit(),
         }
+    }
+}
+
+impl<'a> ParsedSrcinfoBaseSection<'a> {
+    /// Add a value to a unique entry.
+    fn add_value_to_option<Value: Copy>(
+        target: &mut Option<Value>,
+        value: &'a str,
+        make_value: impl FnOnce(&'a str) -> Value,
+        make_error: impl FnOnce(Value) -> ParsedSrcinfoAlreadySetError<'a>,
+    ) -> Result<(), AddFailure<'a>> {
+        let Some(old_value) = target else {
+            *target = Some(make_value(value));
+            return Ok(());
+        };
+        (*old_value)
+            .pipe(make_error)
+            .pipe(SrcinfoParseError::BaseFieldAlreadySet)
+            .pipe(AddFailure::Error)
+            .pipe(Err)
+    }
+}
+
+/// A pair of [`value::Name`] and [`ParsedSrcinfoDerivativeSection`].
+struct ParsedSrcinfoDerivativeSectionEntry<'a, 'r> {
+    name: value::Name<'a>,
+    data: &'r mut ParsedSrcinfoDerivativeSection<'a>,
+}
+
+impl<'a, 'r> ParsedSrcinfoDerivativeSectionEntry<'a, 'r> {
+    /// Create a new pair.
+    fn new(name: value::Name<'a>, data: &'r mut ParsedSrcinfoDerivativeSection<'a>) -> Self {
+        ParsedSrcinfoDerivativeSectionEntry { name, data }
+    }
+
+    /// Add a value to a unique entry.
+    fn add_value_to_option<Value: Copy>(
+        name: value::Name<'a>,
+        target: &mut Option<Value>,
+        value: &'a str,
+        make_value: impl FnOnce(&'a str) -> Value,
+        make_error: impl FnOnce(Value) -> ParsedDerivativeAlreadySetError<'a>,
+    ) -> Result<(), AddFailure<'a>> {
+        let Some(old_value) = target else {
+            *target = Some(make_value(value));
+            return Ok(());
+        };
+        (*old_value)
+            .pipe(make_error)
+            .pipe(move |error| SrcinfoParseError::DerivativeFieldAlreadySet(name, error))
+            .pipe(AddFailure::Error)
+            .pipe(Err)
+    }
+
+    /// Shrink all internal containers' capacities to fit.
+    fn shrink_to_fit(&mut self) {
+        self.data.shrink_to_fit()
     }
 }
 

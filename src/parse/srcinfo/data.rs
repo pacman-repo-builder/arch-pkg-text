@@ -1,4 +1,4 @@
-use super::{AddFailure, ParsedSrcinfo, SrcinfoParseError};
+use super::{AddFailure, ParsedSrcinfo, ParsedSrcinfoDerivativeSectionEntry};
 use crate::{
     srcinfo::{
         field::{FieldName, ParsedField},
@@ -276,24 +276,6 @@ macro_rules! def_struct {
                 }
             }
 
-            /// Add a value to a unique entry.
-            fn add_value_to_option<Value: Copy>(
-                target: &mut Option<Value>,
-                value: &'a str,
-                make_value: impl FnOnce(&'a str) -> Value,
-                make_error: impl FnOnce(Value) -> ParsedSrcinfoAlreadySetError<'a>,
-            ) -> Result<(), AddFailure<'a>> {
-                let Some(old_value) = target else {
-                    *target = Some(make_value(value));
-                    return Ok(());
-                };
-                (*old_value)
-                    .pipe(make_error)
-                    .pipe(SrcinfoParseError::BaseFieldAlreadySet)
-                    .pipe(AddFailure::Error)
-                    .pipe(Err)
-            }
-
             /// Shrink all internal containers' capacities to fit.
             pub fn shrink_to_fit(&mut self) {
                 $(self.$base_multi_name.shrink_to_fit();)*
@@ -319,12 +301,6 @@ macro_rules! def_struct {
             $($shared_multi_arch_name: Vec<(value::$shared_multi_arch_type<'a>, Option<value::Architecture<'a>>)>,)*
         }
 
-        /// A pair of [`value::Name`] and [`ParsedSrcinfoDerivativeSection`].
-        pub(super) struct ParsedSrcinfoDerivativeSectionEntry<'a, 'r> {
-            name: value::Name<'a>,
-            data: &'r mut ParsedSrcinfoDerivativeSection<'a>,
-        }
-
         /// Error that occurs when `.SRCINFO` defines unique field twice.
         #[derive(Debug, Display, Error, Clone, Copy)]
         pub enum ParsedDerivativeAlreadySetError<'a> {$(
@@ -348,11 +324,6 @@ macro_rules! def_struct {
         }
 
         impl<'a, 'r> ParsedSrcinfoDerivativeSectionEntry<'a, 'r> {
-            /// Create a new pair.
-            pub(super) fn new(name: value::Name<'a>, data: &'r mut ParsedSrcinfoDerivativeSection<'a>) -> Self {
-                ParsedSrcinfoDerivativeSectionEntry { name, data }
-            }
-
             /// Add an entry to the section.
             pub(super) fn add(
                 &mut self,
@@ -392,30 +363,6 @@ macro_rules! def_struct {
                         return Ok(());
                     })*
                 }
-            }
-
-            /// Add a value to a unique entry.
-            fn add_value_to_option<Value: Copy>(
-                name: value::Name<'a>,
-                target: &mut Option<Value>,
-                value: &'a str,
-                make_value: impl FnOnce(&'a str) -> Value,
-                make_error: impl FnOnce(Value) -> ParsedDerivativeAlreadySetError<'a>,
-            ) -> Result<(), AddFailure<'a>> {
-                let Some(old_value) = target else {
-                    *target = Some(make_value(value));
-                    return Ok(());
-                };
-                (*old_value)
-                    .pipe(make_error)
-                    .pipe(move |error| SrcinfoParseError::DerivativeFieldAlreadySet(name, error))
-                    .pipe(AddFailure::Error)
-                    .pipe(Err)
-            }
-
-            /// Shrink all internal containers' capacities to fit.
-            pub(super) fn shrink_to_fit(&mut self) {
-                self.data.shrink_to_fit()
             }
         }
     };
