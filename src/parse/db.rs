@@ -1,5 +1,6 @@
+use super::PartialParseResult;
 use crate::db::{
-    field::{FieldName, ParsedField, RawField},
+    field::{FieldName, ParseRawFieldError, ParsedField, RawField},
     query::{Query, QueryMut},
 };
 use derive_more::{Display, Error};
@@ -55,22 +56,68 @@ pub enum DbParseError<'a> {
     ValueWithoutField(#[error(not(source))] &'a str),
 }
 
+/// Issue that may arise during parsing.
+#[derive(Debug, Clone, Copy)]
+pub enum DbParseIssue<'a> {
+    EmptyInput,
+    FirstLineIsNotAField(&'a str, ParseRawFieldError),
+    UnknownField(RawField<'a>),
+}
+
+impl<'a> DbParseIssue<'a> {
+    /// Return `Ok(())` if the issue was [`DbParseIssue::UnknownField`],
+    /// or return an `Err` of [`DbParseError`] otherwise.
+    fn ignore_unknown_field(self) -> Result<(), DbParseError<'a>> {
+        Err(match self {
+            DbParseIssue::EmptyInput => DbParseError::EmptyInput,
+            DbParseIssue::FirstLineIsNotAField(line, _) => DbParseError::ValueWithoutField(line),
+            DbParseIssue::UnknownField(_) => return Ok(()),
+        })
+    }
+}
+
 impl<'a> ParsedDb<'a> {
-    /// Parse a package description text.
+    /// Parse a package description text, unknown fields are ignored.
     pub fn parse(text: &'a str) -> Result<Self, DbParseError<'a>> {
+        ParsedDb::parse_with_issues(text, DbParseIssue::ignore_unknown_field).try_into_complete()
+    }
+
+    /// Parse a package description text with a callback that handle [parsing issues](DbParseIssue).
+    pub fn parse_with_issues<HandleIssue, Error>(
+        text: &'a str,
+        mut handle_issue: HandleIssue,
+    ) -> PartialParseResult<ParsedDb<'a>, Error>
+    where
+        HandleIssue: FnMut(DbParseIssue<'a>) -> Result<(), Error>,
+    {
+        let mut parsed = ParsedDb::default();
         let mut lines = text.lines_inclusive();
         let mut processed_length = 0;
 
+        macro_rules! break_or_continue {
+            ($issue:expr) => {
+                match handle_issue($issue) {
+                    Err(error) => return PartialParseResult::new_partial(parsed, error),
+                    Ok(()) => continue,
+                }
+            };
+        }
+
         // parse the first field
-        let first_line = lines.next().ok_or(DbParseError::EmptyInput)?;
-        let first_field = first_line
-            .trim()
-            .pipe(RawField::parse_raw)
-            .ok()
-            .ok_or(DbParseError::ValueWithoutField(first_line))?;
+        let (first_line, first_field) = loop {
+            let Some(first_line) = lines.next() else {
+                break_or_continue!(DbParseIssue::EmptyInput);
+            };
+            let first_field = match first_line.trim().pipe(RawField::parse_raw) {
+                Ok(first_field) => first_field,
+                Err(error) => {
+                    break_or_continue!(DbParseIssue::FirstLineIsNotAField(first_line, error))
+                }
+            };
+            break (first_line, first_field);
+        };
 
         // parse the remaining values and fields.
-        let mut querier = ParsedDb::default();
         let mut current_field = Some((first_field, first_line));
         while let Some((field, field_line)) = current_field {
             let (value_length, next_field) = ParsedDb::parse_next(&mut lines);
@@ -78,13 +125,13 @@ impl<'a> ParsedDb<'a> {
             let value_end_offset = value_start_offset + value_length;
             if let Ok(field) = field.to_parsed::<FieldName>() {
                 let value = text[value_start_offset..value_end_offset].trim();
-                querier.set_raw_value(*field.name(), value);
+                parsed.set_raw_value(*field.name(), value);
             }
             processed_length = value_end_offset;
             current_field = next_field;
         }
 
-        Ok(querier)
+        PartialParseResult::new_complete(parsed)
     }
 
     /// Parse a value until the end of input or when a [`RawField`] is found.
