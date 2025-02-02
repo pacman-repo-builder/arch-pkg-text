@@ -1,5 +1,6 @@
 mod data;
 
+use super::PartialParseResult;
 use crate::{
     srcinfo::{
         field::{FieldName, ParsedField},
@@ -78,35 +79,7 @@ pub enum SrcinfoParseError<'a> {
 }
 
 /// Return type of [`ParsedSrcinfo::parse`].
-#[derive(Debug, Clone)]
-pub struct SrcinfoParseReturn<'a> {
-    /// The result of the parsing process, either partial or complete.
-    parsed: ParsedSrcinfo<'a>,
-    /// Possible error encountered during parsing.
-    error: Option<SrcinfoParseError<'a>>,
-}
-
-impl<'a> SrcinfoParseReturn<'a> {
-    /// Return an `Ok` of [`ParsedSrcinfo`] if there was no error.
-    ///
-    /// Otherwise, return an `Err` of [`SrcinfoParseError`].
-    pub fn into_complete(self) -> Result<ParsedSrcinfo<'a>, SrcinfoParseError<'a>> {
-        match self.error {
-            Some(error) => Err(error),
-            None => Ok(self.parsed),
-        }
-    }
-
-    /// Return both the parsed querier and the error regardless of whether there was an error.
-    pub fn into_partial(self) -> (ParsedSrcinfo<'a>, Option<SrcinfoParseError<'a>>) {
-        (self.parsed, self.error)
-    }
-
-    /// Return a reference to the stored error if there was one.
-    pub fn error(&self) -> Option<&'_ SrcinfoParseError<'a>> {
-        self.error.as_ref()
-    }
-}
+pub type SrcinfoParseReturn<'a> = PartialParseResult<ParsedSrcinfo<'a>, SrcinfoParseError<'a>>;
 
 impl<'a> ParsedSrcinfo<'a> {
     pub fn new(text: &'a str) -> Self {
@@ -120,10 +93,10 @@ impl<'a> ParsedSrcinfo<'a> {
 
         for line in lines {
             let Some((field, value)) = parse_line(line) else {
-                return SrcinfoParseReturn {
+                return SrcinfoParseReturn::new_partial(
                     parsed,
-                    error: line.pipe(SrcinfoParseError::InvalidLine).pipe(Some),
-                };
+                    SrcinfoParseError::InvalidLine(line),
+                );
             };
             let Ok(field) = field.to_parsed::<FieldName, &str>() else {
                 continue;
@@ -138,17 +111,11 @@ impl<'a> ParsedSrcinfo<'a> {
                     section_mut = parsed.get_or_insert(Section::Derivative(name));
                 }
                 Err(AddFailure::Error(error)) => {
-                    return SrcinfoParseReturn {
-                        parsed,
-                        error: Some(error),
-                    };
+                    return SrcinfoParseReturn::new_partial(parsed, error);
                 }
             }
         }
 
-        SrcinfoParseReturn {
-            parsed,
-            error: None,
-        }
+        SrcinfoParseReturn::new_complete(parsed)
     }
 }

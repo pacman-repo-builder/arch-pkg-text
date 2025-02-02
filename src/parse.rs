@@ -1,3 +1,6 @@
+mod partial;
+pub use partial::*;
+
 mod db;
 pub use db::*;
 
