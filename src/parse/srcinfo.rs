@@ -163,16 +163,16 @@ impl<'a> SrcinfoParseIssue<'a> {
     /// Return `Ok(())` if the issue was [`SrcinfoParseIssue::UnknownField`],
     /// or return an `Err` of [`SrcinfoParseError`] otherwise.
     fn ignore_unknown_field(self) -> Result<(), SrcinfoParseError<'a>> {
-        match self {
-            SrcinfoParseIssue::UnknownField(_) => Ok(()),
+        Err(match self {
+            SrcinfoParseIssue::UnknownField(_) => return Ok(()),
             SrcinfoParseIssue::BaseFieldAlreadySet(error) => {
-                Err(SrcinfoParseError::BaseFieldAlreadySet(error))
+                SrcinfoParseError::BaseFieldAlreadySet(error)
             }
             SrcinfoParseIssue::DerivativeFieldAlreadySet(name, error) => {
-                Err(SrcinfoParseError::DerivativeFieldAlreadySet(name, error))
+                SrcinfoParseError::DerivativeFieldAlreadySet(name, error)
             }
-            SrcinfoParseIssue::InvalidLine(line) => Err(SrcinfoParseError::InvalidLine(line)),
-        }
+            SrcinfoParseIssue::InvalidLine(line) => SrcinfoParseError::InvalidLine(line),
+        })
     }
 }
 
