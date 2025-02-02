@@ -1,4 +1,4 @@
-use super::{AddFailure, EagerQuerier, EagerQuerierParseError};
+use super::{AddFailure, ParsedSrcinfo, SrcinfoParseError};
 use crate::{
     srcinfo::{
         field::{FieldName, ParsedField},
@@ -79,7 +79,7 @@ macro_rules! def_struct {
             }
         }
 
-        impl<'a> Query<'a> for EagerQuerier<'a> {
+        impl<'a> Query<'a> for ParsedSrcinfo<'a> {
             fn query_raw_text(&self, field_name: FieldName) -> impl Iterator<Item = QueryRawTextItem<'a>> {
                 match field_name {
                     FieldName::Name => {
@@ -184,7 +184,7 @@ macro_rules! def_struct {
             })*
         }
 
-        impl<'a> QueryMut<'a> for EagerQuerier<'a> {
+        impl<'a> QueryMut<'a> for ParsedSrcinfo<'a> {
             fn query_raw_text_mut(&mut self, field_name: FieldName) -> impl Iterator<Item = QueryRawTextItem<'a>> {
                 self.query_raw_text(field_name)
             }
@@ -284,7 +284,7 @@ macro_rules! def_struct {
                 };
                 (*old_value)
                     .pipe(make_error)
-                    .pipe(EagerQuerierParseError::BaseFieldAlreadySet)
+                    .pipe(SrcinfoParseError::BaseFieldAlreadySet)
                     .pipe(AddFailure::Error)
                     .pipe(Err)
             }
@@ -395,7 +395,7 @@ macro_rules! def_struct {
                 };
                 (*old_value)
                     .pipe(make_error)
-                    .pipe(move |error| EagerQuerierParseError::DerivativeFieldAlreadySet(name, error))
+                    .pipe(move |error| SrcinfoParseError::DerivativeFieldAlreadySet(name, error))
                     .pipe(AddFailure::Error)
                     .pipe(Err)
             }

@@ -1,11 +1,13 @@
 mod data;
 
-use super::{
-    utils::{non_blank_trimmed_lines, parse_line},
-    Section,
-};
 use crate::{
-    srcinfo::field::{FieldName, ParsedField},
+    srcinfo::{
+        field::{FieldName, ParsedField},
+        query::{
+            utils::{non_blank_trimmed_lines, parse_line},
+            Section,
+        },
+    },
     value,
 };
 use data::EagerDerivativeSectionEntry;
@@ -19,7 +21,7 @@ pub use data::{
 };
 
 #[derive(Debug, Default, Clone)]
-pub struct EagerQuerier<'a> {
+pub struct ParsedSrcinfo<'a> {
     pub base: EagerBaseSection<'a>,
     pub derivatives: IndexMap<value::Name<'a>, EagerDerivativeSection<'a>>,
 }
@@ -29,7 +31,7 @@ enum EagerSectionMut<'a, 'r> {
     Derivative(EagerDerivativeSectionEntry<'a, 'r>),
 }
 
-impl<'a> EagerQuerier<'a> {
+impl<'a> ParsedSrcinfo<'a> {
     fn get_or_insert(&mut self, section: Section<'a>) -> EagerSectionMut<'a, '_> {
         match section {
             Section::Base => self.base.pipe_mut(EagerSectionMut::Base),
@@ -46,7 +48,7 @@ impl<'a> EagerQuerier<'a> {
 /// Private error type for control flow.
 enum AddFailure<'a> {
     MeetHeader(value::Name<'a>),
-    Error(EagerQuerierParseError<'a>),
+    Error(SrcinfoParseError<'a>),
 }
 
 impl<'a, 'r> EagerSectionMut<'a, 'r> {
@@ -66,7 +68,7 @@ impl<'a, 'r> EagerSectionMut<'a, 'r> {
 }
 
 #[derive(Debug, Display, Error, Clone, Copy)]
-pub enum EagerQuerierParseError<'a> {
+pub enum SrcinfoParseError<'a> {
     #[display("Failed to insert value to the pkgbase section: {_0}")]
     BaseFieldAlreadySet(#[error(not(source))] EagerBaseAlreadySetError<'a>),
     #[display("Failed to insert value to the pkgname section named {_0}: {_1}")]
@@ -75,52 +77,52 @@ pub enum EagerQuerierParseError<'a> {
     InvalidLine(#[error(not(source))] &'a str),
 }
 
-/// Return type of [`EagerQuerier::parse`].
+/// Return type of [`ParsedSrcinfo::parse`].
 #[derive(Debug, Clone)]
-pub struct EagerQuerierParseReturn<'a> {
+pub struct SrcinfoParseReturn<'a> {
     /// The result of the parsing process, either partial or complete.
-    querier: EagerQuerier<'a>,
+    parsed: ParsedSrcinfo<'a>,
     /// Possible error encountered during parsing.
-    error: Option<EagerQuerierParseError<'a>>,
+    error: Option<SrcinfoParseError<'a>>,
 }
 
-impl<'a> EagerQuerierParseReturn<'a> {
-    /// Return an `Ok` of [`EagerQuerier`] if there was no error.
+impl<'a> SrcinfoParseReturn<'a> {
+    /// Return an `Ok` of [`ParsedSrcinfo`] if there was no error.
     ///
-    /// Otherwise, return an `Err` of [`EagerQuerierParseError`].
-    pub fn into_complete(self) -> Result<EagerQuerier<'a>, EagerQuerierParseError<'a>> {
+    /// Otherwise, return an `Err` of [`SrcinfoParseError`].
+    pub fn into_complete(self) -> Result<ParsedSrcinfo<'a>, SrcinfoParseError<'a>> {
         match self.error {
             Some(error) => Err(error),
-            None => Ok(self.querier),
+            None => Ok(self.parsed),
         }
     }
 
     /// Return both the parsed querier and the error regardless of whether there was an error.
-    pub fn into_partial(self) -> (EagerQuerier<'a>, Option<EagerQuerierParseError<'a>>) {
-        (self.querier, self.error)
+    pub fn into_partial(self) -> (ParsedSrcinfo<'a>, Option<SrcinfoParseError<'a>>) {
+        (self.parsed, self.error)
     }
 
     /// Return a reference to the stored error if there was one.
-    pub fn error(&self) -> Option<&'_ EagerQuerierParseError<'a>> {
+    pub fn error(&self) -> Option<&'_ SrcinfoParseError<'a>> {
         self.error.as_ref()
     }
 }
 
-impl<'a> EagerQuerier<'a> {
+impl<'a> ParsedSrcinfo<'a> {
     pub fn new(text: &'a str) -> Self {
-        text.pipe(EagerQuerier::parse).into_partial().0
+        text.pipe(ParsedSrcinfo::parse).into_partial().0
     }
 
-    pub fn parse(text: &'a str) -> EagerQuerierParseReturn<'a> {
-        let mut querier = EagerQuerier::default();
+    pub fn parse(text: &'a str) -> SrcinfoParseReturn<'a> {
+        let mut parsed = ParsedSrcinfo::default();
         let lines = non_blank_trimmed_lines(text);
-        let mut section_mut = querier.get_or_insert(Section::Base);
+        let mut section_mut = parsed.get_or_insert(Section::Base);
 
         for line in lines {
             let Some((field, value)) = parse_line(line) else {
-                return EagerQuerierParseReturn {
-                    querier,
-                    error: line.pipe(EagerQuerierParseError::InvalidLine).pipe(Some),
+                return SrcinfoParseReturn {
+                    parsed,
+                    error: line.pipe(SrcinfoParseError::InvalidLine).pipe(Some),
                 };
             };
             let Ok(field) = field.to_parsed::<FieldName, &str>() else {
@@ -133,19 +135,19 @@ impl<'a> EagerQuerier<'a> {
                 Ok(()) => {}
                 Err(AddFailure::MeetHeader(name)) => {
                     section_mut.shrink_to_fit();
-                    section_mut = querier.get_or_insert(Section::Derivative(name));
+                    section_mut = parsed.get_or_insert(Section::Derivative(name));
                 }
                 Err(AddFailure::Error(error)) => {
-                    return EagerQuerierParseReturn {
-                        querier,
+                    return SrcinfoParseReturn {
+                        parsed,
                         error: Some(error),
                     };
                 }
             }
         }
 
-        EagerQuerierParseReturn {
-            querier,
+        SrcinfoParseReturn {
+            parsed,
             error: None,
         }
     }

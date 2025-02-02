@@ -279,7 +279,7 @@ pub trait ChecksumsMut<'a> {
     fn checksums_mut(&mut self) -> impl Iterator<Item = QueryChecksumItem<'a>>;
 }
 
-mod utils;
+pub(crate) mod utils;
 
 mod checksums;
 pub use checksums::*;
@@ -293,6 +293,4 @@ mod memo;
 pub use memo::*;
 
 #[cfg(feature = "std")]
-mod eager;
-#[cfg(feature = "std")]
-pub use eager::*;
+pub use crate::parse::ParsedSrcinfo as EagerQuerier;
