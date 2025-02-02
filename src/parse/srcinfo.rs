@@ -194,7 +194,7 @@ impl<'a> ParsedSrcinfo<'a> {
         let lines = non_blank_trimmed_lines(text);
         let mut section_mut = parsed.get_or_insert(Section::Base);
 
-        macro_rules! break_or_continue {
+        macro_rules! return_or_continue {
             ($issue:expr) => {
                 match handle_issue($issue) {
                     Err(error) => return PartialParseResult::new_partial(parsed, error),
@@ -205,10 +205,10 @@ impl<'a> ParsedSrcinfo<'a> {
 
         for line in lines {
             let Some((field, value)) = parse_line(line) else {
-                break_or_continue!(SrcinfoParseIssue::InvalidLine(line));
+                return_or_continue!(SrcinfoParseIssue::InvalidLine(line));
             };
             let Ok(field) = field.to_parsed::<FieldName, &str>() else {
-                break_or_continue!(SrcinfoParseIssue::UnknownField(field));
+                return_or_continue!(SrcinfoParseIssue::UnknownField(field));
             };
             if value.is_empty() {
                 continue;
@@ -220,7 +220,7 @@ impl<'a> ParsedSrcinfo<'a> {
                     section_mut = parsed.get_or_insert(Section::Derivative(name));
                 }
                 Err(AddFailure::Issue(issue)) => {
-                    break_or_continue!(issue);
+                    return_or_continue!(issue);
                 }
             }
         }

@@ -94,7 +94,7 @@ impl<'a> ParsedDb<'a> {
         let mut lines = text.lines_inclusive();
         let mut processed_length = 0;
 
-        macro_rules! break_or_continue {
+        macro_rules! return_or_continue {
             ($issue:expr) => {
                 match handle_issue($issue) {
                     Err(error) => return PartialParseResult::new_partial(parsed, error),
@@ -106,12 +106,12 @@ impl<'a> ParsedDb<'a> {
         // parse the first field
         let (first_line, first_field) = loop {
             let Some(first_line) = lines.next() else {
-                break_or_continue!(DbParseIssue::EmptyInput);
+                return_or_continue!(DbParseIssue::EmptyInput);
             };
             let first_field = match first_line.trim().pipe(RawField::parse_raw) {
                 Ok(first_field) => first_field,
                 Err(error) => {
-                    break_or_continue!(DbParseIssue::FirstLineIsNotAField(first_line, error))
+                    return_or_continue!(DbParseIssue::FirstLineIsNotAField(first_line, error))
                 }
             };
             break (first_line, first_field);
