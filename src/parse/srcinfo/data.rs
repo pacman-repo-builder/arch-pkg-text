@@ -202,7 +202,7 @@ macro_rules! def_struct {
 
         /// Parsed information of a `pkgbase` section.
         #[derive(Debug, Default, Clone)]
-        pub struct EagerBaseSection<'a> {
+        pub struct ParsedSrcinfoBaseSection<'a> {
             $($base_single_name: Option<value::$base_single_type<'a>>,)*
             $($base_multi_name: Vec<value::$base_multi_type<'a>>,)*
             $($shared_single_name: Option<value::$shared_single_type<'a>>,)*
@@ -212,7 +212,7 @@ macro_rules! def_struct {
 
         /// Error that occurs when `.SRCINFO` defines unique field twice.
         #[derive(Debug, Display, Error, Clone, Copy)]
-        pub enum EagerBaseAlreadySetError<'a> {
+        pub enum ParsedSrcinfoAlreadySetError<'a> {
             $(
                 #[display("Field {} is already set", FieldName::$base_single_field)]
                 $base_single_field(#[error(not(source))] value::$base_single_type<'a>),
@@ -223,7 +223,7 @@ macro_rules! def_struct {
             )*
         }
 
-        impl<'a> EagerBaseSection<'a> {
+        impl<'a> ParsedSrcinfoBaseSection<'a> {
             /// Add an entry to the section.
             pub(super) fn add(
                 &mut self,
@@ -239,11 +239,11 @@ macro_rules! def_struct {
                     }
                     (FieldName::Name, Some(_)) => return Ok(()), // TODO: callback fn to record warnings?
                     $((FieldName::$base_single_field, None) => {
-                        return EagerBaseSection::add_value_to_option(
+                        return ParsedSrcinfoBaseSection::add_value_to_option(
                             &mut self.$base_single_name,
                             value,
                             value::$base_single_type::new,
-                            EagerBaseAlreadySetError::$base_single_field,
+                            ParsedSrcinfoAlreadySetError::$base_single_field,
                         );
                     })*
                     $((FieldName::$base_single_field, Some(_)) => return Ok(()),)* // TODO: callback fn to record warnings?
@@ -253,11 +253,11 @@ macro_rules! def_struct {
                     })*
                     $((FieldName::$base_multi_field, Some(_)) => return Ok(()),)* // TODO: callback fn to record warnings?
                     $((FieldName::$shared_single_field, None) => {
-                        return EagerBaseSection::add_value_to_option(
+                        return ParsedSrcinfoBaseSection::add_value_to_option(
                             &mut self.$shared_single_name,
                             value,
                             value::$shared_single_type::new,
-                            EagerBaseAlreadySetError::$shared_single_field,
+                            ParsedSrcinfoAlreadySetError::$shared_single_field,
                         );
                     })*
                     $((FieldName::$shared_single_field, Some(_)) => return Ok(()),)* // TODO: callback fn to record warnings?
@@ -281,7 +281,7 @@ macro_rules! def_struct {
                 target: &mut Option<Value>,
                 value: &'a str,
                 make_value: impl FnOnce(&'a str) -> Value,
-                make_error: impl FnOnce(Value) -> EagerBaseAlreadySetError<'a>,
+                make_error: impl FnOnce(Value) -> ParsedSrcinfoAlreadySetError<'a>,
             ) -> Result<(), AddFailure<'a>> {
                 let Some(old_value) = target else {
                     *target = Some(make_value(value));
@@ -313,26 +313,26 @@ macro_rules! def_struct {
 
         /// Parsed information of a `pkgname` section.
         #[derive(Debug, Default, Clone)]
-        pub struct EagerDerivativeSection<'a> {
+        pub struct ParsedSrcinfoDerivativeSection<'a> {
             $($shared_single_name: Option<value::$shared_single_type<'a>>,)*
             $($shared_multi_no_arch_name: Vec<value::$shared_multi_no_arch_type<'a>>,)*
             $($shared_multi_arch_name: Vec<(value::$shared_multi_arch_type<'a>, Option<value::Architecture<'a>>)>,)*
         }
 
-        /// A pair of [`value::Name`] and [`EagerDerivativeSection`].
-        pub(super) struct EagerDerivativeSectionEntry<'a, 'r> {
+        /// A pair of [`value::Name`] and [`ParsedSrcinfoDerivativeSection`].
+        pub(super) struct ParsedSrcinfoDerivativeSectionEntry<'a, 'r> {
             name: value::Name<'a>,
-            data: &'r mut EagerDerivativeSection<'a>,
+            data: &'r mut ParsedSrcinfoDerivativeSection<'a>,
         }
 
         /// Error that occurs when `.SRCINFO` defines unique field twice.
         #[derive(Debug, Display, Error, Clone, Copy)]
-        pub enum EagerDerivativeAlreadySetError<'a> {$(
+        pub enum ParsedDerivativeAlreadySetError<'a> {$(
             #[display("Field {} is already set", FieldName::$shared_single_field)]
             $shared_single_field(#[error(not(source))] value::$shared_single_type<'a>),
         )*}
 
-        impl<'a> EagerDerivativeSection<'a> {
+        impl<'a> ParsedSrcinfoDerivativeSection<'a> {
             /// Shrink all internal containers' capacities to fit.
             pub fn shrink_to_fit(&mut self) {
                 $(self.$shared_multi_no_arch_name.shrink_to_fit();)*
@@ -347,10 +347,10 @@ macro_rules! def_struct {
             )] { &self.$shared_multi_arch_name })*
         }
 
-        impl<'a, 'r> EagerDerivativeSectionEntry<'a, 'r> {
+        impl<'a, 'r> ParsedSrcinfoDerivativeSectionEntry<'a, 'r> {
             /// Create a new pair.
-            pub(super) fn new(name: value::Name<'a>, data: &'r mut EagerDerivativeSection<'a>) -> Self {
-                EagerDerivativeSectionEntry { name, data }
+            pub(super) fn new(name: value::Name<'a>, data: &'r mut ParsedSrcinfoDerivativeSection<'a>) -> Self {
+                ParsedSrcinfoDerivativeSectionEntry { name, data }
             }
 
             /// Add an entry to the section.
@@ -370,12 +370,12 @@ macro_rules! def_struct {
                     $((FieldName::$base_single_field, _) => return Ok(()),)* // TODO: callback fn to record warnings?
                     $((FieldName::$base_multi_field, _) => return Ok(()),)* // TODO: callback fn to record warnings?
                     $((FieldName::$shared_single_field, None) => {
-                        return EagerDerivativeSectionEntry::add_value_to_option(
+                        return ParsedSrcinfoDerivativeSectionEntry::add_value_to_option(
                             self.name,
                             &mut self.data.$shared_single_name,
                             value,
                             value::$shared_single_type::new,
-                            EagerDerivativeAlreadySetError::$shared_single_field,
+                            ParsedDerivativeAlreadySetError::$shared_single_field,
                         );
                     })*
                     $((FieldName::$shared_single_field, Some(_)) => return Ok(()),)* // TODO: callback fn to record warnings?
@@ -400,7 +400,7 @@ macro_rules! def_struct {
                 target: &mut Option<Value>,
                 value: &'a str,
                 make_value: impl FnOnce(&'a str) -> Value,
-                make_error: impl FnOnce(Value) -> EagerDerivativeAlreadySetError<'a>,
+                make_error: impl FnOnce(Value) -> ParsedDerivativeAlreadySetError<'a>,
             ) -> Result<(), AddFailure<'a>> {
                 let Some(old_value) = target else {
                     *target = Some(make_value(value));

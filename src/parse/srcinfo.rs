@@ -11,44 +11,44 @@ use crate::{
     },
     value,
 };
-use data::EagerDerivativeSectionEntry;
+use data::ParsedSrcinfoDerivativeSectionEntry;
 use derive_more::{Display, Error};
 use indexmap::IndexMap;
 use pipe_trait::Pipe;
 
 pub use data::{
-    EagerBaseAlreadySetError, EagerBaseSection, EagerDerivativeAlreadySetError,
-    EagerDerivativeSection,
+    ParsedDerivativeAlreadySetError, ParsedSrcinfoAlreadySetError, ParsedSrcinfoBaseSection,
+    ParsedSrcinfoDerivativeSection,
 };
 
 /// Parsed information of `.SRCINFO`.
 #[derive(Debug, Default, Clone)]
 pub struct ParsedSrcinfo<'a> {
     /// The section under `pkgbase`.
-    pub base: EagerBaseSection<'a>,
+    pub base: ParsedSrcinfoBaseSection<'a>,
     /// The sections under `pkgname`.
-    pub derivatives: IndexMap<value::Name<'a>, EagerDerivativeSection<'a>>,
+    pub derivatives: IndexMap<value::Name<'a>, ParsedSrcinfoDerivativeSection<'a>>,
 }
 
 /// Write cursor of the sections in [`ParsedSrcinfo`].
-enum EagerSectionMut<'a, 'r> {
+enum ParsedSrcinfoSectionMut<'a, 'r> {
     /// Write to the `pkgbase` section.
-    Base(&'r mut EagerBaseSection<'a>),
+    Base(&'r mut ParsedSrcinfoBaseSection<'a>),
     /// Write to a `pkgname` section.
-    Derivative(EagerDerivativeSectionEntry<'a, 'r>),
+    Derivative(ParsedSrcinfoDerivativeSectionEntry<'a, 'r>),
 }
 
 impl<'a> ParsedSrcinfo<'a> {
     /// Get a section or create one if didn't exist.
-    fn get_or_insert(&mut self, section: Section<'a>) -> EagerSectionMut<'a, '_> {
+    fn get_or_insert(&mut self, section: Section<'a>) -> ParsedSrcinfoSectionMut<'a, '_> {
         match section {
-            Section::Base => self.base.pipe_mut(EagerSectionMut::Base),
+            Section::Base => self.base.pipe_mut(ParsedSrcinfoSectionMut::Base),
             Section::Derivative(name) => self
                 .derivatives
                 .entry(name)
                 .or_default()
-                .pipe(|data| EagerDerivativeSectionEntry::new(name, data))
-                .pipe(EagerSectionMut::Derivative),
+                .pipe(|data| ParsedSrcinfoDerivativeSectionEntry::new(name, data))
+                .pipe(ParsedSrcinfoSectionMut::Derivative),
         }
     }
 }
@@ -61,20 +61,20 @@ enum AddFailure<'a> {
     Error(SrcinfoParseError<'a>),
 }
 
-impl<'a, 'r> EagerSectionMut<'a, 'r> {
+impl<'a, 'r> ParsedSrcinfoSectionMut<'a, 'r> {
     /// Add an entry to a `pkgbase` or `pkgname` section.
     fn add(&mut self, field: ParsedField<&'a str>, value: &'a str) -> Result<(), AddFailure<'a>> {
         match self {
-            EagerSectionMut::Base(section) => section.add(field, value),
-            EagerSectionMut::Derivative(section) => section.add(field, value),
+            ParsedSrcinfoSectionMut::Base(section) => section.add(field, value),
+            ParsedSrcinfoSectionMut::Derivative(section) => section.add(field, value),
         }
     }
 
     /// Shrink all internal containers' capacities to fit.
     fn shrink_to_fit(&mut self) {
         match self {
-            EagerSectionMut::Base(section) => section.shrink_to_fit(),
-            EagerSectionMut::Derivative(section) => section.shrink_to_fit(),
+            ParsedSrcinfoSectionMut::Base(section) => section.shrink_to_fit(),
+            ParsedSrcinfoSectionMut::Derivative(section) => section.shrink_to_fit(),
         }
     }
 }
@@ -83,9 +83,9 @@ impl<'a, 'r> EagerSectionMut<'a, 'r> {
 #[derive(Debug, Display, Error, Clone, Copy)]
 pub enum SrcinfoParseError<'a> {
     #[display("Failed to insert value to the pkgbase section: {_0}")]
-    BaseFieldAlreadySet(#[error(not(source))] EagerBaseAlreadySetError<'a>),
+    BaseFieldAlreadySet(#[error(not(source))] ParsedSrcinfoAlreadySetError<'a>),
     #[display("Failed to insert value to the pkgname section named {_0}: {_1}")]
-    DerivativeFieldAlreadySet(value::Name<'a>, EagerDerivativeAlreadySetError<'a>),
+    DerivativeFieldAlreadySet(value::Name<'a>, ParsedDerivativeAlreadySetError<'a>),
     #[display("Invalid line: {_0:?}")]
     InvalidLine(#[error(not(source))] &'a str),
 }
