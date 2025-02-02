@@ -63,5 +63,6 @@ def_traits! {
 mod forgetful;
 mod memo;
 
+pub use crate::parse::ParsedDb as EagerQuerier;
 pub use forgetful::ForgetfulQuerier;
 pub use memo::MemoQuerier;
