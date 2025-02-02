@@ -35,7 +35,7 @@ enum ParsedSrcinfoSectionMut<'a, 'r> {
     /// Write to the `pkgbase` section.
     Base(&'r mut ParsedSrcinfoBaseSection<'a>),
     /// Write to a `pkgname` section.
-    Derivative(ParsedSrcinfoDerivativeSectionEntry<'a, 'r>),
+    Derivative(ParsedSrcinfoDerivativeSectionEntryMut<'a, 'r>),
 }
 
 impl<'a> ParsedSrcinfo<'a> {
@@ -47,7 +47,7 @@ impl<'a> ParsedSrcinfo<'a> {
                 .derivatives
                 .entry(name)
                 .or_default()
-                .pipe(|data| ParsedSrcinfoDerivativeSectionEntry::new(name, data))
+                .pipe(|data| ParsedSrcinfoDerivativeSectionEntryMut::new(name, data))
                 .pipe(ParsedSrcinfoSectionMut::Derivative),
         }
     }
@@ -100,15 +100,15 @@ impl<'a> ParsedSrcinfoBaseSection<'a> {
 }
 
 /// A pair of [`value::Name`] and [`ParsedSrcinfoDerivativeSection`].
-struct ParsedSrcinfoDerivativeSectionEntry<'a, 'r> {
+struct ParsedSrcinfoDerivativeSectionEntryMut<'a, 'r> {
     name: value::Name<'a>,
     data: &'r mut ParsedSrcinfoDerivativeSection<'a>,
 }
 
-impl<'a, 'r> ParsedSrcinfoDerivativeSectionEntry<'a, 'r> {
+impl<'a, 'r> ParsedSrcinfoDerivativeSectionEntryMut<'a, 'r> {
     /// Create a new pair.
     fn new(name: value::Name<'a>, data: &'r mut ParsedSrcinfoDerivativeSection<'a>) -> Self {
-        ParsedSrcinfoDerivativeSectionEntry { name, data }
+        ParsedSrcinfoDerivativeSectionEntryMut { name, data }
     }
 
     /// Add a value to a unique entry.

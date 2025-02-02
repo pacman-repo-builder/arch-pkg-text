@@ -1,4 +1,4 @@
-use super::{AddFailure, ParsedSrcinfo, ParsedSrcinfoDerivativeSectionEntry};
+use super::{AddFailure, ParsedSrcinfo, ParsedSrcinfoDerivativeSectionEntryMut};
 use crate::{
     srcinfo::{
         field::{FieldName, ParsedField},
@@ -323,7 +323,7 @@ macro_rules! def_struct {
             )] { &self.$shared_multi_arch_name })*
         }
 
-        impl<'a, 'r> ParsedSrcinfoDerivativeSectionEntry<'a, 'r> {
+        impl<'a, 'r> ParsedSrcinfoDerivativeSectionEntryMut<'a, 'r> {
             /// Add an entry to the section.
             pub(super) fn add(
                 &mut self,
@@ -341,7 +341,7 @@ macro_rules! def_struct {
                     $((FieldName::$base_single_field, _) => return Ok(()),)* // TODO: callback fn to record warnings?
                     $((FieldName::$base_multi_field, _) => return Ok(()),)* // TODO: callback fn to record warnings?
                     $((FieldName::$shared_single_field, None) => {
-                        return ParsedSrcinfoDerivativeSectionEntry::add_value_to_option(
+                        return ParsedSrcinfoDerivativeSectionEntryMut::add_value_to_option(
                             self.name,
                             &mut self.data.$shared_single_name,
                             value,
