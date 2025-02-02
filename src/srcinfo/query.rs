@@ -38,7 +38,7 @@ impl<'a, Value, Architecture> QueryItem<'a, Value, Architecture> {
     }
 
     /// Transform `value`.
-    fn map<NewValue>(
+    pub(crate) fn map<NewValue>(
         self,
         mut f: impl FnMut(Value) -> NewValue + 'static,
     ) -> QueryItem<'a, NewValue, Architecture> {

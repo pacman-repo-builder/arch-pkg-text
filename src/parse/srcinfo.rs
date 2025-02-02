@@ -1,3 +1,4 @@
+mod checksums;
 mod data;
 
 use super::PartialParseResult;
