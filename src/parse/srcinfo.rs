@@ -4,7 +4,7 @@ mod data;
 use super::PartialParseResult;
 use crate::{
     srcinfo::{
-        field::{FieldName, ParsedField},
+        field::{FieldName, ParsedField, RawField},
         query::{
             utils::{non_blank_trimmed_lines, parse_line},
             Section,
@@ -57,8 +57,8 @@ impl<'a> ParsedSrcinfo<'a> {
 enum AddFailure<'a> {
     /// Meet an entry with field `pkgname`.
     MeetHeader(value::Name<'a>),
-    /// Meet a fatal error.
-    Error(SrcinfoParseError<'a>),
+    /// Meet an issue.
+    Issue(SrcinfoParseIssue<'a>),
 }
 
 impl<'a, 'r> ParsedSrcinfoSectionMut<'a, 'r> {
@@ -93,8 +93,8 @@ impl<'a> ParsedSrcinfoBaseSection<'a> {
         };
         (*old_value)
             .pipe(make_error)
-            .pipe(SrcinfoParseError::BaseFieldAlreadySet)
-            .pipe(AddFailure::Error)
+            .pipe(SrcinfoParseIssue::BaseFieldAlreadySet)
+            .pipe(AddFailure::Issue)
             .pipe(Err)
     }
 }
@@ -125,8 +125,8 @@ impl<'a, 'r> ParsedSrcinfoDerivativeSectionEntryMut<'a, 'r> {
         };
         (*old_value)
             .pipe(make_error)
-            .pipe(move |error| SrcinfoParseError::DerivativeFieldAlreadySet(name, error))
-            .pipe(AddFailure::Error)
+            .pipe(move |error| SrcinfoParseIssue::DerivativeFieldAlreadySet(name, error))
+            .pipe(AddFailure::Issue)
             .pipe(Err)
     }
 
@@ -150,22 +150,65 @@ pub enum SrcinfoParseError<'a> {
 /// Return type of [`ParsedSrcinfo::parse`].
 pub type SrcinfoParseReturn<'a> = PartialParseResult<ParsedSrcinfo<'a>, SrcinfoParseError<'a>>;
 
+/// Issue that may arise during parsing.
+#[derive(Debug, Clone, Copy)]
+pub enum SrcinfoParseIssue<'a> {
+    UnknownField(RawField<'a>),
+    BaseFieldAlreadySet(ParsedSrcinfoAlreadySetError<'a>),
+    DerivativeFieldAlreadySet(value::Name<'a>, ParsedDerivativeAlreadySetError<'a>),
+    InvalidLine(&'a str),
+}
+
+impl<'a> SrcinfoParseIssue<'a> {
+    /// Return `Ok(())` if the issue was [`SrcinfoParseIssue::UnknownField`],
+    /// or return an `Err` of [`SrcinfoParseError`] otherwise.
+    fn ignore_unknown_field(self) -> Result<(), SrcinfoParseError<'a>> {
+        match self {
+            SrcinfoParseIssue::UnknownField(_) => Ok(()),
+            SrcinfoParseIssue::BaseFieldAlreadySet(error) => {
+                Err(SrcinfoParseError::BaseFieldAlreadySet(error))
+            }
+            SrcinfoParseIssue::DerivativeFieldAlreadySet(name, error) => {
+                Err(SrcinfoParseError::DerivativeFieldAlreadySet(name, error))
+            }
+            SrcinfoParseIssue::InvalidLine(line) => Err(SrcinfoParseError::InvalidLine(line)),
+        }
+    }
+}
+
 impl<'a> ParsedSrcinfo<'a> {
-    /// Parse `.SRCINFO` text.
+    /// Parse `.SRCINFO` text, unknown fields are ignored.
     pub fn parse(text: &'a str) -> SrcinfoParseReturn<'a> {
+        ParsedSrcinfo::parse_with_issues(text, SrcinfoParseIssue::ignore_unknown_field)
+    }
+
+    /// Parse `.SRCINFO` with a callback that handles [parsing issues](SrcinfoParseIssue).
+    pub fn parse_with_issues<HandleIssue, Error>(
+        text: &'a str,
+        mut handle_issue: HandleIssue,
+    ) -> PartialParseResult<ParsedSrcinfo<'a>, Error>
+    where
+        HandleIssue: FnMut(SrcinfoParseIssue<'a>) -> Result<(), Error>,
+    {
         let mut parsed = ParsedSrcinfo::default();
         let lines = non_blank_trimmed_lines(text);
         let mut section_mut = parsed.get_or_insert(Section::Base);
 
+        macro_rules! break_or_continue {
+            ($issue:expr) => {
+                match handle_issue($issue) {
+                    Err(error) => return PartialParseResult::new_partial(parsed, error),
+                    Ok(()) => continue,
+                }
+            };
+        }
+
         for line in lines {
             let Some((field, value)) = parse_line(line) else {
-                return SrcinfoParseReturn::new_partial(
-                    parsed,
-                    SrcinfoParseError::InvalidLine(line),
-                );
+                break_or_continue!(SrcinfoParseIssue::InvalidLine(line));
             };
             let Ok(field) = field.to_parsed::<FieldName, &str>() else {
-                continue;
+                break_or_continue!(SrcinfoParseIssue::UnknownField(field));
             };
             if value.is_empty() {
                 continue;
@@ -176,13 +219,13 @@ impl<'a> ParsedSrcinfo<'a> {
                     section_mut.shrink_to_fit();
                     section_mut = parsed.get_or_insert(Section::Derivative(name));
                 }
-                Err(AddFailure::Error(error)) => {
-                    return SrcinfoParseReturn::new_partial(parsed, error);
+                Err(AddFailure::Issue(issue)) => {
+                    break_or_continue!(issue);
                 }
             }
         }
 
-        SrcinfoParseReturn::new_complete(parsed)
+        PartialParseResult::new_complete(parsed)
     }
 }
 
