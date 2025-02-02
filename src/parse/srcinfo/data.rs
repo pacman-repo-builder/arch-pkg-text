@@ -463,7 +463,7 @@ def_struct! {
         sha1_checksums, sha1_checksums_mut = Sha1Checksums -> SkipOrHex160;
         sha224_checksums, sha224_checksums_mut = Sha224Checksums -> SkipOrHex224;
         sha256_checksums, sha256_checksums_mut = Sha256Checksums -> SkipOrHex256;
-        sha284_checksums, sha384_checksums_mut = Sha384Checksums -> SkipOrHex384;
+        sha384_checksums, sha384_checksums_mut = Sha384Checksums -> SkipOrHex384;
         sha512_checksums, sha512_checksums_mut = Sha512Checksums -> SkipOrHex512;
         blake2b_checksums, blake2b_checksums_mut = Blake2bChecksums -> SkipOrHex512;
     }
