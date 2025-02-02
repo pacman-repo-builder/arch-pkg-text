@@ -27,7 +27,7 @@ impl<Parsed, Error> PartialParseResult<Parsed, Error> {
     /// Return an `Ok` if there was no error.
     ///
     /// Otherwise, return an `Err`.
-    pub fn into_complete(self) -> Result<Parsed, Error> {
+    pub fn try_into_complete(self) -> Result<Parsed, Error> {
         match self.error {
             Some(error) => Err(error),
             None => Ok(self.parsed),
@@ -57,7 +57,7 @@ impl<Parsed, Error> PartialParseResult<Parsed, Error> {
 
 impl<Parsed, Error> From<PartialParseResult<Parsed, Error>> for Result<Parsed, Error> {
     fn from(value: PartialParseResult<Parsed, Error>) -> Self {
-        value.into_complete()
+        value.try_into_complete()
     }
 }
 

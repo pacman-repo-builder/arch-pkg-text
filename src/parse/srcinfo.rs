@@ -132,6 +132,6 @@ impl<'a> ParsedSrcinfo<'a> {
 impl<'a> TryFrom<&'a str> for ParsedSrcinfo<'a> {
     type Error = SrcinfoParseError<'a>;
     fn try_from(text: &'a str) -> Result<Self, Self::Error> {
-        ParsedSrcinfo::parse(text).into_complete()
+        ParsedSrcinfo::parse(text).try_into_complete()
     }
 }
