@@ -21,18 +21,25 @@ pub use data::{
     EagerDerivativeSection,
 };
 
+/// Parsed information of `.SRCINFO`.
 #[derive(Debug, Default, Clone)]
 pub struct ParsedSrcinfo<'a> {
+    /// The section under `pkgbase`.
     pub base: EagerBaseSection<'a>,
+    /// The sections under `pkgname`.
     pub derivatives: IndexMap<value::Name<'a>, EagerDerivativeSection<'a>>,
 }
 
+/// Write cursor of the sections in [`ParsedSrcinfo`].
 enum EagerSectionMut<'a, 'r> {
+    /// Write to the `pkgbase` section.
     Base(&'r mut EagerBaseSection<'a>),
+    /// Write to a `pkgname` section.
     Derivative(EagerDerivativeSectionEntry<'a, 'r>),
 }
 
 impl<'a> ParsedSrcinfo<'a> {
+    /// Get a section or create one if didn't exist.
     fn get_or_insert(&mut self, section: Section<'a>) -> EagerSectionMut<'a, '_> {
         match section {
             Section::Base => self.base.pipe_mut(EagerSectionMut::Base),
@@ -48,11 +55,14 @@ impl<'a> ParsedSrcinfo<'a> {
 
 /// Private error type for control flow.
 enum AddFailure<'a> {
+    /// Meet an entry with field `pkgname`.
     MeetHeader(value::Name<'a>),
+    /// Meet a fatal error.
     Error(SrcinfoParseError<'a>),
 }
 
 impl<'a, 'r> EagerSectionMut<'a, 'r> {
+    /// Add an entry to a `pkgbase` or `pkgname` section.
     fn add(&mut self, field: ParsedField<&'a str>, value: &'a str) -> Result<(), AddFailure<'a>> {
         match self {
             EagerSectionMut::Base(section) => section.add(field, value),
@@ -60,6 +70,7 @@ impl<'a, 'r> EagerSectionMut<'a, 'r> {
         }
     }
 
+    /// Shrink all internal containers' capacities to fit.
     fn shrink_to_fit(&mut self) {
         match self {
             EagerSectionMut::Base(section) => section.shrink_to_fit(),
@@ -68,6 +79,7 @@ impl<'a, 'r> EagerSectionMut<'a, 'r> {
     }
 }
 
+/// Error type of [`ParsedSrcinfo::parse`].
 #[derive(Debug, Display, Error, Clone, Copy)]
 pub enum SrcinfoParseError<'a> {
     #[display("Failed to insert value to the pkgbase section: {_0}")]
@@ -82,6 +94,7 @@ pub enum SrcinfoParseError<'a> {
 pub type SrcinfoParseReturn<'a> = PartialParseResult<ParsedSrcinfo<'a>, SrcinfoParseError<'a>>;
 
 impl<'a> ParsedSrcinfo<'a> {
+    /// Parse `.SRCINFO` text.
     pub fn parse(text: &'a str) -> SrcinfoParseReturn<'a> {
         let mut parsed = ParsedSrcinfo::default();
         let lines = non_blank_trimmed_lines(text);

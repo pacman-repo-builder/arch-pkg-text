@@ -27,6 +27,7 @@ macro_rules! def_struct {
             $shared_multi_arch_name:ident, $shared_multi_arch_name_mut:ident = $shared_multi_arch_field:ident -> $shared_multi_arch_type:ident;
         )*}
     ) => {
+        /// Private [iterator](Iterator) type to be used as the underlying return types in [`Query`] and [`QueryMut`].
         enum QueryIter<
             Name,
             $($base_single_field,)*
@@ -199,6 +200,7 @@ macro_rules! def_struct {
             > { self.$shared_multi_arch_name() })*
         }
 
+        /// Parsed information of a `pkgbase` section.
         #[derive(Debug, Default, Clone)]
         pub struct EagerBaseSection<'a> {
             $($base_single_name: Option<value::$base_single_type<'a>>,)*
@@ -208,6 +210,7 @@ macro_rules! def_struct {
             $($shared_multi_arch_name: Vec<(value::$shared_multi_arch_type<'a>, Option<value::Architecture<'a>>)>,)*
         }
 
+        /// Error that occurs when `.SRCINFO` defines unique field twice.
         #[derive(Debug, Display, Error, Clone, Copy)]
         pub enum EagerBaseAlreadySetError<'a> {
             $(
@@ -221,6 +224,7 @@ macro_rules! def_struct {
         }
 
         impl<'a> EagerBaseSection<'a> {
+            /// Add an entry to the section.
             pub(super) fn add(
                 &mut self,
                 field: ParsedField<&'a str>,
@@ -272,6 +276,7 @@ macro_rules! def_struct {
                 }
             }
 
+            /// Add a value to a unique entry.
             fn add_value_to_option<Value: Copy>(
                 target: &mut Option<Value>,
                 value: &'a str,
@@ -289,6 +294,7 @@ macro_rules! def_struct {
                     .pipe(Err)
             }
 
+            /// Shrink all internal containers' capacities to fit.
             pub fn shrink_to_fit(&mut self) {
                 $(self.$base_multi_name.shrink_to_fit();)*
                 $(self.$shared_multi_no_arch_name.shrink_to_fit();)*
@@ -305,6 +311,7 @@ macro_rules! def_struct {
             )] { &self.$shared_multi_arch_name })*
         }
 
+        /// Parsed information of a `pkgname` section.
         #[derive(Debug, Default, Clone)]
         pub struct EagerDerivativeSection<'a> {
             $($shared_single_name: Option<value::$shared_single_type<'a>>,)*
@@ -312,11 +319,13 @@ macro_rules! def_struct {
             $($shared_multi_arch_name: Vec<(value::$shared_multi_arch_type<'a>, Option<value::Architecture<'a>>)>,)*
         }
 
+        /// A pair of [`value::Name`] and [`EagerDerivativeSection`].
         pub(super) struct EagerDerivativeSectionEntry<'a, 'r> {
             name: value::Name<'a>,
             data: &'r mut EagerDerivativeSection<'a>,
         }
 
+        /// Error that occurs when `.SRCINFO` defines unique field twice.
         #[derive(Debug, Display, Error, Clone, Copy)]
         pub enum EagerDerivativeAlreadySetError<'a> {$(
             #[display("Field {} is already set", FieldName::$shared_single_field)]
@@ -324,6 +333,7 @@ macro_rules! def_struct {
         )*}
 
         impl<'a> EagerDerivativeSection<'a> {
+            /// Shrink all internal containers' capacities to fit.
             pub fn shrink_to_fit(&mut self) {
                 $(self.$shared_multi_no_arch_name.shrink_to_fit();)*
                 $(self.$shared_multi_arch_name.shrink_to_fit();)*
@@ -338,10 +348,12 @@ macro_rules! def_struct {
         }
 
         impl<'a, 'r> EagerDerivativeSectionEntry<'a, 'r> {
+            /// Create a new pair.
             pub(super) fn new(name: value::Name<'a>, data: &'r mut EagerDerivativeSection<'a>) -> Self {
                 EagerDerivativeSectionEntry { name, data }
             }
 
+            /// Add an entry to the section.
             pub(super) fn add(
                 &mut self,
                 field: ParsedField<&'a str>,
@@ -382,6 +394,7 @@ macro_rules! def_struct {
                 }
             }
 
+            /// Add a value to a unique entry.
             fn add_value_to_option<Value: Copy>(
                 name: value::Name<'a>,
                 target: &mut Option<Value>,
@@ -400,6 +413,7 @@ macro_rules! def_struct {
                     .pipe(Err)
             }
 
+            /// Shrink all internal containers' capacities to fit.
             pub(super) fn shrink_to_fit(&mut self) {
                 self.data.shrink_to_fit()
             }
