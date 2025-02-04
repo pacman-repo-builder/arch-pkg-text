@@ -229,8 +229,11 @@ impl<'a> ParsedSrcinfo<'a> {
     }
 }
 
+/// Try parsing a `.SRCINFO` text, unknown fields are ignored, partial success means error.
 impl<'a> TryFrom<&'a str> for ParsedSrcinfo<'a> {
+    /// Error that occurs when parsing fails or incomplete.
     type Error = SrcinfoParseError<'a>;
+    /// Try parsing a `.SRCINFO` text, unknown fields are ignored, partial success means error.
     fn try_from(text: &'a str) -> Result<Self, Self::Error> {
         ParsedSrcinfo::parse(text).try_into_complete()
     }
