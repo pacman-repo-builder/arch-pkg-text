@@ -376,3 +376,22 @@ fn simple() {
         .unwrap()
         .pipe_ref(assert_simple);
 }
+
+#[test]
+fn query_no_indent() {
+    eprintln!("CASE: complex srcinfo");
+    COMPLEX
+        .pipe(remove_indent)
+        .pipe_as_ref(ParsedSrcinfo::parse)
+        .try_into_complete()
+        .unwrap()
+        .pipe_ref(assert_complex);
+
+    eprintln!("CASE: simple srcinfo");
+    SIMPLE
+        .pipe(remove_indent)
+        .pipe_as_ref(ParsedSrcinfo::parse)
+        .try_into_complete()
+        .unwrap()
+        .pipe_ref(assert_simple);
+}
