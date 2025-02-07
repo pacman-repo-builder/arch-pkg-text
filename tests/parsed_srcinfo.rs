@@ -14,6 +14,7 @@ use pretty_assertions::assert_eq;
 
 /// Run assertions for srcinfo similar to [`COMPLEX`].
 fn assert_complex(querier: &ParsedSrcinfo) {
+    eprintln!("STEP: query");
     assert_eq!(querier.base_name(), Some(Base("complex-example-bin")));
     assert_eq!(querier.version(), Some(UpstreamVersion("12.34.56.r789")));
     assert_eq!(querier.release().unwrap().parse().ok(), Some(2));
@@ -163,6 +164,7 @@ fn assert_complex(querier: &ParsedSrcinfo) {
 
 /// Run assertions for srcinfo similar to [`SIMPLE`].
 fn assert_simple(querier: &ParsedSrcinfo) {
+    eprintln!("STEP: query");
     assert_eq!(querier.base_name(), Some(Base("simple-example-bin")));
     assert_eq!(querier.version(), Some(UpstreamVersion("12.34.56.r789")));
     assert_eq!(querier.release().unwrap().parse().ok(), Some(1));
