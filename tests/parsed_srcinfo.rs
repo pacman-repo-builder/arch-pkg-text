@@ -13,7 +13,7 @@ use pipe_trait::Pipe;
 use pretty_assertions::assert_eq;
 
 /// Run assertions for srcinfo similar to [`COMPLEX`].
-fn assert_query_complex(querier: &ParsedSrcinfo) {
+fn assert_complex(querier: &ParsedSrcinfo) {
     assert_eq!(querier.base_name(), Some(Base("complex-example-bin")));
     assert_eq!(querier.version(), Some(UpstreamVersion("12.34.56.r789")));
     assert_eq!(querier.release().unwrap().parse().ok(), Some(2));
@@ -162,7 +162,7 @@ fn assert_query_complex(querier: &ParsedSrcinfo) {
 }
 
 /// Run assertions for srcinfo similar to [`SIMPLE`].
-fn assert_query_simple(querier: &ParsedSrcinfo) {
+fn assert_simple(querier: &ParsedSrcinfo) {
     assert_eq!(querier.base_name(), Some(Base("simple-example-bin")));
     assert_eq!(querier.version(), Some(UpstreamVersion("12.34.56.r789")));
     assert_eq!(querier.release().unwrap().parse().ok(), Some(1));
@@ -232,20 +232,18 @@ fn assert_query_simple(querier: &ParsedSrcinfo) {
 
 #[test]
 fn complex() {
-    let querier = COMPLEX
+    COMPLEX
         .pipe(ParsedSrcinfo::parse)
         .try_into_complete()
-        .unwrap();
-    eprintln!("STEP: query");
-    assert_query_complex(&querier);
+        .unwrap()
+        .pipe_ref(assert_complex);
 }
 
 #[test]
 fn simple() {
-    let querier = SIMPLE
+    SIMPLE
         .pipe(ParsedSrcinfo::parse)
         .try_into_complete()
-        .unwrap();
-    eprintln!("STEP: query");
-    assert_query_simple(&querier);
+        .unwrap()
+        .pipe_ref(assert_simple);
 }
