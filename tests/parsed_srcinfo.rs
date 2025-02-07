@@ -306,6 +306,58 @@ fn assert_complex(querier: &ParsedSrcinfo) {
 
 /// Run assertions for srcinfo similar to [`SIMPLE`].
 fn assert_simple(querier: &ParsedSrcinfo) {
+    dbg!(querier);
+
+    eprintln!("STEP: pkgbase");
+    let base = dbg!(&querier.base);
+    assert_eq!(base.base_name(), Some(Base("simple-example-bin")));
+    assert_eq!(base.version(), Some(UpstreamVersion("12.34.56.r789")));
+    assert_eq!(base.release().unwrap().parse().ok(), Some(1));
+    assert!(base.epoch().is_none());
+    assert_eq!(
+        base.description(),
+        Some(Description("Simple .SRCINFO example")),
+    );
+    assert_eq!(base.architecture(), ["any"].map(Architecture));
+    assert_eq!(
+        base.dependencies(),
+        ["glibc>=2.0", "coreutils", "linux"].map(|dependency| (Dependency(dependency), None)),
+    );
+    assert_eq!(
+        base.sha1_checksums()
+            .iter()
+            .map(|(value, architecture)| (value.u8_array(), *architecture))
+            .collect::<Vec<_>>(),
+        [
+            SkipOrArray::Array(hex!("4808c01d2da9ba8a1f0da603d20d515e3e7a67e6")),
+            SkipOrArray::Skip,
+            SkipOrArray::Skip,
+        ]
+        .map(|value| (Some(value), None)),
+    );
+    assert_eq!(
+        base.checksums()
+            .map(|(value, architecture)| (value.u8_array(), architecture))
+            .collect::<Vec<_>>(),
+        [
+            ChecksumArray::Sha1(hex!("4808c01d2da9ba8a1f0da603d20d515e3e7a67e6")),
+            ChecksumArray::Skip,
+            ChecksumArray::Skip,
+        ]
+        .map(|value| (Some(value), None)),
+    );
+
+    eprintln!("STEP: pkgname = simple-example-bin");
+    let derivative = querier
+        .derivatives
+        .get(&Name("simple-example-bin"))
+        .unwrap();
+    dbg!(&derivative);
+    assert_eq!(derivative.description(), None);
+    assert_eq!(derivative.architecture(), []);
+    assert_eq!(derivative.dependencies(), []);
+    assert!(derivative.checksums().next().is_none());
+
     eprintln!("STEP: query");
     assert_eq!(querier.base_name(), Some(Base("simple-example-bin")));
     assert_eq!(querier.version(), Some(UpstreamVersion("12.34.56.r789")));
