@@ -12,6 +12,18 @@ use parse_arch_pkg_desc::{
 use pipe_trait::Pipe;
 use pretty_assertions::assert_eq;
 
+/// Convenient methods to convert string to [`ParsedSrcinfo`].
+trait SrcinfoParsingUtils {
+    /// Try parsing [`ParsedSrcinfo`] from a string, panic on error.
+    fn parse_srcinfo_unwrap(&self) -> ParsedSrcinfo<'_>;
+}
+
+impl SrcinfoParsingUtils for str {
+    fn parse_srcinfo_unwrap(&self) -> ParsedSrcinfo<'_> {
+        ParsedSrcinfo::try_from(self).unwrap()
+    }
+}
+
 /// Run assertions for srcinfo similar to [`COMPLEX`].
 fn assert_complex(querier: &ParsedSrcinfo) {
     dbg!(querier);
@@ -361,20 +373,12 @@ fn assert_simple(querier: &ParsedSrcinfo) {
 
 #[test]
 fn complex() {
-    COMPLEX
-        .pipe(ParsedSrcinfo::parse)
-        .try_into_complete()
-        .unwrap()
-        .pipe_ref(assert_complex);
+    COMPLEX.parse_srcinfo_unwrap().pipe_ref(assert_complex);
 }
 
 #[test]
 fn simple() {
-    SIMPLE
-        .pipe(ParsedSrcinfo::parse)
-        .try_into_complete()
-        .unwrap()
-        .pipe_ref(assert_simple);
+    SIMPLE.parse_srcinfo_unwrap().pipe_ref(assert_simple);
 }
 
 #[test]
@@ -382,16 +386,12 @@ fn query_no_indent() {
     eprintln!("CASE: complex srcinfo");
     COMPLEX
         .pipe(remove_indent)
-        .pipe_as_ref(ParsedSrcinfo::parse)
-        .try_into_complete()
-        .unwrap()
+        .parse_srcinfo_unwrap()
         .pipe_ref(assert_complex);
 
     eprintln!("CASE: simple srcinfo");
     SIMPLE
         .pipe(remove_indent)
-        .pipe_as_ref(ParsedSrcinfo::parse)
-        .try_into_complete()
-        .unwrap()
+        .parse_srcinfo_unwrap()
         .pipe_ref(assert_simple);
 }
