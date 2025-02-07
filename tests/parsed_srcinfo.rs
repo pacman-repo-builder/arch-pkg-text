@@ -7,7 +7,10 @@ use hex_literal::hex;
 use parse_arch_pkg_desc::{
     parse::ParsedSrcinfo,
     srcinfo::query::{ChecksumArray, Checksums, Query, QueryItem, Section},
-    value::{Architecture, Base, Dependency, Description, Name, SkipOrArray, UpstreamVersion},
+    value::{
+        Architecture, Base, Dependency, Description, License, Name, SkipOrArray, Source,
+        UpstreamVersion,
+    },
 };
 use pipe_trait::Pipe;
 use pretty_assertions::assert_eq;
@@ -394,4 +397,43 @@ fn query_no_indent() {
         .pipe(remove_indent)
         .parse_srcinfo_unwrap()
         .pipe_ref(assert_simple);
+}
+
+#[test]
+fn filter_out_empty_values() {
+    fn run_assertions(querier: &ParsedSrcinfo) {
+        assert_eq!(
+            querier.derivative_names().collect::<Vec<_>>(),
+            [Name("parallel-disk-usage")],
+        );
+        assert_eq!(
+            querier
+                .license()
+                .map(QueryItem::into_tuple2)
+                .collect::<Vec<_>>(),
+            [(License("Apache-2.0"), Section::Base)],
+        );
+        assert_eq!(
+            querier
+                .source()
+                .map(QueryItem::into_tuple3)
+                .collect::<Vec<_>>(),
+            [(
+                Source("parallel-disk-usage-0.11.0.tar.gz::https://github.com/KSXGitHub/parallel-disk-usage/archive/0.11.0.tar.gz"),
+                Section::Base,
+                None,
+            )],
+        );
+    }
+
+    eprintln!("CASE: no weird format");
+    HAS_EMPTY_VALUES
+        .parse_srcinfo_unwrap()
+        .pipe_ref(run_assertions);
+
+    eprintln!("CASE: trailing whitespaces");
+    HAS_EMPTY_VALUES
+        .pipe(trailing_whitespaces)
+        .parse_srcinfo_unwrap()
+        .pipe_ref(run_assertions);
 }
