@@ -52,6 +52,20 @@ fn assert_complex(querier: &ParsedSrcinfo) {
         ]
         .map(|(value, architecture)| (Some(value), architecture.map(Architecture))),
     );
+    assert_eq!(
+        base.checksums()
+            .map(|(value, architecture)| (value.u8_array(), architecture))
+            .collect::<Vec<_>>(),
+        [
+            (
+                ChecksumArray::Sha1(hex!("4808c01d2da9ba8a1f0da603d20d515e3e7a67e6")),
+                None,
+            ),
+            (ChecksumArray::Skip, Some("x86_64")),
+            (ChecksumArray::Skip, Some("aarch64")),
+        ]
+        .map(|(value, architecture)| (Some(value), architecture.map(Architecture))),
+    );
 
     eprintln!("STEP: pkgname");
     let derivatives = dbg!(&querier.derivatives);
@@ -85,6 +99,14 @@ fn assert_complex(querier: &ParsedSrcinfo) {
         [(SkipOrArray::Skip, None)]
             .map(|(value, architecture)| (Some(value), architecture.map(Architecture))),
     );
+    assert_eq!(
+        derivative
+            .checksums()
+            .map(|(value, architecture)| (value.u8_array(), architecture))
+            .collect::<Vec<_>>(),
+        [(ChecksumArray::Skip, None)]
+            .map(|(value, architecture)| (Some(value), architecture.map(Architecture))),
+    );
 
     eprintln!("STEP: pkgname = bar-bin");
     let derivative = dbg!(derivatives.get(&Name("bar-bin")).unwrap());
@@ -108,6 +130,14 @@ fn assert_complex(querier: &ParsedSrcinfo) {
             .map(|(value, architecture)| (value.u8_array(), *architecture))
             .collect::<Vec<_>>(),
         [(SkipOrArray::Skip, None)]
+            .map(|(value, architecture)| (Some(value), architecture.map(Architecture))),
+    );
+    assert_eq!(
+        derivative
+            .checksums()
+            .map(|(value, architecture)| (value.u8_array(), architecture))
+            .collect::<Vec<_>>(),
+        [(ChecksumArray::Skip, None)]
             .map(|(value, architecture)| (Some(value), architecture.map(Architecture))),
     );
 
