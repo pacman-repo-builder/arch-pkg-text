@@ -14,6 +14,103 @@ use pretty_assertions::assert_eq;
 
 /// Run assertions for srcinfo similar to [`COMPLEX`].
 fn assert_complex(querier: &ParsedSrcinfo) {
+    dbg!(querier);
+
+    eprintln!("STEP: pkgbase");
+    let base = dbg!(&querier.base);
+    assert_eq!(base.base_name(), Some(Base("complex-example-bin")));
+    assert_eq!(base.version(), Some(UpstreamVersion("12.34.56.r789")));
+    assert_eq!(base.release().unwrap().parse().ok(), Some(2));
+    assert_eq!(base.epoch().unwrap().parse().ok(), Some(3));
+    assert_eq!(
+        base.description(),
+        Some(Description("Description under pkgbase")),
+    );
+    assert_eq!(base.architecture(), ["x86_64", "aarch64"].map(Architecture),);
+    assert_eq!(
+        base.dependencies(),
+        [
+            ("glibc>=2.0", None),
+            ("coreutils", None),
+            ("linux", None),
+            ("aarch64-compatibility", Some("aarch64")),
+        ]
+        .map(|(name, architecture)| (Dependency(name), architecture.map(Architecture))),
+    );
+    assert_eq!(
+        base.sha1_checksums()
+            .iter()
+            .map(|(value, architecture)| (value.u8_array(), *architecture))
+            .collect::<Vec<_>>(),
+        [
+            (
+                SkipOrArray::Array(hex!("4808c01d2da9ba8a1f0da603d20d515e3e7a67e6")),
+                None,
+            ),
+            (SkipOrArray::Skip, Some("x86_64")),
+            (SkipOrArray::Skip, Some("aarch64")),
+        ]
+        .map(|(value, architecture)| (Some(value), architecture.map(Architecture))),
+    );
+
+    eprintln!("STEP: pkgname");
+    let derivatives = dbg!(&querier.derivatives);
+    assert_eq!(
+        derivatives.keys().copied().collect::<Vec<_>>(),
+        &["foo-bin", "bar-bin"].map(Name),
+    );
+
+    eprintln!("STEP: pkgname = foo-bin");
+    let derivative = dbg!(derivatives.get(&Name("foo-bin")).unwrap());
+    assert_eq!(
+        derivative.description(),
+        Some(Description("Description under foo-bin")),
+    );
+    assert_eq!(derivative.architecture(), ["i686"].map(Architecture));
+    assert_eq!(
+        derivative.dependencies(),
+        [
+            ("x86_64-compatibility-for-foo", Some("x86_64")),
+            ("i686-compatibility-for-foo", Some("i686")),
+            ("extra-depend-for-foo", None),
+        ]
+        .map(|(name, architecture)| (Dependency(name), architecture.map(Architecture))),
+    );
+    assert_eq!(
+        derivative
+            .sha1_checksums()
+            .iter()
+            .map(|(value, architecture)| (value.u8_array(), *architecture))
+            .collect::<Vec<_>>(),
+        [(SkipOrArray::Skip, None)]
+            .map(|(value, architecture)| (Some(value), architecture.map(Architecture))),
+    );
+
+    eprintln!("STEP: pkgname = bar-bin");
+    let derivative = dbg!(derivatives.get(&Name("bar-bin")).unwrap());
+    assert_eq!(
+        derivative.description(),
+        Some(Description("Description under bar-bin")),
+    );
+    assert_eq!(derivative.architecture(), []);
+    assert_eq!(
+        derivative.dependencies(),
+        [
+            ("x86_64-compatibility-for-bar", Some("x86_64")),
+            ("extra-depend-for-bar", None),
+        ]
+        .map(|(name, architecture)| (Dependency(name), architecture.map(Architecture))),
+    );
+    assert_eq!(
+        derivative
+            .sha1_checksums()
+            .iter()
+            .map(|(value, architecture)| (value.u8_array(), *architecture))
+            .collect::<Vec<_>>(),
+        [(SkipOrArray::Skip, None)]
+            .map(|(value, architecture)| (Some(value), architecture.map(Architecture))),
+    );
+
     eprintln!("STEP: query");
     assert_eq!(querier.base_name(), Some(Base("complex-example-bin")));
     assert_eq!(querier.version(), Some(UpstreamVersion("12.34.56.r789")));
