@@ -50,7 +50,7 @@ fn assert_complex(querier: &ParsedSrcinfo) {
             ("linux", None),
             ("aarch64-compatibility", Some("aarch64")),
         ]
-        .map(|(name, architecture)| (Dependency(name), architecture.map(Architecture))),
+        .map(|(dependency, architecture)| (Dependency(dependency), architecture.map(Architecture))),
     );
     assert_eq!(
         base.sha1_checksums()
@@ -103,7 +103,7 @@ fn assert_complex(querier: &ParsedSrcinfo) {
             ("i686-compatibility-for-foo", Some("i686")),
             ("extra-depend-for-foo", None),
         ]
-        .map(|(name, architecture)| (Dependency(name), architecture.map(Architecture))),
+        .map(|(dependency, architecture)| (Dependency(dependency), architecture.map(Architecture))),
     );
     assert_eq!(
         derivative
@@ -136,7 +136,7 @@ fn assert_complex(querier: &ParsedSrcinfo) {
             ("x86_64-compatibility-for-bar", Some("x86_64")),
             ("extra-depend-for-bar", None),
         ]
-        .map(|(name, architecture)| (Dependency(name), architecture.map(Architecture))),
+        .map(|(dependency, architecture)| (Dependency(dependency), architecture.map(Architecture))),
     );
     assert_eq!(
         derivative
