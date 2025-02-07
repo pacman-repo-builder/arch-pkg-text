@@ -126,6 +126,8 @@ impl<'a> ParsedDb<'a> {
             if let Ok(field) = field.to_parsed::<FieldName>() {
                 let value = text[value_start_offset..value_end_offset].trim();
                 parsed.set_raw_value(*field.name(), value);
+            } else {
+                return_or_continue!(DbParseIssue::UnknownField(field));
             }
             processed_length = value_end_offset;
             current_field = next_field;
