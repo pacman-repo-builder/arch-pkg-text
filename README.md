@@ -1,6 +1,6 @@
 # parse-arch-pkg-desc
 
-Pure Rust library to parse pacman packages' structured text formats. "Pure Rust" means not needing `libalpm`.
+Pure Rust library to parse Arch Linux packages' structured text formats. "Pure Rust" means not needing `libalpm`.
 
 ## Why?
 
