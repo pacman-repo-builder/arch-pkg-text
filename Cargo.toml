@@ -11,6 +11,7 @@ include = [
   "/src",
   "/Cargo.toml",
   "/README.md",
+  "/LICENSE.md",
 ]
 keywords = [
   "pure-rust",
