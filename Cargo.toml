@@ -20,6 +20,10 @@ keywords = [
   "archlinux",
   "pacman",
 ]
+categories = [
+  "no-std",
+  "parsing",
+]
 
 [lib]
 name = "arch_pkg_text"
