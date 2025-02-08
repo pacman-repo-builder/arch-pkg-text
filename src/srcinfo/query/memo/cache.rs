@@ -109,7 +109,7 @@ macro_rules! def_cache {
                     $(FieldName::$shared_single_field => self.$shared_single_field.add_opt(Cache::extract_shared_value_no_arch(item)),)*
                     $(FieldName::$shared_multi_no_arch_field => self.$shared_multi_no_arch_field.add_opt(Cache::extract_shared_value_no_arch(item)),)*
                     $(FieldName::$shared_multi_arch_field => self.$shared_multi_arch_field.add(item),)*
-                    FieldName::Name => self.derivative_names.add(Cache::extract_name_value(item)),
+                    FieldName::Name => self.derivative_names.add_opt(Cache::extract_name_value(item)),
                 }
             }
 
@@ -130,10 +130,11 @@ macro_rules! def_cache {
                 }
             }
 
-            fn extract_name_value(item: QueryRawTextItem) -> &'_ str {
+            fn extract_name_value(item: QueryRawTextItem) -> Option<&'_ str> {
                 let (value, section, architecture) = item.into_tuple3();
-                debug_assert_eq!((section, architecture), (value.pipe(Name).pipe(Section::Derivative), None));
-                value
+                architecture.is_none().then_some(())?;
+                debug_assert_eq!(section, value.pipe(Name).pipe(Section::Derivative));
+                Some(value)
             }
 
             pub fn shrink_to_fit(&mut self) {
