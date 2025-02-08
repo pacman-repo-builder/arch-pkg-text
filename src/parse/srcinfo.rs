@@ -4,11 +4,8 @@ mod data;
 use super::PartialParseResult;
 use crate::{
     srcinfo::{
-        field::{Field, FieldName, ParsedField, RawField},
-        query::{
-            utils::{non_blank_trimmed_lines, parse_line},
-            Section,
-        },
+        utils::{non_blank_trimmed_lines, parse_line},
+        Field, FieldName, ParsedField, RawField, Section,
     },
     value,
 };

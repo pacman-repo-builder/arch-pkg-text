@@ -17,7 +17,7 @@ type ParseResult<'a, Name, Architecture> =
 impl<Name, Architecture> Field<Name, Architecture> {
     /// Parse a [`Field`] from [`str`].
     /// ```
-    /// # use parse_arch_pkg_desc::srcinfo::field::{Field, FieldName, ParsedField};
+    /// # use parse_arch_pkg_desc::srcinfo::{Field, FieldName, ParsedField};
     /// # use pretty_assertions::assert_eq;
     /// let parsed_field: ParsedField<&str> = Field::parse("source_x86_64").unwrap();
     /// assert_eq!(parsed_field.name(), &FieldName::Source);
@@ -48,7 +48,7 @@ impl<'a> RawField<'a> {
     /// **Without architecture:**
     ///
     /// ```
-    /// # use parse_arch_pkg_desc::srcinfo::field::RawField;
+    /// # use parse_arch_pkg_desc::srcinfo::RawField;
     /// # use pretty_assertions::assert_eq;
     /// let raw_field = RawField::parse_raw("source");
     /// assert_eq!(raw_field.name_str(), "source");
@@ -58,7 +58,7 @@ impl<'a> RawField<'a> {
     /// **With architecture:**
     ///
     /// ```
-    /// # use parse_arch_pkg_desc::srcinfo::field::RawField;
+    /// # use parse_arch_pkg_desc::srcinfo::RawField;
     /// # use pretty_assertions::assert_eq;
     /// let raw_field = RawField::parse_raw("source_x86_64");
     /// assert_eq!(raw_field.name_str(), "source");
@@ -75,7 +75,7 @@ impl<'a> RawField<'a> {
     /// Try converting a [`RawField`] into a [`Field<Name, Architecture>`].
     ///
     /// ```
-    /// # use parse_arch_pkg_desc::srcinfo::field::{FieldName, ParsedField, RawField};
+    /// # use parse_arch_pkg_desc::srcinfo::{FieldName, ParsedField, RawField};
     /// # use pretty_assertions::assert_eq;
     /// let raw_field = RawField::parse_raw("source_x86_64");
     /// let parsed_field: ParsedField<&str> = raw_field.to_parsed().unwrap();

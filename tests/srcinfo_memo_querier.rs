@@ -5,10 +5,7 @@ pub use _utils::*;
 
 use hex_literal::hex;
 use parse_arch_pkg_desc::{
-    srcinfo::{
-        field::FieldName,
-        query::{ChecksumArray, ChecksumsMut, MemoQuerier, QueryItem, QueryMut, Section},
-    },
+    srcinfo::{ChecksumArray, ChecksumsMut, FieldName, MemoQuerier, QueryItem, QueryMut, Section},
     value::{
         Architecture, Base, Dependency, Description, License, Name, SkipOrArray, Source,
         UpstreamVersion,

@@ -1,8 +1,6 @@
 use super::{ParsedSrcinfo, ParsedSrcinfoBaseSection, ParsedSrcinfoDerivativeSection};
 use crate::{
-    srcinfo::query::{
-        ChecksumType, ChecksumValue, Checksums, ChecksumsMut, Query, QueryChecksumItem,
-    },
+    srcinfo::{ChecksumType, ChecksumValue, Checksums, ChecksumsMut, Query, QueryChecksumItem},
     value,
 };
 use pipe_trait::Pipe;

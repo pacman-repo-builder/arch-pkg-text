@@ -3,7 +3,7 @@ pub use _utils::*;
 
 use hex_literal::hex;
 use parse_arch_pkg_desc::{
-    srcinfo::query::{ChecksumArray, Checksums, ForgetfulQuerier, Query, QueryItem, Section},
+    srcinfo::{ChecksumArray, Checksums, ForgetfulQuerier, Query, QueryItem, Section},
     value::{
         Architecture, Base, Dependency, Description, License, Name, SkipOrArray, Source,
         UpstreamVersion,

@@ -1,5 +1,5 @@
 use parse_arch_pkg_desc::{
-    db::query::Query,
+    db::Query,
     parse::{DbParseError, DbParseIssue, ParsedDb},
     value::{Architecture, Dependency, Description, FileName, Name},
 };
