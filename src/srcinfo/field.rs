@@ -58,7 +58,7 @@ impl<Name, Architecture> Field<Name, Architecture> {
 
 impl<'a, Architecture> Field<&'a str, Architecture> {
     /// Get the name of the field as a string slice.
-    pub const fn name_str(&self) -> &'_ str {
+    pub const fn name_str(&self) -> &'a str {
         self.name()
     }
 }
