@@ -48,6 +48,7 @@ def_struct!(
     Provides Conflicts Replaces
 );
 
+/// Error type of [`ParsedDb::parse`].
 #[derive(Debug, Display, Error, Clone, Copy)]
 pub enum DbParseError<'a> {
     #[display("Input is empty")]
