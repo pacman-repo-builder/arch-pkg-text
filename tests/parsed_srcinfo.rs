@@ -650,3 +650,17 @@ fn unique_field_duplication() {
         "Failed to insert value to the pkgname section named foo-bin: Field pkgdesc is already set",
     );
 }
+
+#[test]
+fn invalid_line() {
+    let srcinfo = SIMPLE.insert_line_under(|line| line.contains("pkgbase"), "invalid line");
+    let result = dbg!(ParsedSrcinfo::try_from(srcinfo.as_str()));
+    assert!(matches!(
+        result,
+        Err(SrcinfoParseError::InvalidLine("invalid line")),
+    ));
+    assert_eq!(
+        result.unwrap_err().to_string(),
+        r#"Invalid line: "invalid line""#,
+    );
+}
