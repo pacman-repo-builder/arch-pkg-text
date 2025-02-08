@@ -1,7 +1,6 @@
 pub mod _utils;
 pub use _utils::*;
 
-use hex_literal::hex;
 use arch_pkg_text::{
     srcinfo::{ChecksumArray, Checksums, ForgetfulQuerier, Query, QueryItem, Section},
     value::{
@@ -9,6 +8,7 @@ use arch_pkg_text::{
         UpstreamVersion,
     },
 };
+use hex_literal::hex;
 use pipe_trait::Pipe;
 use pretty_assertions::assert_eq;
 
