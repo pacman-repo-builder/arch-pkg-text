@@ -3,7 +3,7 @@
   "extends": [
     "config:recommended"
   ],
-  "schedule": ["0 0 1 * *"],
+  "schedule": ["* 0 1 * *"],
   "semanticCommits": "enabled",
   "semanticCommitType": "chore",
   "addLabels": ["renovate"],
