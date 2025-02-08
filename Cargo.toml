@@ -1,6 +1,6 @@
 [package]
 name = "parse-arch-pkg-desc"
-description = "Pure Rust library to parse pacman package description text and .SRCINFO"
+description = "Pure Rust library to parse pacman packages' structured text formats"
 version = "0.0.0"
 authors = ["khai96_ <hvksmr1996@gmail.com>"]
 license = "MIT"
