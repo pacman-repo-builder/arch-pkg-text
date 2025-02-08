@@ -74,7 +74,7 @@ fn invalid() {
 }
 
 #[test]
-fn parse_with_issues_unknown_fields() {
+fn unknown_fields() {
     #[derive(Debug, Clone, Copy, PartialEq, Eq)]
     struct UnknownField<'a>(&'a str);
 
