@@ -82,7 +82,7 @@ fn empty_input() {
 }
 
 #[test]
-fn unknown_fields() {
+fn unknown_field() {
     #[derive(Debug, Clone, Copy, PartialEq, Eq)]
     struct UnknownField<'a>(&'a str);
 
