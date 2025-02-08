@@ -12,6 +12,14 @@ include = [
   "/Cargo.toml",
   "/README.md",
 ]
+keywords = [
+  "pure-rust",
+  "no-libalpm",
+  "srcinfo",
+  "desc",
+  "archlinux",
+  "pacman",
+]
 
 [lib]
 name = "arch_pkg_text"
