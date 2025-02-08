@@ -6,7 +6,7 @@ pub use _utils::*;
 use hex_literal::hex;
 use parse_arch_pkg_desc::{
     parse::{
-        ParsedDerivativeAlreadySetError, ParsedSrcinfo, ParsedSrcinfoAlreadySetError,
+        ParsedSrcinfo, ParsedSrcinfoBaseAlreadySetError, ParsedSrcinfoDerivativeAlreadySetError,
         SrcinfoParseError,
     },
     srcinfo::query::{ChecksumArray, Checksums, Query, QueryItem, Section},
@@ -590,7 +590,7 @@ fn duplicated_single_fields() {
     assert!(matches!(
         result,
         Err(SrcinfoParseError::BaseFieldAlreadySet(
-            ParsedSrcinfoAlreadySetError::Base(Base("simple-example-bin")),
+            ParsedSrcinfoBaseAlreadySetError::Base(Base("simple-example-bin")),
         )),
     ));
     assert_eq!(
@@ -604,7 +604,7 @@ fn duplicated_single_fields() {
     assert!(matches!(
         result,
         Err(SrcinfoParseError::BaseFieldAlreadySet(
-            ParsedSrcinfoAlreadySetError::Description(Description("Simple .SRCINFO example")),
+            ParsedSrcinfoBaseAlreadySetError::Description(Description("Simple .SRCINFO example")),
         )),
     ));
     assert_eq!(
@@ -618,7 +618,7 @@ fn duplicated_single_fields() {
     assert!(matches!(
         result,
         Err(SrcinfoParseError::BaseFieldAlreadySet(
-            ParsedSrcinfoAlreadySetError::Version(UpstreamVersion("12.34.56.r789")),
+            ParsedSrcinfoBaseAlreadySetError::Version(UpstreamVersion("12.34.56.r789")),
         )),
     ));
     assert_eq!(
@@ -637,7 +637,9 @@ fn duplicated_single_fields() {
         result,
         Err(SrcinfoParseError::DerivativeFieldAlreadySet(
             Name("foo-bin"),
-            ParsedDerivativeAlreadySetError::Description(Description("Description under foo-bin")),
+            ParsedSrcinfoDerivativeAlreadySetError::Description(Description(
+                "Description under foo-bin"
+            )),
         )),
     ));
     assert_eq!(

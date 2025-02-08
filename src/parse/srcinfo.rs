@@ -17,8 +17,8 @@ use indexmap::IndexMap;
 use pipe_trait::Pipe;
 
 pub use data::{
-    ParsedDerivativeAlreadySetError, ParsedSrcinfoAlreadySetError, ParsedSrcinfoBaseSection,
-    ParsedSrcinfoDerivativeSection,
+    ParsedSrcinfoBaseAlreadySetError, ParsedSrcinfoBaseSection,
+    ParsedSrcinfoDerivativeAlreadySetError, ParsedSrcinfoDerivativeSection,
 };
 
 /// Parsed information of `.SRCINFO`.
@@ -85,7 +85,7 @@ impl<'a> ParsedSrcinfoBaseSection<'a> {
         target: &mut Option<Value>,
         value: &'a str,
         make_value: impl FnOnce(&'a str) -> Value,
-        make_error: impl FnOnce(Value) -> ParsedSrcinfoAlreadySetError<'a>,
+        make_error: impl FnOnce(Value) -> ParsedSrcinfoBaseAlreadySetError<'a>,
     ) -> Result<(), AddFailure<'a>> {
         let Some(old_value) = target else {
             *target = Some(make_value(value));
@@ -117,7 +117,7 @@ impl<'a, 'r> ParsedSrcinfoDerivativeSectionEntryMut<'a, 'r> {
         target: &mut Option<Value>,
         value: &'a str,
         make_value: impl FnOnce(&'a str) -> Value,
-        make_error: impl FnOnce(Value) -> ParsedDerivativeAlreadySetError<'a>,
+        make_error: impl FnOnce(Value) -> ParsedSrcinfoDerivativeAlreadySetError<'a>,
     ) -> Result<(), AddFailure<'a>> {
         let Some(old_value) = target else {
             *target = Some(make_value(value));
@@ -140,9 +140,9 @@ impl<'a, 'r> ParsedSrcinfoDerivativeSectionEntryMut<'a, 'r> {
 #[derive(Debug, Display, Error, Clone, Copy)]
 pub enum SrcinfoParseError<'a> {
     #[display("Failed to insert value to the pkgbase section: {_0}")]
-    BaseFieldAlreadySet(#[error(not(source))] ParsedSrcinfoAlreadySetError<'a>),
+    BaseFieldAlreadySet(#[error(not(source))] ParsedSrcinfoBaseAlreadySetError<'a>),
     #[display("Failed to insert value to the pkgname section named {_0}: {_1}")]
-    DerivativeFieldAlreadySet(value::Name<'a>, ParsedDerivativeAlreadySetError<'a>),
+    DerivativeFieldAlreadySet(value::Name<'a>, ParsedSrcinfoDerivativeAlreadySetError<'a>),
     #[display("Invalid line: {_0:?}")]
     InvalidLine(#[error(not(source))] &'a str),
 }
@@ -154,8 +154,8 @@ pub type SrcinfoParseReturn<'a> = PartialParseResult<ParsedSrcinfo<'a>, SrcinfoP
 #[derive(Debug, Clone, Copy)]
 pub enum SrcinfoParseIssue<'a> {
     UnknownField(RawField<'a>),
-    BaseFieldAlreadySet(ParsedSrcinfoAlreadySetError<'a>),
-    DerivativeFieldAlreadySet(value::Name<'a>, ParsedDerivativeAlreadySetError<'a>),
+    BaseFieldAlreadySet(ParsedSrcinfoBaseAlreadySetError<'a>),
+    DerivativeFieldAlreadySet(value::Name<'a>, ParsedSrcinfoDerivativeAlreadySetError<'a>),
     InvalidLine(&'a str),
 }
 
