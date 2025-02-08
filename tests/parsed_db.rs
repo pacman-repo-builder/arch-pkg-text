@@ -58,19 +58,27 @@ fn query() {
 }
 
 #[test]
-fn invalid() {
+fn value_without_field() {
+    let error = dbg!(ParsedDb::parse("not a package description text")).unwrap_err();
     assert!(matches!(
-        dbg!(ParsedDb::parse("not a package description text")).unwrap_err(),
+        error,
         DbParseError::ValueWithoutField("not a package description text"),
     ));
-    assert!(matches!(
-        dbg!(ParsedDb::parse("\nnot a package description text")).unwrap_err(),
-        DbParseError::ValueWithoutField("\n"),
-    ));
-    assert!(matches!(
-        dbg!(ParsedDb::parse("")).unwrap_err(),
-        DbParseError::EmptyInput,
-    ));
+    assert_eq!(
+        error.to_string(),
+        r#"Receive a value without field: "not a package description text""#,
+    );
+
+    let error = dbg!(ParsedDb::parse("\nnot a package description text")).unwrap_err();
+    assert!(matches!(error, DbParseError::ValueWithoutField("\n"),));
+    assert_eq!(error.to_string(), r#"Receive a value without field: "\n""#,);
+}
+
+#[test]
+fn empty_input() {
+    let error = dbg!(ParsedDb::parse("")).unwrap_err();
+    assert!(matches!(error, DbParseError::EmptyInput,));
+    assert_eq!(error.to_string(), "Input is empty");
 }
 
 #[test]
