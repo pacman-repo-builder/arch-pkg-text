@@ -23,7 +23,7 @@ trait SrcinfoParsingUtils {
 
 impl SrcinfoParsingUtils for str {
     fn parse_srcinfo_unwrap(&self) -> ParsedSrcinfo<'_> {
-        ParsedSrcinfo::try_from(self).unwrap()
+        self.try_into().unwrap()
     }
 }
 
