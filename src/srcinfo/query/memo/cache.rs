@@ -27,6 +27,12 @@ macro_rules! def_cache {
                 self.0 = Some(value);
             }
 
+            fn add_opt(&mut self, value: Option<&'a str>) {
+                if let Some(value) = value {
+                    self.add(value);
+                }
+            }
+
             fn shrink_to_fit(&mut self) {}
         }
 
@@ -40,6 +46,12 @@ macro_rules! def_cache {
 
             fn add(&mut self, value: Value) {
                 self.0.push(value);
+            }
+
+            fn add_opt(&mut self, value: Option<Value>) {
+                if let Some(value) = value {
+                    self.add(value);
+                }
             }
 
             fn shrink_to_fit(&mut self) {
@@ -92,25 +104,30 @@ macro_rules! def_cache {
 
             pub fn add(&mut self, field_name: FieldName, item: QueryRawTextItem<'a>) {
                 match field_name {
-                    $(FieldName::$base_single_field => self.$base_single_field.add(Cache::extract_base_value(item)),)*
-                    $(FieldName::$base_multi_field => self.$base_multi_field.add(Cache::extract_base_value(item)),)*
-                    $(FieldName::$shared_single_field => self.$shared_single_field.add(Cache::extract_shared_value_no_arch(item)),)*
-                    $(FieldName::$shared_multi_no_arch_field => self.$shared_multi_no_arch_field.add(Cache::extract_shared_value_no_arch(item)),)*
+                    $(FieldName::$base_single_field => self.$base_single_field.add_opt(Cache::extract_base_value(item)),)*
+                    $(FieldName::$base_multi_field => self.$base_multi_field.add_opt(Cache::extract_base_value(item)),)*
+                    $(FieldName::$shared_single_field => self.$shared_single_field.add_opt(Cache::extract_shared_value_no_arch(item)),)*
+                    $(FieldName::$shared_multi_no_arch_field => self.$shared_multi_no_arch_field.add_opt(Cache::extract_shared_value_no_arch(item)),)*
                     $(FieldName::$shared_multi_arch_field => self.$shared_multi_arch_field.add(item),)*
                     FieldName::Name => self.derivative_names.add(Cache::extract_name_value(item)),
                 }
             }
 
-            fn extract_base_value(item: QueryRawTextItem) -> &'_ str {
+            fn extract_base_value(item: QueryRawTextItem) -> Option<&'_ str> {
                 let (value, section, architecture) = item.into_tuple3();
-                debug_assert_eq!((section, architecture), (Section::Base, None));
-                value
+                debug_assert_eq!(section, Section::Base);
+                match architecture {
+                    Some(_) => None,
+                    None => Some(value),
+                }
             }
 
-            fn extract_shared_value_no_arch(item: QueryRawTextItem) -> QueryItem<'_, &'_ str, ()> {
+            fn extract_shared_value_no_arch(item: QueryRawTextItem) -> Option<QueryItem<'_, &'_ str, ()>> {
                 let (value, section, architecture) = item.into_tuple3();
-                debug_assert_eq!(architecture, None);
-                QueryItem::from_tuple2((value, section))
+                match architecture {
+                    Some(_) => None,
+                    None => Some(QueryItem::from_tuple2((value, section))),
+                }
             }
 
             fn extract_name_value(item: QueryRawTextItem) -> &'_ str {
