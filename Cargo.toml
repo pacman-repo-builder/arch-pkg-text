@@ -14,11 +14,9 @@ include = [
 ]
 keywords = [
   "pure-rust",
-  "no-libalpm",
   "srcinfo",
   "desc",
   "archlinux",
-  "pacman",
 ]
 categories = [
   "no-std",
