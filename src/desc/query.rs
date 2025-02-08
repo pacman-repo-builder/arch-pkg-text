@@ -1,5 +1,5 @@
 use crate::{
-    db::field::{FieldName, ParsedField},
+    desc::field::{FieldName, ParsedField},
     value,
 };
 
@@ -63,6 +63,6 @@ def_traits! {
 mod forgetful;
 mod memo;
 
-pub use crate::parse::ParsedDb as EagerQuerier;
+pub use crate::parse::ParsedDesc as EagerQuerier;
 pub use forgetful::ForgetfulQuerier;
 pub use memo::MemoQuerier;

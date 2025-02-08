@@ -1,6 +1,6 @@
 use core::ops::Not;
 use parse_arch_pkg_desc::{
-    db::{FieldName, MemoQuerier, QueryMut},
+    desc::{FieldName, MemoQuerier, QueryMut},
     value::{Architecture, Dependency},
 };
 use pretty_assertions::assert_eq;
@@ -120,7 +120,7 @@ fn query() {
 #[cfg(feature = "std")]
 #[test]
 fn query_std_mutex() {
-    use parse_arch_pkg_desc::db::Query;
+    use parse_arch_pkg_desc::desc::Query;
     use pipe_trait::Pipe;
     use std::sync::Mutex;
 
@@ -211,7 +211,7 @@ fn query_std_mutex() {
 #[test]
 fn query_parking_lot_mutex() {
     use parking_lot::Mutex;
-    use parse_arch_pkg_desc::db::Query;
+    use parse_arch_pkg_desc::desc::Query;
     use pipe_trait::Pipe;
 
     fn has_cache(querier: &Mutex<MemoQuerier>, field: FieldName) -> bool {

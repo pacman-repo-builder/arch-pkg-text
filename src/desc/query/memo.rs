@@ -1,5 +1,5 @@
 use super::QueryMut;
-use crate::db::field::{FieldName, ParsedField, RawField};
+use crate::desc::field::{FieldName, ParsedField, RawField};
 
 /// [Query](QueryMut) with a cache.
 #[derive(Debug, Clone)]
