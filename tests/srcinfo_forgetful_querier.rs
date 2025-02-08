@@ -366,3 +366,16 @@ fn multiple_checksum_types() {
         ],
     );
 }
+
+#[test]
+fn section_header_should_not_have_architecture_suffix() {
+    eprintln!("CASE: pkgbase");
+    let srcinfo = COMPLEX.replacen("pkgbase", "pkgbase_aarch64", 1);
+    let querier = ForgetfulQuerier::new(&srcinfo);
+    assert_eq!(querier.base_name(), None);
+
+    eprintln!("CASE: pkgname");
+    let srcinfo = COMPLEX.replace("pkgname", "pkgname_aarch64");
+    let querier = ForgetfulQuerier::new(&srcinfo);
+    assert_eq!(querier.derivative_names().collect::<Vec<_>>(), []);
+}
