@@ -7,7 +7,7 @@ use hex_literal::hex;
 use parse_arch_pkg_desc::{
     parse::{
         ParsedSrcinfo, ParsedSrcinfoBaseUniqueFieldDuplicationError,
-        ParsedSrcinfoDerivativeUniqueFieldDuplicationError, SrcinfoParseError,
+        ParsedSrcinfoDerivativeUniqueFieldDuplicationError, SrcinfoParseError, SrcinfoParseIssue,
     },
     srcinfo::query::{ChecksumArray, Checksums, Query, QueryItem, Section},
     value::{
@@ -663,4 +663,37 @@ fn invalid_line() {
         result.unwrap_err().to_string(),
         r#"Invalid line: "invalid line""#,
     );
+}
+
+#[test]
+fn unknown_field() {
+    #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+    struct UnknownField<'a>(&'a str, Option<&'a str>);
+
+    fn stop_at_unknown_fields(issue: SrcinfoParseIssue) -> Result<(), UnknownField<'_>> {
+        if let SrcinfoParseIssue::UnknownField(field) = issue {
+            Err(UnknownField(field.name_str(), field.architecture_str()))
+        } else {
+            panic!("Unexpected issue: {issue:?}")
+        }
+    }
+
+    let contains = move |search: &'static str| move |line: &str| line.contains(search);
+
+    eprintln!("CASE: unknown field");
+    let srcinfo = SIMPLE.insert_line_under(contains("pkgver"), "unknown = some value");
+    let (querier, error) =
+        ParsedSrcinfo::parse_with_issues(&srcinfo, stop_at_unknown_fields).into_partial();
+    dbg!(&querier, &error);
+    assert_eq!(error, Some(UnknownField("unknown", None)));
+    eprintln!("ASSERT: fields before the unknown field are recorded");
+    assert_eq!(querier.base.base_name(), Some(Base("simple-example-bin")));
+    assert_eq!(
+        querier.base.version(),
+        Some(UpstreamVersion("12.34.56.r789"))
+    );
+    eprintln!("ASSERT: fields after the unknown field are not recorded");
+    assert_eq!(querier.base.architecture(), []);
+    eprintln!("ASSERT: sections after the unknown field are not recorded");
+    assert!(querier.derivatives.is_empty());
 }
