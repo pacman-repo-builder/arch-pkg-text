@@ -4,7 +4,7 @@ mod data;
 use super::PartialParseResult;
 use crate::{
     srcinfo::{
-        field::{FieldName, ParsedField, RawField},
+        field::{Field, FieldName, ParsedField, RawField},
         query::{
             utils::{non_blank_trimmed_lines, parse_line},
             Section,
@@ -59,6 +59,16 @@ enum AddFailure<'a> {
     MeetHeader(value::Name<'a>),
     /// Meet an issue.
     Issue(SrcinfoParseIssue<'a>),
+}
+
+/// Create an [`Err`] of an [`AddFailure::Issue`] of a [`SrcinfoParseIssue::UnknownField`] of a [`ParsedField`].
+fn unknown_field_from_parsed(field: ParsedField<&str>) -> Result<(), AddFailure<'_>> {
+    Field::blank()
+        .with_name(field.name_str())
+        .with_architecture(field.architecture_str())
+        .pipe(SrcinfoParseIssue::UnknownField)
+        .pipe(AddFailure::Issue)
+        .pipe(Err)
 }
 
 impl<'a, 'r> ParsedSrcinfoSectionMut<'a, 'r> {

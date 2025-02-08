@@ -1,4 +1,6 @@
-use super::{AddFailure, ParsedSrcinfo, ParsedSrcinfoDerivativeSectionEntryMut};
+use super::{
+    unknown_field_from_parsed, AddFailure, ParsedSrcinfo, ParsedSrcinfoDerivativeSectionEntryMut,
+};
 use crate::{
     srcinfo::{
         field::{FieldName, ParsedField},
@@ -237,7 +239,7 @@ macro_rules! def_struct {
                             .pipe(AddFailure::MeetHeader)
                             .pipe(Err);
                     }
-                    (FieldName::Name, Some(_)) => return Ok(()), // TODO: callback fn to record warnings?
+                    (FieldName::Name, Some(_)) => return unknown_field_from_parsed(field),
                     $((FieldName::$base_single_field, None) => {
                         return ParsedSrcinfoBaseSection::add_value_to_option(
                             &mut self.$base_single_name,
@@ -246,12 +248,12 @@ macro_rules! def_struct {
                             ParsedSrcinfoBaseUniqueFieldDuplicationError::$base_single_field,
                         );
                     })*
-                    $((FieldName::$base_single_field, Some(_)) => return Ok(()),)* // TODO: callback fn to record warnings?
+                    $((FieldName::$base_single_field, Some(_)) => return unknown_field_from_parsed(field),)*
                     $((FieldName::$base_multi_field, None) => {
                         self.$base_multi_name.push(value::$base_multi_type::new(value));
                         return Ok(());
                     })*
-                    $((FieldName::$base_multi_field, Some(_)) => return Ok(()),)* // TODO: callback fn to record warnings?
+                    $((FieldName::$base_multi_field, Some(_)) => return unknown_field_from_parsed(field),)*
                     $((FieldName::$shared_single_field, None) => {
                         return ParsedSrcinfoBaseSection::add_value_to_option(
                             &mut self.$shared_single_name,
@@ -260,12 +262,12 @@ macro_rules! def_struct {
                             ParsedSrcinfoBaseUniqueFieldDuplicationError::$shared_single_field,
                         );
                     })*
-                    $((FieldName::$shared_single_field, Some(_)) => return Ok(()),)* // TODO: callback fn to record warnings?
+                    $((FieldName::$shared_single_field, Some(_)) => return unknown_field_from_parsed(field),)*
                     $((FieldName::$shared_multi_no_arch_field, None) => {
                         self.$shared_multi_no_arch_name.push(value::$shared_multi_no_arch_type::new(value));
                         return Ok(());
                     })*
-                    $((FieldName::$shared_multi_no_arch_field, Some(_)) => return Ok(()),)* // TODO: callback fn to record warnings?
+                    $((FieldName::$shared_multi_no_arch_field, Some(_)) => return unknown_field_from_parsed(field),)*
                     $((FieldName::$shared_multi_arch_field, architecture) => {
                         self.$shared_multi_arch_name.push((
                             value::$shared_multi_arch_type::new(value),
@@ -337,9 +339,9 @@ macro_rules! def_struct {
                             .pipe(AddFailure::MeetHeader)
                             .pipe(Err);
                     }
-                    (FieldName::Name, Some(_)) => return Ok(()), // TODO: callback fn to record warnings?
-                    $((FieldName::$base_single_field, _) => return Ok(()),)* // TODO: callback fn to record warnings?
-                    $((FieldName::$base_multi_field, _) => return Ok(()),)* // TODO: callback fn to record warnings?
+                    (FieldName::Name, Some(_)) => return unknown_field_from_parsed(field),
+                    $((FieldName::$base_single_field, _) => return unknown_field_from_parsed(field),)*
+                    $((FieldName::$base_multi_field, _) => return unknown_field_from_parsed(field),)*
                     $((FieldName::$shared_single_field, None) => {
                         return ParsedSrcinfoDerivativeSectionEntryMut::add_value_to_option(
                             self.name,
@@ -349,12 +351,12 @@ macro_rules! def_struct {
                             ParsedSrcinfoDerivativeUniqueFieldDuplicationError::$shared_single_field,
                         );
                     })*
-                    $((FieldName::$shared_single_field, Some(_)) => return Ok(()),)* // TODO: callback fn to record warnings?
+                    $((FieldName::$shared_single_field, Some(_)) => return unknown_field_from_parsed(field),)*
                     $((FieldName::$shared_multi_no_arch_field, None) => {
                         self.data.$shared_multi_no_arch_name.push(value::$shared_multi_no_arch_type::new(value));
                         return Ok(());
                     })*
-                    $((FieldName::$shared_multi_no_arch_field, Some(_)) => return Ok(()),)* // TODO: callback fn to record warnings?
+                    $((FieldName::$shared_multi_no_arch_field, Some(_)) => return unknown_field_from_parsed(field),)*
                     $((FieldName::$shared_multi_arch_field, architecture) => {
                         self.data.$shared_multi_arch_name.push((
                             value::$shared_multi_arch_type::new(value),

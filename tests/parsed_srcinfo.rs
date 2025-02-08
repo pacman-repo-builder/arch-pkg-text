@@ -30,6 +30,17 @@ impl SrcinfoParsingUtils for str {
     }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+struct UnknownField<'a>(&'a str, Option<&'a str>);
+
+fn stop_at_unknown_fields(issue: SrcinfoParseIssue) -> Result<(), UnknownField<'_>> {
+    if let SrcinfoParseIssue::UnknownField(field) = issue {
+        Err(UnknownField(field.name_str(), field.architecture_str()))
+    } else {
+        panic!("Unexpected issue: {issue:?}")
+    }
+}
+
 /// Run assertions for srcinfo similar to [`COMPLEX`].
 fn assert_complex(querier: &ParsedSrcinfo) {
     dbg!(querier);
@@ -667,17 +678,6 @@ fn invalid_line() {
 
 #[test]
 fn unknown_field() {
-    #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-    struct UnknownField<'a>(&'a str, Option<&'a str>);
-
-    fn stop_at_unknown_fields(issue: SrcinfoParseIssue) -> Result<(), UnknownField<'_>> {
-        if let SrcinfoParseIssue::UnknownField(field) = issue {
-            Err(UnknownField(field.name_str(), field.architecture_str()))
-        } else {
-            panic!("Unexpected issue: {issue:?}")
-        }
-    }
-
     let contains = move |search: &'static str| move |line: &str| line.contains(search);
 
     eprintln!("CASE: unknown field");
@@ -696,4 +696,21 @@ fn unknown_field() {
     assert_eq!(querier.base.architecture(), []);
     eprintln!("ASSERT: sections after the unknown field are not recorded");
     assert!(querier.derivatives.is_empty());
+}
+
+#[test]
+fn section_header_should_not_have_architecture_suffix() {
+    eprintln!("CASE: pkgbase");
+    let srcinfo = COMPLEX.replacen("pkgbase", "pkgbase_aarch64", 1);
+    let (querier, error) =
+        ParsedSrcinfo::parse_with_issues(&srcinfo, stop_at_unknown_fields).into_partial();
+    assert_eq!(querier.base_name(), None);
+    assert_eq!(error, Some(UnknownField("pkgbase", Some("aarch64"))));
+
+    eprintln!("CASE: pkgname");
+    let srcinfo = COMPLEX.replace("pkgname", "pkgname_aarch64");
+    let (querier, error) =
+        ParsedSrcinfo::parse_with_issues(&srcinfo, stop_at_unknown_fields).into_partial();
+    assert_eq!(querier.derivative_names().collect::<Vec<_>>(), []);
+    assert_eq!(error, Some(UnknownField("pkgname", Some("aarch64"))));
 }
