@@ -583,7 +583,7 @@ fn multiple_checksum_types() {
 }
 
 #[test]
-fn duplicated_single_fields() {
+fn unique_field_duplication() {
     eprintln!("CASE: duplicated pkgbase under pkgbase");
     let srcinfo = insert_line_under(SIMPLE, "pkgbase", "pkgbase = duplicated");
     let result = dbg!(ParsedSrcinfo::try_from(srcinfo.as_str()));
