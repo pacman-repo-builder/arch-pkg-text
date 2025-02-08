@@ -6,8 +6,8 @@ pub use _utils::*;
 use hex_literal::hex;
 use parse_arch_pkg_desc::{
     parse::{
-        ParsedSrcinfo, ParsedSrcinfoBaseAlreadySetError, ParsedSrcinfoDerivativeAlreadySetError,
-        SrcinfoParseError,
+        ParsedSrcinfo, ParsedSrcinfoBaseUniqueFieldDuplicationError,
+        ParsedSrcinfoDerivativeUniqueFieldDuplicationError, SrcinfoParseError,
     },
     srcinfo::query::{ChecksumArray, Checksums, Query, QueryItem, Section},
     value::{
@@ -589,8 +589,8 @@ fn duplicated_single_fields() {
     let result = dbg!(ParsedSrcinfo::try_from(srcinfo.as_str()));
     assert!(matches!(
         result,
-        Err(SrcinfoParseError::BaseFieldAlreadySet(
-            ParsedSrcinfoBaseAlreadySetError::Base(Base("simple-example-bin")),
+        Err(SrcinfoParseError::BaseUniqueFieldDuplication(
+            ParsedSrcinfoBaseUniqueFieldDuplicationError::Base(Base("simple-example-bin")),
         )),
     ));
     assert_eq!(
@@ -603,8 +603,10 @@ fn duplicated_single_fields() {
     let result = dbg!(ParsedSrcinfo::try_from(srcinfo.as_str()));
     assert!(matches!(
         result,
-        Err(SrcinfoParseError::BaseFieldAlreadySet(
-            ParsedSrcinfoBaseAlreadySetError::Description(Description("Simple .SRCINFO example")),
+        Err(SrcinfoParseError::BaseUniqueFieldDuplication(
+            ParsedSrcinfoBaseUniqueFieldDuplicationError::Description(Description(
+                "Simple .SRCINFO example"
+            )),
         )),
     ));
     assert_eq!(
@@ -617,8 +619,8 @@ fn duplicated_single_fields() {
     let result = dbg!(ParsedSrcinfo::try_from(srcinfo.as_str()));
     assert!(matches!(
         result,
-        Err(SrcinfoParseError::BaseFieldAlreadySet(
-            ParsedSrcinfoBaseAlreadySetError::Version(UpstreamVersion("12.34.56.r789")),
+        Err(SrcinfoParseError::BaseUniqueFieldDuplication(
+            ParsedSrcinfoBaseUniqueFieldDuplicationError::Version(UpstreamVersion("12.34.56.r789")),
         )),
     ));
     assert_eq!(
@@ -635,9 +637,9 @@ fn duplicated_single_fields() {
     let result = dbg!(ParsedSrcinfo::try_from(srcinfo.as_str()));
     assert!(matches!(
         result,
-        Err(SrcinfoParseError::DerivativeFieldAlreadySet(
+        Err(SrcinfoParseError::DerivativeUniqueFieldDuplication(
             Name("foo-bin"),
-            ParsedSrcinfoDerivativeAlreadySetError::Description(Description(
+            ParsedSrcinfoDerivativeUniqueFieldDuplicationError::Description(Description(
                 "Description under foo-bin"
             )),
         )),

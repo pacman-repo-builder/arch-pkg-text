@@ -17,8 +17,8 @@ use indexmap::IndexMap;
 use pipe_trait::Pipe;
 
 pub use data::{
-    ParsedSrcinfoBaseAlreadySetError, ParsedSrcinfoBaseSection,
-    ParsedSrcinfoDerivativeAlreadySetError, ParsedSrcinfoDerivativeSection,
+    ParsedSrcinfoBaseSection, ParsedSrcinfoBaseUniqueFieldDuplicationError,
+    ParsedSrcinfoDerivativeSection, ParsedSrcinfoDerivativeUniqueFieldDuplicationError,
 };
 
 /// Parsed information of `.SRCINFO`.
@@ -85,7 +85,7 @@ impl<'a> ParsedSrcinfoBaseSection<'a> {
         target: &mut Option<Value>,
         value: &'a str,
         make_value: impl FnOnce(&'a str) -> Value,
-        make_error: impl FnOnce(Value) -> ParsedSrcinfoBaseAlreadySetError<'a>,
+        make_error: impl FnOnce(Value) -> ParsedSrcinfoBaseUniqueFieldDuplicationError<'a>,
     ) -> Result<(), AddFailure<'a>> {
         let Some(old_value) = target else {
             *target = Some(make_value(value));
@@ -93,7 +93,7 @@ impl<'a> ParsedSrcinfoBaseSection<'a> {
         };
         (*old_value)
             .pipe(make_error)
-            .pipe(SrcinfoParseIssue::BaseFieldAlreadySet)
+            .pipe(SrcinfoParseIssue::BaseUniqueFieldDuplication)
             .pipe(AddFailure::Issue)
             .pipe(Err)
     }
@@ -117,7 +117,7 @@ impl<'a, 'r> ParsedSrcinfoDerivativeSectionEntryMut<'a, 'r> {
         target: &mut Option<Value>,
         value: &'a str,
         make_value: impl FnOnce(&'a str) -> Value,
-        make_error: impl FnOnce(Value) -> ParsedSrcinfoDerivativeAlreadySetError<'a>,
+        make_error: impl FnOnce(Value) -> ParsedSrcinfoDerivativeUniqueFieldDuplicationError<'a>,
     ) -> Result<(), AddFailure<'a>> {
         let Some(old_value) = target else {
             *target = Some(make_value(value));
@@ -125,7 +125,7 @@ impl<'a, 'r> ParsedSrcinfoDerivativeSectionEntryMut<'a, 'r> {
         };
         (*old_value)
             .pipe(make_error)
-            .pipe(move |error| SrcinfoParseIssue::DerivativeFieldAlreadySet(name, error))
+            .pipe(move |error| SrcinfoParseIssue::DerivativeUniqueFieldDuplication(name, error))
             .pipe(AddFailure::Issue)
             .pipe(Err)
     }
@@ -140,9 +140,14 @@ impl<'a, 'r> ParsedSrcinfoDerivativeSectionEntryMut<'a, 'r> {
 #[derive(Debug, Display, Error, Clone, Copy)]
 pub enum SrcinfoParseError<'a> {
     #[display("Failed to insert value to the pkgbase section: {_0}")]
-    BaseFieldAlreadySet(#[error(not(source))] ParsedSrcinfoBaseAlreadySetError<'a>),
+    BaseUniqueFieldDuplication(
+        #[error(not(source))] ParsedSrcinfoBaseUniqueFieldDuplicationError<'a>,
+    ),
     #[display("Failed to insert value to the pkgname section named {_0}: {_1}")]
-    DerivativeFieldAlreadySet(value::Name<'a>, ParsedSrcinfoDerivativeAlreadySetError<'a>),
+    DerivativeUniqueFieldDuplication(
+        value::Name<'a>,
+        ParsedSrcinfoDerivativeUniqueFieldDuplicationError<'a>,
+    ),
     #[display("Invalid line: {_0:?}")]
     InvalidLine(#[error(not(source))] &'a str),
 }
@@ -154,8 +159,11 @@ pub type SrcinfoParseReturn<'a> = PartialParseResult<ParsedSrcinfo<'a>, SrcinfoP
 #[derive(Debug, Clone, Copy)]
 pub enum SrcinfoParseIssue<'a> {
     UnknownField(RawField<'a>),
-    BaseFieldAlreadySet(ParsedSrcinfoBaseAlreadySetError<'a>),
-    DerivativeFieldAlreadySet(value::Name<'a>, ParsedSrcinfoDerivativeAlreadySetError<'a>),
+    BaseUniqueFieldDuplication(ParsedSrcinfoBaseUniqueFieldDuplicationError<'a>),
+    DerivativeUniqueFieldDuplication(
+        value::Name<'a>,
+        ParsedSrcinfoDerivativeUniqueFieldDuplicationError<'a>,
+    ),
     InvalidLine(&'a str),
 }
 
@@ -165,11 +173,11 @@ impl<'a> SrcinfoParseIssue<'a> {
     fn ignore_unknown_field(self) -> Result<(), SrcinfoParseError<'a>> {
         Err(match self {
             SrcinfoParseIssue::UnknownField(_) => return Ok(()),
-            SrcinfoParseIssue::BaseFieldAlreadySet(error) => {
-                SrcinfoParseError::BaseFieldAlreadySet(error)
+            SrcinfoParseIssue::BaseUniqueFieldDuplication(error) => {
+                SrcinfoParseError::BaseUniqueFieldDuplication(error)
             }
-            SrcinfoParseIssue::DerivativeFieldAlreadySet(name, error) => {
-                SrcinfoParseError::DerivativeFieldAlreadySet(name, error)
+            SrcinfoParseIssue::DerivativeUniqueFieldDuplication(name, error) => {
+                SrcinfoParseError::DerivativeUniqueFieldDuplication(name, error)
             }
             SrcinfoParseIssue::InvalidLine(line) => SrcinfoParseError::InvalidLine(line),
         })

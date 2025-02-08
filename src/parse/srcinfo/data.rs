@@ -210,9 +210,9 @@ macro_rules! def_struct {
             $($shared_multi_arch_name: Vec<(value::$shared_multi_arch_type<'a>, Option<value::Architecture<'a>>)>,)*
         }
 
-        /// Error that occurs when a pkgbase section of `.SRCINFO` defines a unique field twice.
+        /// Error that occurs when a pkgbase section of `.SRCINFO` defines a unique field more than once.
         #[derive(Debug, Display, Error, Clone, Copy)]
-        pub enum ParsedSrcinfoBaseAlreadySetError<'a> {
+        pub enum ParsedSrcinfoBaseUniqueFieldDuplicationError<'a> {
             $(
                 #[display("Field {} is already set", FieldName::$base_single_field)]
                 $base_single_field(#[error(not(source))] value::$base_single_type<'a>),
@@ -243,7 +243,7 @@ macro_rules! def_struct {
                             &mut self.$base_single_name,
                             value,
                             value::$base_single_type::new,
-                            ParsedSrcinfoBaseAlreadySetError::$base_single_field,
+                            ParsedSrcinfoBaseUniqueFieldDuplicationError::$base_single_field,
                         );
                     })*
                     $((FieldName::$base_single_field, Some(_)) => return Ok(()),)* // TODO: callback fn to record warnings?
@@ -257,7 +257,7 @@ macro_rules! def_struct {
                             &mut self.$shared_single_name,
                             value,
                             value::$shared_single_type::new,
-                            ParsedSrcinfoBaseAlreadySetError::$shared_single_field,
+                            ParsedSrcinfoBaseUniqueFieldDuplicationError::$shared_single_field,
                         );
                     })*
                     $((FieldName::$shared_single_field, Some(_)) => return Ok(()),)* // TODO: callback fn to record warnings?
@@ -301,9 +301,9 @@ macro_rules! def_struct {
             $($shared_multi_arch_name: Vec<(value::$shared_multi_arch_type<'a>, Option<value::Architecture<'a>>)>,)*
         }
 
-        /// Error that occurs when a pkgname section of `.SRCINFO` defines a unique field twice.
+        /// Error that occurs when a pkgname section of `.SRCINFO` defines a unique field more than once.
         #[derive(Debug, Display, Error, Clone, Copy)]
-        pub enum ParsedSrcinfoDerivativeAlreadySetError<'a> {$(
+        pub enum ParsedSrcinfoDerivativeUniqueFieldDuplicationError<'a> {$(
             #[display("Field {} is already set", FieldName::$shared_single_field)]
             $shared_single_field(#[error(not(source))] value::$shared_single_type<'a>),
         )*}
@@ -346,7 +346,7 @@ macro_rules! def_struct {
                             &mut self.data.$shared_single_name,
                             value,
                             value::$shared_single_type::new,
-                            ParsedSrcinfoDerivativeAlreadySetError::$shared_single_field,
+                            ParsedSrcinfoDerivativeUniqueFieldDuplicationError::$shared_single_field,
                         );
                     })*
                     $((FieldName::$shared_single_field, Some(_)) => return Ok(()),)* // TODO: callback fn to record warnings?
