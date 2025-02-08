@@ -443,13 +443,13 @@ fn simple() {
 fn query_no_indent() {
     eprintln!("CASE: complex srcinfo");
     COMPLEX
-        .pipe(remove_indent)
+        .without_indent()
         .parse_srcinfo_unwrap()
         .pipe_ref(assert_complex);
 
     eprintln!("CASE: simple srcinfo");
     SIMPLE
-        .pipe(remove_indent)
+        .without_indent()
         .parse_srcinfo_unwrap()
         .pipe_ref(assert_simple);
 }
@@ -488,7 +488,7 @@ fn filter_out_empty_values() {
 
     eprintln!("CASE: trailing whitespaces");
     HAS_EMPTY_VALUES
-        .pipe(trailing_whitespaces)
+        .trailing_whitespaces()
         .parse_srcinfo_unwrap()
         .pipe_ref(run_assertions);
 }
@@ -584,8 +584,10 @@ fn multiple_checksum_types() {
 
 #[test]
 fn unique_field_duplication() {
+    let contains = move |search: &'static str| move |line: &str| line.contains(search);
+
     eprintln!("CASE: duplicated pkgbase under pkgbase");
-    let srcinfo = insert_line_under(SIMPLE, "pkgbase", "pkgbase = duplicated");
+    let srcinfo = SIMPLE.insert_line_under(contains("pkgbase"), "pkgbase = duplicated");
     let result = dbg!(ParsedSrcinfo::try_from(srcinfo.as_str()));
     assert!(matches!(
         result,
@@ -599,7 +601,7 @@ fn unique_field_duplication() {
     );
 
     eprintln!("CASE: duplicated pkgdesc under pkgbase");
-    let srcinfo = insert_line_under(SIMPLE, "pkgdesc", "pkgdesc = duplicated");
+    let srcinfo = SIMPLE.insert_line_under(contains("pkgdesc"), "pkgdesc = duplicated");
     let result = dbg!(ParsedSrcinfo::try_from(srcinfo.as_str()));
     assert!(matches!(
         result,
@@ -615,7 +617,7 @@ fn unique_field_duplication() {
     );
 
     eprintln!("CASE: duplicated pkgver under pkgbase");
-    let srcinfo = insert_line_under(SIMPLE, "pkgver", "pkgver = 0.1.2");
+    let srcinfo = SIMPLE.insert_line_under(contains("pkgver"), "pkgver = 0.1.2");
     let result = dbg!(ParsedSrcinfo::try_from(srcinfo.as_str()));
     assert!(matches!(
         result,
@@ -629,9 +631,8 @@ fn unique_field_duplication() {
     );
 
     eprintln!("CASE: duplicated pkgdesc under pkgname");
-    let srcinfo = insert_line_under(
-        COMPLEX,
-        "pkgdesc = Description under foo-bin",
+    let srcinfo = COMPLEX.insert_line_under(
+        |line| line.contains("pkgdesc") && line.contains("foo-bin"),
         "pkgdesc = duplicated",
     );
     let result = dbg!(ParsedSrcinfo::try_from(srcinfo.as_str()));

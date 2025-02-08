@@ -299,14 +299,14 @@ fn query_simple() {
 
 #[test]
 fn query_no_indent() {
-    let srcinfo = remove_indent(COMPLEX);
+    let srcinfo = COMPLEX.without_indent();
     let mut querier = MemoQuerier::new(&srcinfo);
     eprintln!("CASE: complex srcinfo without cache");
     assert_complex(&mut querier, false);
     eprintln!("CASE: complex srcinfo with cache");
     assert_complex(&mut querier, true);
 
-    let srcinfo = remove_indent(SIMPLE);
+    let srcinfo = SIMPLE.without_indent();
     let mut querier = MemoQuerier::new(&srcinfo);
     eprintln!("CASE: simple srcinfo without cache");
     assert_simple(&mut querier, false);
@@ -316,14 +316,14 @@ fn query_no_indent() {
 
 #[test]
 fn query_uneven_indent() {
-    let srcinfo = uneven_indent(COMPLEX);
+    let srcinfo = COMPLEX.uneven_indent();
     let mut querier = MemoQuerier::new(&srcinfo);
     eprintln!("CASE: complex srcinfo without cache");
     assert_complex(&mut querier, false);
     eprintln!("CASE: complex srcinfo with cache");
     assert_complex(&mut querier, true);
 
-    let srcinfo = uneven_indent(SIMPLE);
+    let srcinfo = SIMPLE.uneven_indent();
     let mut querier = MemoQuerier::new(&srcinfo);
     eprintln!("CASE: simple srcinfo without cache");
     assert_simple(&mut querier, false);
@@ -365,7 +365,7 @@ fn filter_out_empty_values() {
 
     eprintln!("CASE: trailing whitespaces");
     HAS_EMPTY_VALUES
-        .pipe(trailing_whitespaces)
+        .trailing_whitespaces()
         .pipe_as_ref(MemoQuerier::new)
         .pipe_mut(run_assertions);
 }

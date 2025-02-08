@@ -244,13 +244,13 @@ fn query_simple() {
 fn query_no_indent() {
     eprintln!("CASE: complex srcinfo");
     COMPLEX
-        .pipe(remove_indent)
+        .without_indent()
         .pipe_as_ref(ForgetfulQuerier::new)
         .pipe_ref(assert_complex);
 
     eprintln!("CASE: simple srcinfo");
     SIMPLE
-        .pipe(remove_indent)
+        .without_indent()
         .pipe_as_ref(ForgetfulQuerier::new)
         .pipe_ref(assert_simple);
 }
@@ -259,13 +259,13 @@ fn query_no_indent() {
 fn query_uneven_indent() {
     eprintln!("CASE: complex srcinfo");
     COMPLEX
-        .pipe(uneven_indent)
+        .uneven_indent()
         .pipe_as_ref(ForgetfulQuerier::new)
         .pipe_ref(assert_complex);
 
     eprintln!("CASE: simple srcinfo");
     SIMPLE
-        .pipe(uneven_indent)
+        .uneven_indent()
         .pipe_as_ref(ForgetfulQuerier::new)
         .pipe_ref(assert_simple);
 }
@@ -304,7 +304,7 @@ fn filter_out_empty_values() {
 
     eprintln!("CASE: trailing whitespaces");
     HAS_EMPTY_VALUES
-        .pipe(trailing_whitespaces)
+        .trailing_whitespaces()
         .pipe_as_ref(ForgetfulQuerier::new)
         .pipe_ref(run_assertions);
 }
