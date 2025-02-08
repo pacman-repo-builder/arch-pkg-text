@@ -68,7 +68,7 @@ fn unknown_field_from_parsed(field: ParsedField<&str>) -> Result<(), AddFailure<
         .pipe(Err)
 }
 
-impl<'a, 'r> ParsedSrcinfoSectionMut<'a, 'r> {
+impl<'a> ParsedSrcinfoSectionMut<'a, '_> {
     /// Add an entry to a `pkgbase` or `pkgname` section.
     fn add(&mut self, field: ParsedField<&'a str>, value: &'a str) -> Result<(), AddFailure<'a>> {
         match self {

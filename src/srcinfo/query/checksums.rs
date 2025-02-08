@@ -116,7 +116,7 @@ impl TryFrom<FieldName> for ChecksumType {
     }
 }
 
-impl<'a> ParseArray for ChecksumValue<'a> {
+impl ParseArray for ChecksumValue<'_> {
     type Array = ChecksumArray;
     type Error = ();
     fn parse_array(&self) -> Result<Self::Array, Self::Error> {

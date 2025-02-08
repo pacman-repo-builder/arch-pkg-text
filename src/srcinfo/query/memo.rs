@@ -83,7 +83,7 @@ impl<'a, 'r> QueryIter<'a, 'r> {
     }
 }
 
-impl<'a, 'r> Iterator for QueryIter<'a, 'r> {
+impl<'a> Iterator for QueryIter<'a, '_> {
     type Item = QueryRawTextItem<'a>;
     fn next(&mut self) -> Option<Self::Item> {
         let QueryIter {
@@ -130,7 +130,7 @@ impl<'a, 'r> ChecksumIter<'a, 'r> {
     }
 }
 
-impl<'a, 'r> Iterator for ChecksumIter<'a, 'r> {
+impl<'a> Iterator for ChecksumIter<'a, '_> {
     type Item = QueryChecksumItem<'a>;
     fn next(&mut self) -> Option<Self::Item> {
         let ChecksumIter {

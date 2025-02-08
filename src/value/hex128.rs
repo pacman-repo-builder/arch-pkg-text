@@ -1,6 +1,6 @@
 use super::{parse_hex::ParseHex, Hex128, SkipOrHex128};
 
-impl<'a> Hex128<'a> {
+impl Hex128<'_> {
     /// Convert the hex string into a 128-bit unsigned integer.
     pub fn u128(self) -> Option<u128> {
         let (invalid, value) = ParseHex::parse_hex(self.0);
@@ -8,7 +8,7 @@ impl<'a> Hex128<'a> {
     }
 }
 
-impl<'a> SkipOrHex128<'a> {
+impl SkipOrHex128<'_> {
     /// Convert the hex string into a 128-bit unsigned integer.
     pub fn u128(self) -> Option<Option<u128>> {
         if self.as_str() == "SKIP" {
