@@ -40,3 +40,22 @@ pub fn trailing_whitespaces(input: &str) -> String {
     output.shrink_to_fit();
     output
 }
+
+pub fn insert_line_under(input: &str, search: &str, value: &str) -> String {
+    let mut lines = input.lines();
+    let mut output = String::with_capacity(input.len() + value.len());
+    for line in lines.by_ref() {
+        output.push_str(line);
+        output.push('\n');
+        if line.contains(search) {
+            output.push_str(value);
+            output.push('\n');
+            break;
+        }
+    }
+    for line in lines {
+        output.push_str(line);
+        output.push('\n');
+    }
+    output
+}

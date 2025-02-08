@@ -5,7 +5,10 @@ pub use _utils::*;
 
 use hex_literal::hex;
 use parse_arch_pkg_desc::{
-    parse::ParsedSrcinfo,
+    parse::{
+        ParsedDerivativeAlreadySetError, ParsedSrcinfo, ParsedSrcinfoAlreadySetError,
+        SrcinfoParseError,
+    },
     srcinfo::query::{ChecksumArray, Checksums, Query, QueryItem, Section},
     value::{
         Architecture, Base, Dependency, Description, License, Name, SkipOrArray, Source,
@@ -576,5 +579,69 @@ fn multiple_checksum_types() {
             hex!("ee15d4c86f91b296327ac552c5b214e1e2102a38").as_slice(),
             hex!("e33a9949d6206a799a25daf21056761119c8227e").as_slice(),
         ],
+    );
+}
+
+#[test]
+fn duplicated_single_fields() {
+    eprintln!("CASE: duplicated pkgbase under pkgbase");
+    let srcinfo = insert_line_under(SIMPLE, "pkgbase", "pkgbase = duplicated");
+    let result = dbg!(ParsedSrcinfo::try_from(srcinfo.as_str()));
+    assert!(matches!(
+        result,
+        Err(SrcinfoParseError::BaseFieldAlreadySet(
+            ParsedSrcinfoAlreadySetError::Base(Base("simple-example-bin")),
+        )),
+    ));
+    assert_eq!(
+        result.unwrap_err().to_string(),
+        "Failed to insert value to the pkgbase section: Field pkgbase is already set",
+    );
+
+    eprintln!("CASE: duplicated pkgdesc under pkgbase");
+    let srcinfo = insert_line_under(SIMPLE, "pkgdesc", "pkgdesc = duplicated");
+    let result = dbg!(ParsedSrcinfo::try_from(srcinfo.as_str()));
+    assert!(matches!(
+        result,
+        Err(SrcinfoParseError::BaseFieldAlreadySet(
+            ParsedSrcinfoAlreadySetError::Description(Description("Simple .SRCINFO example")),
+        )),
+    ));
+    assert_eq!(
+        result.unwrap_err().to_string(),
+        "Failed to insert value to the pkgbase section: Field pkgdesc is already set",
+    );
+
+    eprintln!("CASE: duplicated pkgver under pkgbase");
+    let srcinfo = insert_line_under(SIMPLE, "pkgver", "pkgver = 0.1.2");
+    let result = dbg!(ParsedSrcinfo::try_from(srcinfo.as_str()));
+    assert!(matches!(
+        result,
+        Err(SrcinfoParseError::BaseFieldAlreadySet(
+            ParsedSrcinfoAlreadySetError::Version(UpstreamVersion("12.34.56.r789")),
+        )),
+    ));
+    assert_eq!(
+        result.unwrap_err().to_string(),
+        "Failed to insert value to the pkgbase section: Field pkgver is already set",
+    );
+
+    eprintln!("CASE: duplicated pkgdesc under pkgname");
+    let srcinfo = insert_line_under(
+        COMPLEX,
+        "pkgdesc = Description under foo-bin",
+        "pkgdesc = duplicated",
+    );
+    let result = dbg!(ParsedSrcinfo::try_from(srcinfo.as_str()));
+    assert!(matches!(
+        result,
+        Err(SrcinfoParseError::DerivativeFieldAlreadySet(
+            Name("foo-bin"),
+            ParsedDerivativeAlreadySetError::Description(Description("Description under foo-bin")),
+        )),
+    ));
+    assert_eq!(
+        result.unwrap_err().to_string(),
+        "Failed to insert value to the pkgname section named foo-bin: Field pkgdesc is already set",
     );
 }
