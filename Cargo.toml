@@ -24,7 +24,7 @@ parking_lot = ["std", "dep:parking_lot"]
 std = ["strum/std", "dep:indexmap"]
 
 [dependencies]
-derive_more = { version = "1.0.0", default-features = false, features = ["as_ref", "deref", "display", "error"] }
+derive_more = { version = "2.0.1", default-features = false, features = ["as_ref", "deref", "display", "error"] }
 lines-inclusive = "0.0.0"
 indexmap = { version = "2.7.1", optional = true }
 iter-scan = "0.4.0"
