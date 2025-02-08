@@ -3,8 +3,8 @@
 mod partial;
 pub use partial::*;
 
-mod db;
-pub use db::*;
+mod desc;
+pub use desc::*;
 
 #[cfg(feature = "std")]
 mod srcinfo;

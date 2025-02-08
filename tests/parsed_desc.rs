@@ -1,6 +1,6 @@
 use parse_arch_pkg_desc::{
-    db::Query,
-    parse::{DbParseError, DbParseIssue, ParsedDb},
+    desc::Query,
+    parse::{DescParseError, DescParseIssue, ParsedDesc},
     value::{Architecture, Dependency, Description, FileName, Name},
 };
 use pipe_trait::Pipe;
@@ -8,7 +8,7 @@ use pretty_assertions::assert_eq;
 
 const TEXT: &str = include_str!("fixtures/gnome-shell.desc");
 
-fn assert_query(querier: &ParsedDb) {
+fn assert_query(querier: &ParsedDesc) {
     assert_eq!(querier.name(), Some(Name("gnome-shell")));
 
     assert_eq!(
@@ -52,32 +52,32 @@ fn assert_query(querier: &ParsedDb) {
 
 #[test]
 fn query() {
-    let querier = ParsedDb::parse(TEXT).unwrap();
+    let querier = ParsedDesc::parse(TEXT).unwrap();
     dbg!(&querier);
     assert_query(&querier);
 }
 
 #[test]
 fn value_without_field() {
-    let error = dbg!(ParsedDb::parse("not a package description text")).unwrap_err();
+    let error = dbg!(ParsedDesc::parse("not a package description text")).unwrap_err();
     assert!(matches!(
         error,
-        DbParseError::ValueWithoutField("not a package description text"),
+        DescParseError::ValueWithoutField("not a package description text"),
     ));
     assert_eq!(
         error.to_string(),
         r#"Receive a value without field: "not a package description text""#,
     );
 
-    let error = dbg!(ParsedDb::parse("\nnot a package description text")).unwrap_err();
-    assert!(matches!(error, DbParseError::ValueWithoutField("\n"),));
+    let error = dbg!(ParsedDesc::parse("\nnot a package description text")).unwrap_err();
+    assert!(matches!(error, DescParseError::ValueWithoutField("\n"),));
     assert_eq!(error.to_string(), r#"Receive a value without field: "\n""#,);
 }
 
 #[test]
 fn empty_input() {
-    let error = dbg!(ParsedDb::parse("")).unwrap_err();
-    assert!(matches!(error, DbParseError::EmptyInput,));
+    let error = dbg!(ParsedDesc::parse("")).unwrap_err();
+    assert!(matches!(error, DescParseError::EmptyInput,));
     assert_eq!(error.to_string(), "Input is empty");
 }
 
@@ -86,8 +86,8 @@ fn unknown_field() {
     #[derive(Debug, Clone, Copy, PartialEq, Eq)]
     struct UnknownField<'a>(&'a str);
 
-    fn stop_at_unknown_fields(issue: DbParseIssue) -> Result<(), UnknownField<'_>> {
-        if let DbParseIssue::UnknownField(field) = issue {
+    fn stop_at_unknown_fields(issue: DescParseIssue) -> Result<(), UnknownField<'_>> {
+        if let DescParseIssue::UnknownField(field) = issue {
             field.name_str().pipe(UnknownField).pipe(Err)
         } else {
             panic!("Unexpected issue: {issue:?}")
@@ -96,7 +96,7 @@ fn unknown_field() {
 
     let text = format!("{TEXT}\n%UNKNOWN%\nfoo\nbar\n");
     let (querier, error) =
-        ParsedDb::parse_with_issues(&text, stop_at_unknown_fields).into_partial();
+        ParsedDesc::parse_with_issues(&text, stop_at_unknown_fields).into_partial();
     dbg!(&querier, &error);
     assert_eq!(error, Some(UnknownField("UNKNOWN")));
     assert_query(&querier);

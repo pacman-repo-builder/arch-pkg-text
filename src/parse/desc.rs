@@ -1,5 +1,5 @@
 use super::PartialParseResult;
-use crate::db::{FieldName, ParseRawFieldError, ParsedField, Query, QueryMut, RawField};
+use crate::desc::{FieldName, ParseRawFieldError, ParsedField, Query, QueryMut, RawField};
 use derive_more::{Display, Error};
 use lines_inclusive::{LinesInclusive, LinesInclusiveIter};
 use pipe_trait::Pipe;
@@ -14,12 +14,12 @@ macro_rules! def_struct {
         /// Every function call in [`Query`] and [`QueryMut`] is constant time.
         #[derive(Debug, Default, Clone, Copy)]
         #[allow(non_snake_case, reason = "We don't access the field names directly, keep it simple.")]
-        pub struct ParsedDb<'a> {$(
+        pub struct ParsedDesc<'a> {$(
             $(#[$attrs])*
             $field: Option<&'a str>,
         )*}
 
-        impl<'a> ParsedDb<'a> {
+        impl<'a> ParsedDesc<'a> {
             /// Get a raw value from the querier.
             fn get_raw_value(&self, field_name: FieldName) -> Option<&'a str> {
                 match field_name {$(
@@ -45,9 +45,9 @@ def_struct!(
     Provides Conflicts Replaces
 );
 
-/// Error type of [`ParsedDb::parse`].
+/// Error type of [`ParsedDesc::parse`].
 #[derive(Debug, Display, Error, Clone, Copy)]
-pub enum DbParseError<'a> {
+pub enum DescParseError<'a> {
     #[display("Input is empty")]
     EmptyInput,
     #[display("Receive a value without field: {_0:?}")]
@@ -56,39 +56,42 @@ pub enum DbParseError<'a> {
 
 /// Issue that may arise during parsing.
 #[derive(Debug, Clone, Copy)]
-pub enum DbParseIssue<'a> {
+pub enum DescParseIssue<'a> {
     EmptyInput,
     FirstLineIsNotAField(&'a str, ParseRawFieldError),
     UnknownField(RawField<'a>),
 }
 
-impl<'a> DbParseIssue<'a> {
-    /// Return `Ok(())` if the issue was [`DbParseIssue::UnknownField`],
-    /// or return an `Err` of [`DbParseError`] otherwise.
-    fn ignore_unknown_field(self) -> Result<(), DbParseError<'a>> {
+impl<'a> DescParseIssue<'a> {
+    /// Return `Ok(())` if the issue was [`DescParseIssue::UnknownField`],
+    /// or return an `Err` of [`DescParseError`] otherwise.
+    fn ignore_unknown_field(self) -> Result<(), DescParseError<'a>> {
         Err(match self {
-            DbParseIssue::EmptyInput => DbParseError::EmptyInput,
-            DbParseIssue::FirstLineIsNotAField(line, _) => DbParseError::ValueWithoutField(line),
-            DbParseIssue::UnknownField(_) => return Ok(()),
+            DescParseIssue::EmptyInput => DescParseError::EmptyInput,
+            DescParseIssue::FirstLineIsNotAField(line, _) => {
+                DescParseError::ValueWithoutField(line)
+            }
+            DescParseIssue::UnknownField(_) => return Ok(()),
         })
     }
 }
 
-impl<'a> ParsedDb<'a> {
+impl<'a> ParsedDesc<'a> {
     /// Parse a package description text, unknown fields are ignored.
-    pub fn parse(text: &'a str) -> Result<Self, DbParseError<'a>> {
-        ParsedDb::parse_with_issues(text, DbParseIssue::ignore_unknown_field).try_into_complete()
+    pub fn parse(text: &'a str) -> Result<Self, DescParseError<'a>> {
+        ParsedDesc::parse_with_issues(text, DescParseIssue::ignore_unknown_field)
+            .try_into_complete()
     }
 
-    /// Parse a package description text with a callback that handle [parsing issues](DbParseIssue).
+    /// Parse a package description text with a callback that handle [parsing issues](DescParseIssue).
     pub fn parse_with_issues<HandleIssue, Error>(
         text: &'a str,
         mut handle_issue: HandleIssue,
-    ) -> PartialParseResult<ParsedDb<'a>, Error>
+    ) -> PartialParseResult<ParsedDesc<'a>, Error>
     where
-        HandleIssue: FnMut(DbParseIssue<'a>) -> Result<(), Error>,
+        HandleIssue: FnMut(DescParseIssue<'a>) -> Result<(), Error>,
     {
-        let mut parsed = ParsedDb::default();
+        let mut parsed = ParsedDesc::default();
         let mut lines = text.lines_inclusive();
         let mut processed_length = 0;
 
@@ -104,12 +107,12 @@ impl<'a> ParsedDb<'a> {
         // parse the first field
         let (first_line, first_field) = loop {
             let Some(first_line) = lines.next() else {
-                return_or_continue!(DbParseIssue::EmptyInput);
+                return_or_continue!(DescParseIssue::EmptyInput);
             };
             let first_field = match first_line.trim().pipe(RawField::parse_raw) {
                 Ok(first_field) => first_field,
                 Err(error) => {
-                    return_or_continue!(DbParseIssue::FirstLineIsNotAField(first_line, error))
+                    return_or_continue!(DescParseIssue::FirstLineIsNotAField(first_line, error))
                 }
             };
             break (first_line, first_field);
@@ -118,14 +121,14 @@ impl<'a> ParsedDb<'a> {
         // parse the remaining values and fields.
         let mut current_field = Some((first_field, first_line));
         while let Some((field, field_line)) = current_field {
-            let (value_length, next_field) = ParsedDb::parse_next(&mut lines);
+            let (value_length, next_field) = ParsedDesc::parse_next(&mut lines);
             let value_start_offset = processed_length + field_line.len();
             let value_end_offset = value_start_offset + value_length;
             if let Ok(field) = field.to_parsed::<FieldName>() {
                 let value = text[value_start_offset..value_end_offset].trim();
                 parsed.set_raw_value(*field.name(), value);
             } else {
-                return_or_continue!(DbParseIssue::UnknownField(field));
+                return_or_continue!(DescParseIssue::UnknownField(field));
             }
             processed_length = value_end_offset;
             current_field = next_field;
@@ -153,20 +156,20 @@ impl<'a> ParsedDb<'a> {
     }
 }
 
-impl<'a> TryFrom<&'a str> for ParsedDb<'a> {
-    type Error = DbParseError<'a>;
+impl<'a> TryFrom<&'a str> for ParsedDesc<'a> {
+    type Error = DescParseError<'a>;
     fn try_from(text: &'a str) -> Result<Self, Self::Error> {
-        ParsedDb::parse(text)
+        ParsedDesc::parse(text)
     }
 }
 
-impl<'a> Query<'a> for ParsedDb<'a> {
+impl<'a> Query<'a> for ParsedDesc<'a> {
     fn query_raw_text(&self, field: ParsedField) -> Option<&'a str> {
         self.get_raw_value(*field.name())
     }
 }
 
-impl<'a> QueryMut<'a> for ParsedDb<'a> {
+impl<'a> QueryMut<'a> for ParsedDesc<'a> {
     fn query_raw_text_mut(&mut self, field: ParsedField) -> Option<&'a str> {
         self.query_raw_text(field)
     }
