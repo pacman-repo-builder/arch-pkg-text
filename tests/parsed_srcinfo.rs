@@ -3,8 +3,7 @@
 pub mod _utils;
 pub use _utils::*;
 
-use hex_literal::hex;
-use parse_arch_pkg_desc::{
+use arch_pkg_text::{
     parse::{
         ParsedSrcinfo, ParsedSrcinfoBaseUniqueFieldDuplicationError,
         ParsedSrcinfoDerivativeUniqueFieldDuplicationError, SrcinfoParseError, SrcinfoParseIssue,
@@ -15,6 +14,7 @@ use parse_arch_pkg_desc::{
         UpstreamVersion,
     },
 };
+use hex_literal::hex;
 use pipe_trait::Pipe;
 use pretty_assertions::assert_eq;
 

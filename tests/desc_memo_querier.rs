@@ -1,8 +1,8 @@
-use core::ops::Not;
-use parse_arch_pkg_desc::{
+use arch_pkg_text::{
     desc::{FieldName, MemoQuerier, QueryMut},
     value::{Architecture, Dependency},
 };
+use core::ops::Not;
 use pretty_assertions::assert_eq;
 
 const TEXT: &str = include_str!("fixtures/gnome-shell.desc");
@@ -120,7 +120,7 @@ fn query() {
 #[cfg(feature = "std")]
 #[test]
 fn query_std_mutex() {
-    use parse_arch_pkg_desc::desc::Query;
+    use arch_pkg_text::desc::Query;
     use pipe_trait::Pipe;
     use std::sync::Mutex;
 
@@ -210,8 +210,8 @@ fn query_std_mutex() {
 #[cfg(feature = "parking_lot")]
 #[test]
 fn query_parking_lot_mutex() {
+    use arch_pkg_text::desc::Query;
     use parking_lot::Mutex;
-    use parse_arch_pkg_desc::desc::Query;
     use pipe_trait::Pipe;
 
     fn has_cache(querier: &Mutex<MemoQuerier>, field: FieldName) -> bool {

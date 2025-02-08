@@ -4,7 +4,7 @@ impl<'a> DependencySpecification<'a> {
     /// Extract [`DependencySpecificationOperator`] and [`Version`].
     ///
     /// ```
-    /// # use parse_arch_pkg_desc::value::{DependencySpecification, DependencySpecificationOperator, Version};
+    /// # use arch_pkg_text::value::{DependencySpecification, DependencySpecificationOperator, Version};
     /// # use pretty_assertions::assert_eq;
     /// assert_eq!(
     ///     DependencySpecification(">=1.27.0-1").components(),

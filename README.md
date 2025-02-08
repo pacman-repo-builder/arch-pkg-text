@@ -1,4 +1,4 @@
-# parse-arch-pkg-desc
+# arch-pkg-text
 
 Pure Rust library to parse Arch Linux packages' structured text formats. "Pure Rust" means not needing `libalpm`.
 
@@ -12,8 +12,8 @@ This library aims to provide parsers for packaging related structured text forma
 
 ## Usage
 
-Read the [documentation](https://docs.rs/parse-arch-pkg-desc).
+Read the [documentation](https://docs.rs/arch-pkg-text).
 
 ## License
 
-[MIT](https://github.com/KSXGitHub/parse-arch-pkg-desc/blob/master/LICENSE.md) © [Hoàng Văn Khải](https://github.com/KSXGitHub).
+[MIT](https://github.com/KSXGitHub/arch-pkg-text/blob/master/LICENSE.md) © [Hoàng Văn Khải](https://github.com/KSXGitHub).
