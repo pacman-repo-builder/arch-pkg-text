@@ -1,4 +1,7 @@
 //! Fields and queriers of the text format of `desc` files.
 
-pub mod field;
-pub mod query;
+mod field;
+pub use field::*;
+
+mod query;
+pub use query::*;

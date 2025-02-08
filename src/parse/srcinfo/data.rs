@@ -2,10 +2,7 @@ use super::{
     unknown_field_from_parsed, AddFailure, ParsedSrcinfo, ParsedSrcinfoDerivativeSectionEntryMut,
 };
 use crate::{
-    srcinfo::{
-        field::{FieldName, ParsedField},
-        query::{Query, QueryItem, QueryMut, QueryRawTextItem, Section},
-    },
+    srcinfo::{FieldName, ParsedField, Query, QueryItem, QueryMut, QueryRawTextItem, Section},
     value,
 };
 use derive_more::{Display, Error};

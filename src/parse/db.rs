@@ -1,8 +1,5 @@
 use super::PartialParseResult;
-use crate::db::{
-    field::{FieldName, ParseRawFieldError, ParsedField, RawField},
-    query::{Query, QueryMut},
-};
+use crate::db::{FieldName, ParseRawFieldError, ParsedField, Query, QueryMut, RawField};
 use derive_more::{Display, Error};
 use lines_inclusive::{LinesInclusive, LinesInclusiveIter};
 use pipe_trait::Pipe;

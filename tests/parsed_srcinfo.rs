@@ -9,7 +9,7 @@ use parse_arch_pkg_desc::{
         ParsedSrcinfo, ParsedSrcinfoBaseUniqueFieldDuplicationError,
         ParsedSrcinfoDerivativeUniqueFieldDuplicationError, SrcinfoParseError, SrcinfoParseIssue,
     },
-    srcinfo::query::{ChecksumArray, Checksums, Query, QueryItem, Section},
+    srcinfo::{ChecksumArray, Checksums, Query, QueryItem, Section},
     value::{
         Architecture, Base, Dependency, Description, License, Name, SkipOrArray, Source,
         UpstreamVersion,
