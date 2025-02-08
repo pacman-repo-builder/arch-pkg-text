@@ -1,5 +1,5 @@
 use super::{
-    utils::{parse_line, trimmed_line_is_blank},
+    utils::{non_blank_trimmed_lines, parse_line},
     ChecksumValue, Checksums, ChecksumsMut, Query, QueryChecksumItem, QueryMut, QueryRawTextItem,
     Section,
 };
@@ -8,6 +8,7 @@ use crate::{
     value::{Architecture, Name},
 };
 use iter_scan::IterScan;
+use pipe_trait::Pipe;
 
 /// [Query] without a cache.
 #[derive(Debug, Clone, Copy)]
@@ -24,9 +25,7 @@ impl<'a> ForgetfulQuerier<'a> {
         &self,
     ) -> impl Iterator<Item = (Section<'a>, (ParsedField<&'a str>, &'a str))> {
         self.0
-            .lines()
-            .map(str::trim)
-            .filter(|line| !trimmed_line_is_blank(line))
+            .pipe(non_blank_trimmed_lines)
             .map_while(parse_line)
             .filter_map(known_field)
             .filter(|(_, value)| !value.is_empty())

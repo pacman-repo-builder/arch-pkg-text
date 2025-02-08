@@ -38,7 +38,7 @@ impl<'a, Value, Architecture> QueryItem<'a, Value, Architecture> {
     }
 
     /// Transform `value`.
-    fn map<NewValue>(
+    pub(crate) fn map<NewValue>(
         self,
         mut f: impl FnMut(Value) -> NewValue + 'static,
     ) -> QueryItem<'a, NewValue, Architecture> {
@@ -279,7 +279,7 @@ pub trait ChecksumsMut<'a> {
     fn checksums_mut(&mut self) -> impl Iterator<Item = QueryChecksumItem<'a>>;
 }
 
-mod utils;
+pub(crate) mod utils;
 
 mod checksums;
 pub use checksums::*;
@@ -291,3 +291,6 @@ pub use forgetful::*;
 mod memo;
 #[cfg(feature = "std")]
 pub use memo::*;
+
+#[cfg(feature = "std")]
+pub use crate::parse::ParsedSrcinfo as EagerQuerier;

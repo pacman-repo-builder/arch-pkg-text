@@ -3,40 +3,73 @@ pub const SIMPLE: &str = include_str!("fixtures/simple/.SRCINFO");
 pub const HAS_EMPTY_VALUES: &str = include_str!("fixtures/has-empty-values/.SRCINFO");
 pub const MULTIPLE_CHECKSUM_TYPES: &str = include_str!("fixtures/multiple-checksum-types/.SRCINFO");
 
-pub fn remove_indent(input: &str) -> String {
-    let mut output = String::with_capacity(input.len());
-
-    for line in input.lines() {
-        output.push_str(line.trim_start());
-        output.push('\n');
-    }
-
-    output.shrink_to_fit();
-    output
+/// Convenient methods to manipulate a string.
+pub trait StrUtils {
+    /// Remove all indentations from every line in a string.
+    fn without_indent(&self) -> String;
+    /// Make the indentations of a string ugly, chaotic, and uneven.
+    fn uneven_indent(&self) -> String;
+    /// Add a single trailing whitespace to every line of a string.
+    fn trailing_whitespaces(&self) -> String;
+    /// Insert a line under a line.
+    fn insert_line_under(&self, search: impl FnMut(&str) -> bool, value: &str) -> String;
 }
 
-pub fn uneven_indent(input: &str) -> String {
-    let indent_types = ["  ", "\t", " \t \t", "", "    "].into_iter().cycle();
-    let mut output = String::new();
+impl StrUtils for str {
+    fn without_indent(&self) -> String {
+        let mut output = String::with_capacity(self.len());
 
-    for (line, indent) in input.lines().zip(indent_types) {
-        output.push_str(indent);
-        output.push_str(line.trim_start());
-        output.push('\n');
+        for line in self.lines() {
+            output.push_str(line.trim_start());
+            output.push('\n');
+        }
+
+        output.shrink_to_fit();
+        output
     }
 
-    output.shrink_to_fit();
-    output
-}
+    fn uneven_indent(&self) -> String {
+        let indent_types = ["  ", "\t", " \t \t", "", "    "].into_iter().cycle();
+        let mut output = String::new();
 
-pub fn trailing_whitespaces(input: &str) -> String {
-    let mut output = String::new();
+        for (line, indent) in self.lines().zip(indent_types) {
+            output.push_str(indent);
+            output.push_str(line.trim_start());
+            output.push('\n');
+        }
 
-    for line in input.lines() {
-        output.push_str(line.trim_start());
-        output.push_str(" \n");
+        output.shrink_to_fit();
+        output
     }
 
-    output.shrink_to_fit();
-    output
+    fn trailing_whitespaces(&self) -> String {
+        let mut output = String::new();
+
+        for line in self.lines() {
+            output.push_str(line.trim_start());
+            output.push_str(" \n");
+        }
+
+        output.shrink_to_fit();
+        output
+    }
+
+    fn insert_line_under(&self, mut search: impl FnMut(&str) -> bool, value: &str) -> String {
+        let mut lines = self.lines();
+        let mut output = String::with_capacity(self.len() + value.len());
+        for line in lines.by_ref() {
+            output.push_str(line);
+            output.push('\n');
+            if search(line) {
+                output.push_str(value);
+                output.push('\n');
+                break;
+            }
+        }
+        for line in lines {
+            output.push_str(line);
+            output.push('\n');
+        }
+        output
+    }
 }
