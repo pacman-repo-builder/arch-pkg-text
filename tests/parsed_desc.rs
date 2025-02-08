@@ -59,17 +59,17 @@ fn query() {
 
 #[test]
 fn value_without_field() {
-    let error = dbg!(ParsedDesc::parse("not a package description text")).unwrap_err();
+    let error = dbg!(ParsedDesc::parse("not a `desc` file text")).unwrap_err();
     assert!(matches!(
         error,
-        DescParseError::ValueWithoutField("not a package description text"),
+        DescParseError::ValueWithoutField("not a `desc` file text"),
     ));
     assert_eq!(
         error.to_string(),
-        r#"Receive a value without field: "not a package description text""#,
+        r#"Receive a value without field: "not a `desc` file text""#,
     );
 
-    let error = dbg!(ParsedDesc::parse("\nnot a package description text")).unwrap_err();
+    let error = dbg!(ParsedDesc::parse("\nnot a `desc` file text")).unwrap_err();
     assert!(matches!(error, DescParseError::ValueWithoutField("\n"),));
     assert_eq!(error.to_string(), r#"Receive a value without field: "\n""#,);
 }

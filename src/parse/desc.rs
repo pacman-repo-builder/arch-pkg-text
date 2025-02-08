@@ -9,7 +9,7 @@ macro_rules! def_struct {
         $(#[$attrs:meta])*
         $field:ident $(,)? $(;)?
     )*) => {
-        /// Parsed data of a package description text.
+        /// Parsed data of a `desc` file text.
         ///
         /// Every function call in [`Query`] and [`QueryMut`] is constant time.
         #[derive(Debug, Default, Clone, Copy)]
@@ -77,13 +77,13 @@ impl<'a> DescParseIssue<'a> {
 }
 
 impl<'a> ParsedDesc<'a> {
-    /// Parse a package description text, unknown fields are ignored.
+    /// Parse a `desc` file text, unknown fields are ignored.
     pub fn parse(text: &'a str) -> Result<Self, DescParseError<'a>> {
         ParsedDesc::parse_with_issues(text, DescParseIssue::ignore_unknown_field)
             .try_into_complete()
     }
 
-    /// Parse a package description text with a callback that handle [parsing issues](DescParseIssue).
+    /// Parse a `desc` file text with a callback that handle [parsing issues](DescParseIssue).
     pub fn parse_with_issues<HandleIssue, Error>(
         text: &'a str,
         mut handle_issue: HandleIssue,

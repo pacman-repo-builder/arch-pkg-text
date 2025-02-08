@@ -1,7 +1,7 @@
 use derive_more::{AsRef, Deref};
 use strum::{AsRefStr, Display, EnumString, IntoStaticStr};
 
-/// Field of a package description.
+/// Field of a `desc` file.
 #[derive(Debug, Clone, Copy, Eq, PartialEq)] // core traits
 #[derive(AsRef, Deref, derive_more::Display)] // derive_more traits
 #[display("%{_0}%")]
@@ -19,7 +19,7 @@ impl<Name> Field<Name> {
     }
 }
 
-/// Raw string field of a package description.
+/// Raw string field of a `desc` file.
 pub type RawField<'a> = Field<&'a str>;
 
 impl<'a> RawField<'a> {
@@ -29,7 +29,7 @@ impl<'a> RawField<'a> {
     }
 }
 
-/// Parsed field of a package description.
+/// Parsed field of a `desc` file.
 pub type ParsedField = Field<FieldName>;
 
 impl ParsedField {
@@ -50,7 +50,7 @@ impl From<FieldName> for ParsedField {
     }
 }
 
-/// Field name of a package description.
+/// Field name of a `desc` file.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)] // core traits
 #[derive(AsRefStr, Display, EnumString, IntoStaticStr)] // strum traits
 #[strum(use_phf)]
