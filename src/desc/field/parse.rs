@@ -12,7 +12,7 @@ pub enum ParseFieldError<ParseNameError> {
 impl<Name> Field<Name> {
     /// Parse a [`Field`] from [`str`].
     /// ```
-    /// # use parse_arch_pkg_desc::desc::{FieldName, ParsedField};
+    /// # use arch_pkg_text::desc::{FieldName, ParsedField};
     /// # use pretty_assertions::assert_eq;
     /// let parsed_field = ParsedField::parse("%NAME%").unwrap();
     /// assert_eq!(parsed_field.name(), &FieldName::Name);
@@ -59,7 +59,7 @@ impl<'a> RawField<'a> {
     /// Parse a [`RawField`] from a [`str`].
     ///
     /// ```
-    /// # use parse_arch_pkg_desc::desc::RawField;
+    /// # use arch_pkg_text::desc::RawField;
     /// # use pretty_assertions::assert_eq;
     /// let raw_field = RawField::parse_raw("%NAME%").unwrap();
     /// assert_eq!(raw_field.name_str(), "NAME");
@@ -88,7 +88,7 @@ impl<'a> RawField<'a> {
     /// Try converting a [`RawField`] into a [`Field<Name>`].
     ///
     /// ```
-    /// # use parse_arch_pkg_desc::desc::{FieldName, ParsedField, RawField};
+    /// # use arch_pkg_text::desc::{FieldName, ParsedField, RawField};
     /// # use pretty_assertions::assert_eq;
     /// let raw_field = RawField::parse_raw("%NAME%").unwrap();
     /// let parsed_field: ParsedField = raw_field.to_parsed().unwrap();

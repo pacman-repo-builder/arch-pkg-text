@@ -1,11 +1,11 @@
 [package]
-name = "parse-arch-pkg-desc"
+name = "arch-pkg-text"
 description = "Pure Rust library to parse Arch Linux packages' structured text formats"
 version = "0.0.0"
 authors = ["khai96_ <hvksmr1996@gmail.com>"]
 license = "MIT"
 edition = "2021"
-repository = "https://github.com/pacman-repo-builder/parse-arch-pkg-desc.git"
+repository = "https://github.com/pacman-repo-builder/arch-pkg-text.git"
 readme = "README.md"
 include = [
   "/src",
@@ -14,7 +14,7 @@ include = [
 ]
 
 [lib]
-name = "parse_arch_pkg_desc"
+name = "arch_pkg_text"
 path = "src/lib.rs"
 
 [features]

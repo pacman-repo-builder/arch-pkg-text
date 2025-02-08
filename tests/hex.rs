@@ -1,4 +1,4 @@
-use parse_arch_pkg_desc::value::{Hex128, Hex256, SkipOrArray, SkipOrHex128, SkipOrHex256};
+use arch_pkg_text::value::{Hex128, Hex256, SkipOrArray, SkipOrHex128, SkipOrHex256};
 use pretty_assertions::assert_eq;
 
 #[test]

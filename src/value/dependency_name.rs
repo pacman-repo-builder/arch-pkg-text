@@ -10,7 +10,7 @@ impl<'a> DependencyName<'a> {
     /// > -- from <https://wiki.archlinux.org/title/PKGBUILD#pkgname>
     ///
     /// ```
-    /// # use parse_arch_pkg_desc::value::DependencyName;
+    /// # use arch_pkg_text::value::DependencyName;
     /// # use pretty_assertions::assert_eq;
     /// let (name, rest) = DependencyName::parse("rustup>=1.27.0-1");
     /// assert_eq!(name, DependencyName("rustup"));

@@ -4,7 +4,7 @@ pub mod _utils;
 pub use _utils::*;
 
 use hex_literal::hex;
-use parse_arch_pkg_desc::{
+use arch_pkg_text::{
     parse::{
         ParsedSrcinfo, ParsedSrcinfoBaseUniqueFieldDuplicationError,
         ParsedSrcinfoDerivativeUniqueFieldDuplicationError, SrcinfoParseError, SrcinfoParseIssue,

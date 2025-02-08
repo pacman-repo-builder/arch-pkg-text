@@ -1,4 +1,4 @@
-use parse_arch_pkg_desc::{
+use arch_pkg_text::{
     desc::{ForgetfulQuerier, Query},
     value::{Architecture, Dependency, Description, FileName, Name},
 };

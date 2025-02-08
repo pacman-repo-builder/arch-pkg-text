@@ -2,7 +2,7 @@ pub mod _utils;
 pub use _utils::*;
 
 use hex_literal::hex;
-use parse_arch_pkg_desc::{
+use arch_pkg_text::{
     srcinfo::{ChecksumArray, Checksums, ForgetfulQuerier, Query, QueryItem, Section},
     value::{
         Architecture, Base, Dependency, Description, License, Name, SkipOrArray, Source,
