@@ -1,3 +1,5 @@
+//! Value types returned by the various queries on the different structured text formats.
+
 use core::{
     iter::{DoubleEndedIterator, FusedIterator},
     num::ParseIntError,

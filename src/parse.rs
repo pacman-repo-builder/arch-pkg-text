@@ -1,3 +1,5 @@
+//! Parsers of the various structured text formats.
+
 mod partial;
 pub use partial::*;
 
