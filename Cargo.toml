@@ -9,7 +9,6 @@ repository = "https://github.com/pacman-repo-builder/parse-arch-pkg-desc.git"
 readme = "README.md"
 include = [
   "/src",
-  "/tests",
   "/Cargo.toml",
   "/README.md",
 ]
