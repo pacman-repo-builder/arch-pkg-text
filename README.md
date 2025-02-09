@@ -16,4 +16,4 @@ Read the [documentation](https://docs.rs/arch-pkg-text).
 
 ## License
 
-[MIT](https://github.com/KSXGitHub/arch-pkg-text/blob/master/LICENSE.md) © [Hoàng Văn Khải](https://github.com/KSXGitHub).
+[MIT](https://github.com/pacman-repo-builder/arch-pkg-text/blob/master/LICENSE.md) © [Hoàng Văn Khải](https://github.com/KSXGitHub).
