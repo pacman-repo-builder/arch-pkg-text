@@ -17,6 +17,3 @@ updates:
     - dependencies
     - dependabot
     - rust
-  ignore:
-    - dependency-name: dprint-core
-    - dependency-name: dprint-plugin-typescript
