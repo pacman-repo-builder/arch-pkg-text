@@ -29,7 +29,7 @@ name = "arch_pkg_text"
 path = "src/lib.rs"
 
 [features]
-default = []
+default = ["std"]
 parking_lot = ["std", "dep:parking_lot"]
 std = ["strum/std", "dep:indexmap"]
 
