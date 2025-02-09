@@ -6,6 +6,7 @@
   "schedule": ["* 0 1 * *"],
   "semanticCommits": "enabled",
   "semanticCommitType": "chore",
+  "prHourlyLimit": 10,
   "addLabels": ["renovate"],
   "github-actions": {
     "addLabels": ["github-actions"],
