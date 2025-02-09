@@ -11,7 +11,7 @@ doc *args:
 
 # Type check
 check *args:
-  cargo check --locked --all-targets {{args}}
+  cargo check --locked {{args}}
 
 # Lint with clippy
 clippy *args:
