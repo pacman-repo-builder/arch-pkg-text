@@ -24,3 +24,6 @@ impl<'a, Querier: QueryMut<'a>> QueryMut<'a> for &'a mut Querier {
         Querier::query_raw_text_mut(*self, field_name)
     }
 }
+
+#[cfg(feature = "std")]
+mod std_ext;
