@@ -61,6 +61,7 @@ def_traits! {
 }
 
 mod forgetful;
+mod generic;
 mod memo;
 
 pub use crate::parse::ParsedDesc as EagerQuerier;
