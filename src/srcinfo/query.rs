@@ -281,6 +281,8 @@ pub trait ChecksumsMut<'a> {
 
 pub(crate) mod utils;
 
+mod generic;
+
 mod checksums;
 pub use checksums::*;
 
