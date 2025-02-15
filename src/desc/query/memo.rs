@@ -151,8 +151,3 @@ def_cache!(
     Dependencies CheckDependencies MakeDependencies OptionalDependencies
     Provides Conflicts Replaces
 );
-
-#[cfg(feature = "parking_lot")]
-mod parking_lot_ext;
-#[cfg(feature = "std")]
-mod std_ext;
