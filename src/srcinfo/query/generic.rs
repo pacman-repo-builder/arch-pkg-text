@@ -31,7 +31,7 @@ impl<'a, Querier: QueryMut<'a> + ?Sized> QueryMut<'a> for &'a mut Querier {
 
 impl<'a, Ptr: Deref<Target: Query<'a>>> Query<'a> for Pin<Ptr> {
     fn query_raw_text(&self, field_name: FieldName) -> impl Iterator<Item = QueryRawTextItem<'a>> {
-        self.as_ref().get_ref().query_raw_text(field_name)
+        self.deref().query_raw_text(field_name)
     }
 }
 
@@ -40,7 +40,7 @@ impl<'a, Ptr: DerefMut<Target: QueryMut<'a> + Unpin>> QueryMut<'a> for Pin<Ptr> 
         &mut self,
         field_name: FieldName,
     ) -> impl Iterator<Item = QueryRawTextItem<'a>> {
-        self.as_mut().get_mut().query_raw_text_mut(field_name)
+        self.deref_mut().query_raw_text_mut(field_name)
     }
 }
 

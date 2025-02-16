@@ -25,13 +25,13 @@ impl<'a, Querier: QueryMut<'a> + ?Sized> QueryMut<'a> for &'a mut Querier {
 
 impl<'a, Ptr: Deref<Target: Query<'a>>> Query<'a> for Pin<Ptr> {
     fn query_raw_text(&self, field: ParsedField) -> Option<&'a str> {
-        self.as_ref().get_ref().query_raw_text(field)
+        self.deref().query_raw_text(field)
     }
 }
 
 impl<'a, Ptr: DerefMut<Target: QueryMut<'a> + Unpin>> QueryMut<'a> for Pin<Ptr> {
     fn query_raw_text_mut(&mut self, field: ParsedField) -> Option<&'a str> {
-        self.as_mut().get_mut().query_raw_text_mut(field)
+        self.deref_mut().query_raw_text_mut(field)
     }
 }
 
