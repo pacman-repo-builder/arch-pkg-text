@@ -134,7 +134,7 @@ macro_rules! def_traits {
         )*}
     ) => {
         /// Get information from a querier of `.SRCINFO`.
-        pub trait Query<'a>: QueryMut<'a> {
+        pub trait Query<'a> {
             fn query_raw_text(&self, field_name: FieldName) -> impl Iterator<Item = QueryRawTextItem<'a>>;
 
             $(fn $base_single_name(&self) -> Option<value::$base_single_type<'a>> {

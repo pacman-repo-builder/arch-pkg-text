@@ -9,7 +9,7 @@ macro_rules! def_traits {
         $name:ident, $name_mut:ident = $field_name:ident -> $value_type:ident;
     )*) => {
         /// Get information from a `desc` file.
-        pub trait Query<'a>: QueryMut<'a> {
+        pub trait Query<'a> {
             fn query_raw_text(&self, field: ParsedField) -> Option<&'a str>;
             $(
                 $(#[$attrs])*
