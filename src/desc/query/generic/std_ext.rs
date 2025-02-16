@@ -6,13 +6,13 @@ use std::{
 
 macro_rules! impl_pointer {
     ($wrapper:ident) => {
-        impl<'a, Querier: Query<'a>> Query<'a> for $wrapper<Querier> {
+        impl<'a, Querier: Query<'a> + ?Sized> Query<'a> for $wrapper<Querier> {
             fn query_raw_text(&self, field: ParsedField) -> Option<&'a str> {
                 Querier::query_raw_text(self, field)
             }
         }
 
-        impl<'a, Querier: Query<'a>> QueryMut<'a> for $wrapper<Querier> {
+        impl<'a, Querier: Query<'a> + ?Sized> QueryMut<'a> for $wrapper<Querier> {
             fn query_raw_text_mut(&mut self, field: ParsedField) -> Option<&'a str> {
                 self.query_raw_text(field)
             }
@@ -26,7 +26,7 @@ impl_pointer!(Arc);
 
 macro_rules! impl_lock {
     ($wrapper:ident, $lock:ident) => {
-        impl<'a, Querier: QueryMut<'a>> Query<'a> for $wrapper<Querier> {
+        impl<'a, Querier: QueryMut<'a> + ?Sized> Query<'a> for $wrapper<Querier> {
             fn query_raw_text(&self, field: ParsedField) -> Option<&'a str> {
                 self.$lock()
                     .expect("lock must be acquired successfully")
@@ -34,7 +34,7 @@ macro_rules! impl_lock {
             }
         }
 
-        impl<'a, Querier: QueryMut<'a>> QueryMut<'a> for $wrapper<Querier> {
+        impl<'a, Querier: QueryMut<'a> + ?Sized> QueryMut<'a> for $wrapper<Querier> {
             fn query_raw_text_mut(&mut self, field: ParsedField) -> Option<&'a str> {
                 self.query_raw_text(field)
             }

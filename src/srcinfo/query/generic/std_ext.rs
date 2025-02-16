@@ -3,7 +3,7 @@ use std::{rc::Rc, sync::Arc};
 
 macro_rules! impl_pointer {
     ($wrapper:ident) => {
-        impl<'a, Querier: Query<'a>> Query<'a> for $wrapper<Querier> {
+        impl<'a, Querier: Query<'a> + ?Sized> Query<'a> for $wrapper<Querier> {
             fn query_raw_text(
                 &self,
                 field_name: FieldName,
@@ -12,7 +12,7 @@ macro_rules! impl_pointer {
             }
         }
 
-        impl<'a, Querier: Query<'a>> QueryMut<'a> for $wrapper<Querier> {
+        impl<'a, Querier: Query<'a> + ?Sized> QueryMut<'a> for $wrapper<Querier> {
             fn query_raw_text_mut(
                 &mut self,
                 field_name: FieldName,
