@@ -1,5 +1,9 @@
 use super::{Query, QueryMut};
 use crate::desc::ParsedField;
+use core::{
+    ops::{Deref, DerefMut},
+    pin::Pin,
+};
 
 impl<'a, Querier: Query<'a> + ?Sized> Query<'a> for &'a Querier {
     fn query_raw_text(&self, field: ParsedField) -> Option<&'a str> {
@@ -16,6 +20,18 @@ impl<'a, Querier: Query<'a> + ?Sized> QueryMut<'a> for &'a Querier {
 impl<'a, Querier: QueryMut<'a> + ?Sized> QueryMut<'a> for &'a mut Querier {
     fn query_raw_text_mut(&mut self, field: ParsedField) -> Option<&'a str> {
         Querier::query_raw_text_mut(*self, field)
+    }
+}
+
+impl<'a, Ptr: Deref<Target: Query<'a>>> Query<'a> for Pin<Ptr> {
+    fn query_raw_text(&self, field: ParsedField) -> Option<&'a str> {
+        self.as_ref().get_ref().query_raw_text(field)
+    }
+}
+
+impl<'a, Ptr: DerefMut<Target: QueryMut<'a> + Unpin>> QueryMut<'a> for Pin<Ptr> {
+    fn query_raw_text_mut(&mut self, field: ParsedField) -> Option<&'a str> {
+        self.as_mut().get_mut().query_raw_text_mut(field)
     }
 }
 
