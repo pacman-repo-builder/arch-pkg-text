@@ -60,6 +60,12 @@ def_traits! {
     replaces, replaces_mut = Replaces -> DependencyList;
 }
 
+/// Denote whether a certain querier should be reused.
+pub trait EncourageReuse {
+    /// Whether the querier should be reused
+    const ENCOURAGE_REUSE: bool;
+}
+
 mod forgetful;
 mod generic;
 mod memo;

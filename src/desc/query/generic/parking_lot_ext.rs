@@ -1,4 +1,4 @@
-use crate::desc::{ParsedField, Query, QueryMut};
+use crate::desc::{EncourageReuse, ParsedField, Query, QueryMut};
 use parking_lot::{FairMutex, Mutex, RwLock};
 
 macro_rules! impl_lock {
@@ -13,6 +13,10 @@ macro_rules! impl_lock {
             fn query_raw_text_mut(&mut self, field: ParsedField) -> Option<&'a str> {
                 self.query_raw_text(field)
             }
+        }
+
+        impl<Querier: EncourageReuse + ?Sized> EncourageReuse for $wrapper<Querier> {
+            const ENCOURAGE_REUSE: bool = Querier::ENCOURAGE_REUSE;
         }
     };
 }

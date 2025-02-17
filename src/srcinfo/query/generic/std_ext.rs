@@ -1,4 +1,4 @@
-use crate::srcinfo::{FieldName, Query, QueryMut, QueryRawTextItem};
+use crate::srcinfo::{EncourageReuse, FieldName, Query, QueryMut, QueryRawTextItem};
 use std::{rc::Rc, sync::Arc};
 
 macro_rules! impl_pointer {
@@ -19,6 +19,10 @@ macro_rules! impl_pointer {
             ) -> impl Iterator<Item = QueryRawTextItem<'a>> {
                 self.query_raw_text(field_name)
             }
+        }
+
+        impl<Querier: EncourageReuse + ?Sized> EncourageReuse for $wrapper<Querier> {
+            const ENCOURAGE_REUSE: bool = Querier::ENCOURAGE_REUSE;
         }
     };
 }

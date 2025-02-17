@@ -2,8 +2,8 @@ mod cache;
 
 use super::{
     utils::{parse_line, trimmed_line_is_blank},
-    ChecksumType, ChecksumValue, ChecksumsMut, QueryChecksumItem, QueryMut, QueryRawTextItem,
-    Section,
+    ChecksumType, ChecksumValue, ChecksumsMut, EncourageReuse, QueryChecksumItem, QueryMut,
+    QueryRawTextItem, Section,
 };
 use crate::{
     srcinfo::field::FieldName,
@@ -158,4 +158,12 @@ impl<'a> ChecksumsMut<'a> for MemoQuerier<'a> {
     fn checksums_mut(&mut self) -> impl Iterator<Item = QueryChecksumItem<'a>> {
         ChecksumIter::new(self)
     }
+}
+
+impl EncourageReuse for MemoQuerier<'_> {
+    /// [`MemoQuerier`] costs O(1) time to construct. Performing a lookup on it
+    /// costs O(n) the first time and O(1) after that.
+    ///
+    /// This struct is designed to be reused.
+    const ENCOURAGE_REUSE: bool = true;
 }

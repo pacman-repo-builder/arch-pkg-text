@@ -1,4 +1,4 @@
-use super::{Query, QueryMut, QueryRawTextItem};
+use super::{EncourageReuse, Query, QueryMut, QueryRawTextItem};
 use crate::srcinfo::FieldName;
 use core::{
     ops::{Deref, DerefMut},
@@ -42,6 +42,18 @@ impl<'a, Ptr: DerefMut<Target: QueryMut<'a> + Unpin>> QueryMut<'a> for Pin<Ptr> 
     ) -> impl Iterator<Item = QueryRawTextItem<'a>> {
         self.deref_mut().query_raw_text_mut(field_name)
     }
+}
+
+impl<Querier: EncourageReuse + ?Sized> EncourageReuse for &Querier {
+    const ENCOURAGE_REUSE: bool = Querier::ENCOURAGE_REUSE;
+}
+
+impl<Querier: EncourageReuse + ?Sized> EncourageReuse for &mut Querier {
+    const ENCOURAGE_REUSE: bool = Querier::ENCOURAGE_REUSE;
+}
+
+impl<Ptr: Deref<Target: EncourageReuse + ?Sized>> EncourageReuse for Pin<Ptr> {
+    const ENCOURAGE_REUSE: bool = <Ptr::Target as EncourageReuse>::ENCOURAGE_REUSE;
 }
 
 #[cfg(feature = "std")]

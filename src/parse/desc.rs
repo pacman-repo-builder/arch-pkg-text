@@ -1,5 +1,7 @@
 use super::PartialParseResult;
-use crate::desc::{FieldName, ParseRawFieldError, ParsedField, Query, QueryMut, RawField};
+use crate::desc::{
+    EncourageReuse, FieldName, ParseRawFieldError, ParsedField, Query, QueryMut, RawField,
+};
 use derive_more::{Display, Error};
 use lines_inclusive::{LinesInclusive, LinesInclusiveIter};
 use pipe_trait::Pipe;
@@ -173,4 +175,12 @@ impl<'a> QueryMut<'a> for ParsedDesc<'a> {
     fn query_raw_text_mut(&mut self, field: ParsedField) -> Option<&'a str> {
         self.query_raw_text(field)
     }
+}
+
+impl EncourageReuse for ParsedDesc<'_> {
+    /// [`ParsedDesc`] costs O(n) time to construct (n being text length).
+    /// Performing a lookup on it costs O(1) time.
+    ///
+    /// This struct is designed to be reused.
+    const ENCOURAGE_REUSE: bool = true;
 }

@@ -1,4 +1,4 @@
-use super::{Query, QueryMut};
+use super::{EncourageReuse, Query, QueryMut};
 use crate::desc::ParsedField;
 use core::{
     ops::{Deref, DerefMut},
@@ -33,6 +33,18 @@ impl<'a, Ptr: DerefMut<Target: QueryMut<'a> + Unpin>> QueryMut<'a> for Pin<Ptr> 
     fn query_raw_text_mut(&mut self, field: ParsedField) -> Option<&'a str> {
         self.deref_mut().query_raw_text_mut(field)
     }
+}
+
+impl<Querier: EncourageReuse + ?Sized> EncourageReuse for &Querier {
+    const ENCOURAGE_REUSE: bool = Querier::ENCOURAGE_REUSE;
+}
+
+impl<Querier: EncourageReuse + ?Sized> EncourageReuse for &mut Querier {
+    const ENCOURAGE_REUSE: bool = Querier::ENCOURAGE_REUSE;
+}
+
+impl<Ptr: Deref<Target: EncourageReuse + ?Sized>> EncourageReuse for Pin<Ptr> {
+    const ENCOURAGE_REUSE: bool = <Ptr::Target as EncourageReuse>::ENCOURAGE_REUSE;
 }
 
 #[cfg(feature = "parking_lot")]

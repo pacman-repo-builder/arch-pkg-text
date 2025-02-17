@@ -279,6 +279,12 @@ pub trait ChecksumsMut<'a> {
     fn checksums_mut(&mut self) -> impl Iterator<Item = QueryChecksumItem<'a>>;
 }
 
+/// Denote whether a certain querier should be reused.
+pub trait EncourageReuse {
+    /// Whether the querier should be reused
+    const ENCOURAGE_REUSE: bool;
+}
+
 pub(crate) mod utils;
 
 mod generic;

@@ -5,7 +5,7 @@ use super::PartialParseResult;
 use crate::{
     srcinfo::{
         utils::{non_blank_trimmed_lines, parse_line},
-        Field, FieldName, ParsedField, RawField, Section,
+        EncourageReuse, Field, FieldName, ParsedField, RawField, Section,
     },
     value,
 };
@@ -252,4 +252,12 @@ impl<'a> TryFrom<&'a str> for ParsedSrcinfo<'a> {
     fn try_from(text: &'a str) -> Result<Self, Self::Error> {
         ParsedSrcinfo::parse(text).try_into_complete()
     }
+}
+
+impl EncourageReuse for ParsedSrcinfo<'_> {
+    /// [`ParsedSrcinfo`] costs O(n) time to construct (n being text length).
+    /// Performing a lookup on it costs O(1) time.
+    ///
+    /// This struct is designed to be reused.
+    const ENCOURAGE_REUSE: bool = true;
 }

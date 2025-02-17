@@ -1,8 +1,16 @@
-use crate::desc::{ParsedField, Query, QueryMut};
+use crate::desc::{EncourageReuse, ParsedField, Query, QueryMut};
 use std::{
     rc::Rc,
     sync::{Arc, Mutex, RwLock},
 };
+
+macro_rules! impl_reuse {
+    ($wrapper:ident) => {
+        impl<Querier: EncourageReuse + ?Sized> EncourageReuse for $wrapper<Querier> {
+            const ENCOURAGE_REUSE: bool = Querier::ENCOURAGE_REUSE;
+        }
+    };
+}
 
 macro_rules! impl_pointer {
     ($wrapper:ident) => {
@@ -17,6 +25,8 @@ macro_rules! impl_pointer {
                 self.query_raw_text(field)
             }
         }
+
+        impl_reuse!($wrapper);
     };
 }
 
@@ -39,6 +49,8 @@ macro_rules! impl_lock {
                 self.query_raw_text(field)
             }
         }
+
+        impl_reuse!($wrapper);
     };
 }
 

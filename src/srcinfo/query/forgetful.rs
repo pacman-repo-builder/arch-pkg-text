@@ -1,7 +1,7 @@
 use super::{
     utils::{non_blank_trimmed_lines, parse_line},
-    ChecksumValue, Checksums, ChecksumsMut, Query, QueryChecksumItem, QueryMut, QueryRawTextItem,
-    Section,
+    ChecksumValue, Checksums, ChecksumsMut, EncourageReuse, Query, QueryChecksumItem, QueryMut,
+    QueryRawTextItem, Section,
 };
 use crate::{
     srcinfo::field::{FieldName, ParsedField, RawField},
@@ -95,4 +95,12 @@ fn scan_section<'a>(
         FieldName::Name => (Section::Derivative(Name(value)), (field, value)),
         _ => (section, (field, value)),
     }
+}
+
+impl EncourageReuse for ForgetfulQuerier<'_> {
+    /// Whilst [`ForgetfulQuerier`] costs nothing to construct, performing a
+    /// lookup on it costs O(n) time complexity (n being text length).
+    ///
+    /// This struct is best used to lookup once.
+    const ENCOURAGE_REUSE: bool = false;
 }

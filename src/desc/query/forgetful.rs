@@ -1,4 +1,4 @@
-use super::{Query, QueryMut};
+use super::{EncourageReuse, Query, QueryMut};
 use crate::desc::field::{ParsedField, RawField};
 use pipe_trait::Pipe;
 
@@ -48,4 +48,12 @@ impl<'a> QueryMut<'a> for ForgetfulQuerier<'a> {
     fn query_raw_text_mut(&mut self, field: ParsedField) -> Option<&'a str> {
         self.query_raw_text(field)
     }
+}
+
+impl EncourageReuse for ForgetfulQuerier<'_> {
+    /// Whilst [`ForgetfulQuerier`] costs nothing to construct, performing a
+    /// lookup on it costs O(n) time complexity (n being text length).
+    ///
+    /// This struct is best used to lookup once.
+    const ENCOURAGE_REUSE: bool = false;
 }
