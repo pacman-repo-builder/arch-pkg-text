@@ -1,5 +1,8 @@
-use super::{EncourageReuse, Query, QueryMut};
-use crate::desc::field::{ParsedField, RawField};
+use super::{Query, QueryMut};
+use crate::desc::{
+    field::{ParsedField, RawField},
+    misc::{False, ReuseAdvice},
+};
 use pipe_trait::Pipe;
 
 /// [Query] without a cache.
@@ -50,10 +53,10 @@ impl<'a> QueryMut<'a> for ForgetfulQuerier<'a> {
     }
 }
 
-impl EncourageReuse for ForgetfulQuerier<'_> {
+impl ReuseAdvice for ForgetfulQuerier<'_> {
     /// Whilst [`ForgetfulQuerier`] costs nothing to construct, performing a
     /// lookup on it costs O(n) time complexity (n being text length).
     ///
     /// This struct is best used to lookup once.
-    const ENCOURAGE_REUSE: bool = false;
+    type ShouldReuse = False;
 }

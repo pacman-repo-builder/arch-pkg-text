@@ -1,4 +1,4 @@
-use crate::desc::{EncourageReuse, ParsedField, Query, QueryMut};
+use crate::desc::{misc::ReuseAdvice, ParsedField, Query, QueryMut};
 use std::{
     rc::Rc,
     sync::{Arc, Mutex, RwLock},
@@ -6,8 +6,8 @@ use std::{
 
 macro_rules! impl_reuse {
     ($wrapper:ident) => {
-        impl<Querier: EncourageReuse + ?Sized> EncourageReuse for $wrapper<Querier> {
-            const ENCOURAGE_REUSE: bool = Querier::ENCOURAGE_REUSE;
+        impl<Querier: ReuseAdvice + ?Sized> ReuseAdvice for $wrapper<Querier> {
+            type ShouldReuse = Querier::ShouldReuse;
         }
     };
 }

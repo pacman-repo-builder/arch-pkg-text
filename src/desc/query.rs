@@ -60,19 +60,9 @@ def_traits! {
     replaces, replaces_mut = Replaces -> DependencyList;
 }
 
-/// Denote whether a certain querier should be reused.
-///
-/// "Reuse" means to call methods of [`Query`] and/or [`QueryMut`] more than once.
-pub trait EncourageReuse {
-    /// Whether the querier should be reused
-    const ENCOURAGE_REUSE: bool;
-}
-
 mod forgetful;
 mod generic;
 mod memo;
-
-pub mod misc;
 
 pub use crate::parse::ParsedDesc as EagerQuerier;
 pub use forgetful::ForgetfulQuerier;

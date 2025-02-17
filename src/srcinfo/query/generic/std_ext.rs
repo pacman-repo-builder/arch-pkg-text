@@ -1,4 +1,4 @@
-use crate::srcinfo::{EncourageReuse, FieldName, Query, QueryMut, QueryRawTextItem};
+use crate::srcinfo::{misc::ReuseAdvice, FieldName, Query, QueryMut, QueryRawTextItem};
 use std::{rc::Rc, sync::Arc};
 
 macro_rules! impl_pointer {
@@ -21,8 +21,8 @@ macro_rules! impl_pointer {
             }
         }
 
-        impl<Querier: EncourageReuse + ?Sized> EncourageReuse for $wrapper<Querier> {
-            const ENCOURAGE_REUSE: bool = Querier::ENCOURAGE_REUSE;
+        impl<Querier: ReuseAdvice + ?Sized> ReuseAdvice for $wrapper<Querier> {
+            type ShouldReuse = Querier::ShouldReuse;
         }
     };
 }

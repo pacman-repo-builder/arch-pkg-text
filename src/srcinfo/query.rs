@@ -279,14 +279,6 @@ pub trait ChecksumsMut<'a> {
     fn checksums_mut(&mut self) -> impl Iterator<Item = QueryChecksumItem<'a>>;
 }
 
-/// Denote whether a certain querier should be reused.
-///
-/// "Reuse" means to call methods of [`Query`] and/or [`QueryMut`] more than once.
-pub trait EncourageReuse {
-    /// Whether the querier should be reused
-    const ENCOURAGE_REUSE: bool;
-}
-
 pub(crate) mod utils;
 
 mod generic;
@@ -304,5 +296,3 @@ pub use memo::*;
 
 #[cfg(feature = "std")]
 pub use crate::parse::ParsedSrcinfo as EagerQuerier;
-
-pub mod misc;

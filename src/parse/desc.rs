@@ -1,6 +1,7 @@
 use super::PartialParseResult;
 use crate::desc::{
-    EncourageReuse, FieldName, ParseRawFieldError, ParsedField, Query, QueryMut, RawField,
+    misc::{ReuseAdvice, True},
+    FieldName, ParseRawFieldError, ParsedField, Query, QueryMut, RawField,
 };
 use derive_more::{Display, Error};
 use lines_inclusive::{LinesInclusive, LinesInclusiveIter};
@@ -177,10 +178,10 @@ impl<'a> QueryMut<'a> for ParsedDesc<'a> {
     }
 }
 
-impl EncourageReuse for ParsedDesc<'_> {
+impl ReuseAdvice for ParsedDesc<'_> {
     /// [`ParsedDesc`] costs O(n) time to construct (n being text length).
     /// Performing a lookup on it costs O(1) time.
     ///
     /// This struct is designed to be reused.
-    const ENCOURAGE_REUSE: bool = true;
+    type ShouldReuse = True;
 }

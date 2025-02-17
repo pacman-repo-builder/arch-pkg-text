@@ -1,4 +1,5 @@
-use crate::desc::{EncourageReuse, ParsedField, Query, QueryMut};
+use super::ReuseAdvice;
+use crate::desc::{ParsedField, Query, QueryMut};
 
 /// Wrapper struct to permit [`QueryMut`] on a struct that only implements [`Query`].
 #[derive(Debug, Default, Clone, Copy)]
@@ -16,6 +17,6 @@ impl<'a, Querier: Query<'a> + ?Sized> QueryMut<'a> for DeriveQueryMut<Querier> {
     }
 }
 
-impl<'a, Querier: Query<'a> + EncourageReuse + ?Sized> EncourageReuse for DeriveQueryMut<Querier> {
-    const ENCOURAGE_REUSE: bool = Querier::ENCOURAGE_REUSE;
+impl<Querier: ReuseAdvice + ?Sized> ReuseAdvice for DeriveQueryMut<Querier> {
+    type ShouldReuse = Querier::ShouldReuse;
 }

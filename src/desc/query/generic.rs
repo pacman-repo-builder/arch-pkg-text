@@ -1,5 +1,5 @@
-use super::{EncourageReuse, Query, QueryMut};
-use crate::desc::ParsedField;
+use super::{Query, QueryMut};
+use crate::desc::{misc::ReuseAdvice, ParsedField};
 use core::{
     ops::{Deref, DerefMut},
     pin::Pin,
@@ -35,16 +35,16 @@ impl<'a, Ptr: DerefMut<Target: QueryMut<'a> + Unpin>> QueryMut<'a> for Pin<Ptr> 
     }
 }
 
-impl<Querier: EncourageReuse + ?Sized> EncourageReuse for &Querier {
-    const ENCOURAGE_REUSE: bool = Querier::ENCOURAGE_REUSE;
+impl<Querier: ReuseAdvice + ?Sized> ReuseAdvice for &Querier {
+    type ShouldReuse = Querier::ShouldReuse;
 }
 
-impl<Querier: EncourageReuse + ?Sized> EncourageReuse for &mut Querier {
-    const ENCOURAGE_REUSE: bool = Querier::ENCOURAGE_REUSE;
+impl<Querier: ReuseAdvice + ?Sized> ReuseAdvice for &mut Querier {
+    type ShouldReuse = Querier::ShouldReuse;
 }
 
-impl<Ptr: Deref<Target: EncourageReuse + ?Sized>> EncourageReuse for Pin<Ptr> {
-    const ENCOURAGE_REUSE: bool = <Ptr::Target as EncourageReuse>::ENCOURAGE_REUSE;
+impl<Ptr: Deref<Target: ReuseAdvice + ?Sized>> ReuseAdvice for Pin<Ptr> {
+    type ShouldReuse = <Ptr::Target as ReuseAdvice>::ShouldReuse;
 }
 
 #[cfg(feature = "parking_lot")]

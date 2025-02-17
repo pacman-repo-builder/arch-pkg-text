@@ -1,5 +1,8 @@
-use super::{EncourageReuse, QueryMut};
-use crate::desc::field::{FieldName, ParsedField, RawField};
+use super::QueryMut;
+use crate::desc::{
+    field::{FieldName, ParsedField, RawField},
+    misc::{ReuseAdvice, True},
+};
 
 /// [Query](QueryMut) with a cache.
 #[derive(Debug, Clone)]
@@ -152,10 +155,10 @@ def_cache!(
     Provides Conflicts Replaces
 );
 
-impl EncourageReuse for MemoQuerier<'_> {
+impl ReuseAdvice for MemoQuerier<'_> {
     /// [`MemoQuerier`] costs O(1) time to construct. Performing a lookup on it
     /// costs O(n) the first time and O(1) after that.
     ///
     /// This struct is designed to be reused.
-    const ENCOURAGE_REUSE: bool = true;
+    type ShouldReuse = True;
 }

@@ -1,5 +1,6 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 pub mod desc;
+pub mod misc;
 pub mod parse;
 pub mod srcinfo;
 pub mod value;

@@ -4,8 +4,9 @@ mod data;
 use super::PartialParseResult;
 use crate::{
     srcinfo::{
+        misc::{ReuseAdvice, True},
         utils::{non_blank_trimmed_lines, parse_line},
-        EncourageReuse, Field, FieldName, ParsedField, RawField, Section,
+        Field, FieldName, ParsedField, RawField, Section,
     },
     value,
 };
@@ -254,10 +255,10 @@ impl<'a> TryFrom<&'a str> for ParsedSrcinfo<'a> {
     }
 }
 
-impl EncourageReuse for ParsedSrcinfo<'_> {
+impl ReuseAdvice for ParsedSrcinfo<'_> {
     /// [`ParsedSrcinfo`] costs O(n) time to construct (n being text length).
     /// Performing a lookup on it costs O(1) time.
     ///
     /// This struct is designed to be reused.
-    const ENCOURAGE_REUSE: bool = true;
+    type ShouldReuse = True;
 }

@@ -2,11 +2,14 @@ mod cache;
 
 use super::{
     utils::{parse_line, trimmed_line_is_blank},
-    ChecksumType, ChecksumValue, ChecksumsMut, EncourageReuse, QueryChecksumItem, QueryMut,
-    QueryRawTextItem, Section,
+    ChecksumType, ChecksumValue, ChecksumsMut, QueryChecksumItem, QueryMut, QueryRawTextItem,
+    Section,
 };
 use crate::{
-    srcinfo::field::FieldName,
+    srcinfo::{
+        field::FieldName,
+        misc::{ReuseAdvice, True},
+    },
     value::{Architecture, Name},
 };
 use cache::Cache;
@@ -160,10 +163,10 @@ impl<'a> ChecksumsMut<'a> for MemoQuerier<'a> {
     }
 }
 
-impl EncourageReuse for MemoQuerier<'_> {
+impl ReuseAdvice for MemoQuerier<'_> {
     /// [`MemoQuerier`] costs O(1) time to construct. Performing a lookup on it
     /// costs O(n) the first time and O(1) after that.
     ///
     /// This struct is designed to be reused.
-    const ENCOURAGE_REUSE: bool = true;
+    type ShouldReuse = True;
 }
