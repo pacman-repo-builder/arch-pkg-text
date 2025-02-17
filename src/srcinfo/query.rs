@@ -280,6 +280,8 @@ pub trait ChecksumsMut<'a> {
 }
 
 /// Denote whether a certain querier should be reused.
+///
+/// "Reuse" means to call methods of [`Query`] and/or [`QueryMut`] more than once.
 pub trait EncourageReuse {
     /// Whether the querier should be reused
     const ENCOURAGE_REUSE: bool;
