@@ -72,6 +72,8 @@ mod forgetful;
 mod generic;
 mod memo;
 
+pub mod misc;
+
 pub use crate::parse::ParsedDesc as EagerQuerier;
 pub use forgetful::ForgetfulQuerier;
 pub use memo::MemoQuerier;

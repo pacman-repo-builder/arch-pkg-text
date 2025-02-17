@@ -304,3 +304,5 @@ pub use memo::*;
 
 #[cfg(feature = "std")]
 pub use crate::parse::ParsedSrcinfo as EagerQuerier;
+
+pub mod misc;
