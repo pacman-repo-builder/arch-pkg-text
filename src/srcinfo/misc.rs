@@ -1,3 +1,5 @@
+//! Miscellaneous items.
+
 mod derive_query_mut;
 mod reuse_advice;
 
