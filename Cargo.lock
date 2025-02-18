@@ -15,6 +15,7 @@ dependencies = [
  "pipe-trait",
  "pretty_assertions",
  "strum",
+ "typebool",
 ]
 
 [[package]]
@@ -373,6 +374,12 @@ dependencies = [
  "quote",
  "unicode-ident",
 ]
+
+[[package]]
+name = "typebool"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d094029e04f227a8065b5eb31b8a5e95bcdaeccbc3fe7e9cc19b74120752c219"
 
 [[package]]
 name = "unicode-ident"

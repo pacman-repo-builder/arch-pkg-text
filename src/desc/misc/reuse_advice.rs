@@ -1,4 +1,4 @@
-pub use crate::misc::{False, StaticBool, StaticValue, True};
+pub use crate::misc::{False, StaticBool, True};
 
 /// Denote whether a certain querier should be reused.
 ///
