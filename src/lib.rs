@@ -10,8 +10,3 @@ pub use parse::ParsedDesc;
 #[cfg(feature = "std")]
 pub use parse::ParsedSrcinfo;
 pub use srcinfo::{Query as QuerySrcinfo, QueryMut as QuerySrcinfoMut};
-
-#[cfg(feature = "std")]
-pub use indexmap;
-#[cfg(feature = "parking_lot")]
-pub use parking_lot;
