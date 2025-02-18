@@ -41,7 +41,7 @@ iter-scan = "0.4.0"
 parking_lot = { version = "0.12.3", optional = true }
 pipe-trait = "0.4.0"
 typebool = "0.1.0"
-strum = { version = "0.26.3", default-features = false, features = ["derive", "phf"] }
+strum = { version = "0.27.1", default-features = false, features = ["derive", "phf"] }
 
 [dev-dependencies]
 hex-literal = "0.4.1"
