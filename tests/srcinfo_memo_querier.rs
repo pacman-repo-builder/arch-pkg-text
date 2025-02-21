@@ -348,7 +348,9 @@ fn filter_out_empty_values() {
                 .map(QueryItem::into_tuple3)
                 .collect::<Vec<_>>(),
             [(
-                Source("parallel-disk-usage-0.11.0.tar.gz::https://github.com/KSXGitHub/parallel-disk-usage/archive/0.11.0.tar.gz"),
+                Source(
+                    "parallel-disk-usage-0.11.0.tar.gz::https://github.com/KSXGitHub/parallel-disk-usage/archive/0.11.0.tar.gz"
+                ),
                 Section::Base,
                 None,
             )],

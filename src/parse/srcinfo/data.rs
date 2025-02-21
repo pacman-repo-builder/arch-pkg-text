@@ -1,5 +1,5 @@
 use super::{
-    unknown_field_from_parsed, AddFailure, ParsedSrcinfo, ParsedSrcinfoDerivativeSectionEntryMut,
+    AddFailure, ParsedSrcinfo, ParsedSrcinfoDerivativeSectionEntryMut, unknown_field_from_parsed,
 };
 use crate::{
     srcinfo::{FieldName, ParsedField, Query, QueryItem, QueryMut, QueryRawTextItem, Section},

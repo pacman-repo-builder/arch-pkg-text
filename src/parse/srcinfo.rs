@@ -4,9 +4,9 @@ mod data;
 use super::PartialParseResult;
 use crate::{
     srcinfo::{
+        Field, FieldName, ParsedField, RawField, Section,
         misc::{ReuseAdvice, True},
         utils::{non_blank_trimmed_lines, parse_line},
-        Field, FieldName, ParsedField, RawField, Section,
     },
     value,
 };

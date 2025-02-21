@@ -1,5 +1,5 @@
 use super::{Query, QueryMut};
-use crate::desc::{misc::ReuseAdvice, ParsedField};
+use crate::desc::{ParsedField, misc::ReuseAdvice};
 use core::{
     ops::{Deref, DerefMut},
     pin::Pin,

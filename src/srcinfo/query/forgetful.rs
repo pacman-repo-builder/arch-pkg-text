@@ -1,7 +1,7 @@
 use super::{
-    utils::{non_blank_trimmed_lines, parse_line},
     ChecksumValue, Checksums, ChecksumsMut, Query, QueryChecksumItem, QueryMut, QueryRawTextItem,
     Section,
+    utils::{non_blank_trimmed_lines, parse_line},
 };
 use crate::{
     srcinfo::{

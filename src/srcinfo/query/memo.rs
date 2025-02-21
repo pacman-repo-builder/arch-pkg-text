@@ -1,9 +1,9 @@
 mod cache;
 
 use super::{
-    utils::{parse_line, trimmed_line_is_blank},
     ChecksumType, ChecksumValue, ChecksumsMut, QueryChecksumItem, QueryMut, QueryRawTextItem,
     Section,
+    utils::{parse_line, trimmed_line_is_blank},
 };
 use crate::{
     srcinfo::{

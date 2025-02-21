@@ -1,5 +1,5 @@
 use super::{Query, QueryMut, QueryRawTextItem};
-use crate::srcinfo::{misc::ReuseAdvice, FieldName};
+use crate::srcinfo::{FieldName, misc::ReuseAdvice};
 use core::{
     ops::{Deref, DerefMut},
     pin::Pin,

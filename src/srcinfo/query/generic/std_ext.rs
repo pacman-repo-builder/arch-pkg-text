@@ -1,4 +1,4 @@
-use crate::srcinfo::{misc::ReuseAdvice, FieldName, Query, QueryMut, QueryRawTextItem};
+use crate::srcinfo::{FieldName, Query, QueryMut, QueryRawTextItem, misc::ReuseAdvice};
 use std::{rc::Rc, sync::Arc};
 
 macro_rules! impl_pointer {

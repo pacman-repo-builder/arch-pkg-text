@@ -1,7 +1,7 @@
 use super::PartialParseResult;
 use crate::desc::{
-    misc::{ReuseAdvice, True},
     FieldName, ParseRawFieldError, ParsedField, Query, QueryMut, RawField,
+    misc::{ReuseAdvice, True},
 };
 use derive_more::{Display, Error};
 use lines_inclusive::{LinesInclusive, LinesInclusiveIter};

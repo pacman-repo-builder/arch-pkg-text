@@ -39,11 +39,7 @@ impl<'a> Query<'a> for ForgetfulQuerier<'a> {
 
         let value = self.0[value_start_offset..value_end_offset].trim_matches(['\n', '\r']);
 
-        if value.is_empty() {
-            None
-        } else {
-            Some(value)
-        }
+        if value.is_empty() { None } else { Some(value) }
     }
 }
 

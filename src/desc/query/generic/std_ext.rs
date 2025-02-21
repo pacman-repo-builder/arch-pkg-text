@@ -1,4 +1,4 @@
-use crate::desc::{misc::ReuseAdvice, ParsedField, Query, QueryMut};
+use crate::desc::{ParsedField, Query, QueryMut, misc::ReuseAdvice};
 use std::{
     rc::Rc,
     sync::{Arc, Mutex, RwLock},
