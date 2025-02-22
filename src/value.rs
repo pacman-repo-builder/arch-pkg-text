@@ -3,19 +3,49 @@
 use core::{
     iter::{DoubleEndedIterator, FusedIterator},
     num::ParseIntError,
+    ops::Deref,
     str::Split,
 };
 use derive_more::{AsRef, Deref, Display};
 use parse_hex::ParseHex;
+use pipe_trait::Pipe;
 
 macro_rules! impl_str {
     ($container:ident) => {
-        impl<'a> $container<'a> {
+        impl<Text> $container<Text> {
             /// Create the wrapper.
-            pub fn new(text: &'a str) -> Self {
+            pub fn new(text: Text) -> Self {
                 $container(text)
             }
 
+            /// Create a wrapper of referenced internal.
+            pub fn to_ref<Ref>(&self) -> $container<&Ref>
+            where
+                Ref: ?Sized,
+                Text: AsRef<Ref>,
+            {
+                self.0.as_ref().pipe($container)
+            }
+
+            /// Create a wrapper of dereferenced internal.
+            pub fn as_deref(&self) -> $container<&Text::Target>
+            where
+                Text: Deref,
+            {
+                $container(&self.0)
+            }
+
+            /// Create an owned version of the wrapper.
+            #[cfg(feature = "std")]
+            pub fn to_owned(&self) -> $container<Text::Owned>
+            where
+                Text: ToOwned,
+            {
+                self.0.to_owned().pipe($container)
+            }
+        }
+
+        impl<'a> $container<&'a str> {
             /// Get an immutable reference to the raw string underneath.
             pub fn as_str(&self) -> &'a str {
                 &self.0.as_ref()
@@ -26,15 +56,15 @@ macro_rules! impl_str {
 
 macro_rules! impl_hex {
     ($container:ident, $size:literal) => {
-        impl<'a> $container<'a> {
+        impl<Text: AsRef<str>> $container<Text> {
             /// Convert the hex string into an array of 8-bit unsigned integers.
-            pub fn u8_array(self) -> Option<[u8; $size]> {
-                let (invalid, array) = ParseHex::parse_hex(self.0);
+            pub fn u8_array(&self) -> Option<[u8; $size]> {
+                let (invalid, array) = ParseHex::parse_hex(self.0.as_ref());
                 invalid.is_empty().then_some(array)
             }
         }
 
-        impl<'a> ParseArray for $container<'a> {
+        impl<Text: AsRef<str>> ParseArray for $container<Text> {
             type Array = [u8; $size];
             type Error = ();
             fn parse_array(&self) -> Result<Self::Array, Self::Error> {
@@ -46,18 +76,19 @@ macro_rules! impl_hex {
 
 macro_rules! impl_srcinfo_checksum {
     ($container:ident, $size:literal) => {
-        impl<'a> $container<'a> {
+        impl<Text: AsRef<str>> $container<Text> {
             /// Convert the hex string into an array of 8-bit unsigned integers.
-            pub fn u8_array(self) -> Option<SkipOrArray<$size>> {
-                if self.as_str() == "SKIP" {
+            pub fn u8_array(&self) -> Option<SkipOrArray<$size>> {
+                let text = self.0.as_ref();
+                if text == "SKIP" {
                     return Some(SkipOrArray::Skip);
                 }
-                let (invalid, array) = ParseHex::parse_hex(self.0);
+                let (invalid, array) = ParseHex::parse_hex(text);
                 invalid.is_empty().then_some(SkipOrArray::Array(array))
             }
         }
 
-        impl<'a> ParseArray for $container<'a> {
+        impl<Text: AsRef<str>> ParseArray for $container<Text> {
             type Array = SkipOrArray<$size>;
             type Error = ();
             fn parse_array(&self) -> Result<Self::Array, Self::Error> {
@@ -70,10 +101,10 @@ macro_rules! impl_srcinfo_checksum {
 macro_rules! impl_num {
     ($container:ident, $num:ty) => {
         impl_str!($container);
-        impl<'a> $container<'a> {
+        impl<Text: AsRef<str>> $container<Text> {
             /// Extract numeric value.
             pub fn parse(&self) -> Result<$num, ParseIntError> {
-                self.as_str().parse()
+                self.0.as_ref().parse()
             }
         }
     };
@@ -86,7 +117,7 @@ macro_rules! def_str_wrappers {
     )*) => {$(
         $(#[$attrs])*
         #[derive(Debug, Display, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, AsRef, Deref)]
-        pub struct $name<'a>(pub &'a str);
+        pub struct $name<Text>(pub Text);
         impl_str!($name);
     )*};
 }
@@ -100,7 +131,7 @@ macro_rules! def_hex_wrappers {
     )*) => {$(
         $(#[$attrs])*
         #[derive(Debug, Display, Clone, Copy, AsRef, Deref)]
-        pub struct $name<'a>(pub &'a str);
+        pub struct $name<Text>(pub Text);
         impl_str!($name);
         impl_hex!($name, $size);
     )*};
@@ -115,7 +146,7 @@ macro_rules! def_srcinfo_checksum_wrappers {
     )*) => {$(
         $(#[$attrs])*
         #[derive(Debug, Display, Clone, Copy, AsRef, Deref)]
-        pub struct $name<'a>(pub &'a str);
+        pub struct $name<Text>(pub Text);
         impl_str!($name);
         impl_srcinfo_checksum!($name, $size);
     )*};
@@ -128,7 +159,7 @@ macro_rules! def_b64_wrappers {
     )*) => {$(
         $(#[$attrs])*
         #[derive(Debug, Display, Clone, Copy, AsRef, Deref)]
-        pub struct $name<'a>(pub &'a str);
+        pub struct $name<Text>(pub Text);
         impl_str!($name);
     )*};
 }
@@ -140,7 +171,7 @@ macro_rules! def_num_wrappers {
     )*) => {$(
         $(#[$attrs])*
         #[derive(Debug, Display, Clone, Copy, AsRef, Deref)]
-        pub struct $name<'a>(&'a str);
+        pub struct $name<Text>(Text);
         impl_num!($name, $num);
     )*};
 }
@@ -157,23 +188,26 @@ macro_rules! def_list_wrappers {
     )*) => {$(
         $(#[$container_attrs])*
         #[derive(Debug, Clone, Copy)]
-        pub struct $container_name<'a>(&'a str);
+        pub struct $container_name<Text>(Text);
 
-        impl<'a> $container_name<'a> {
+        impl<Text> $container_name<Text> {
             /// Create the wrapper.
-            pub fn new(text: &'a str) -> Self {
+            pub fn new(text: Text) -> Self {
                 $container_name(text)
             }
 
             /// List the items.
-            pub fn iter(&self) -> $iter_name<'_> {
-                self.into_iter()
+            pub fn iter(&self) -> $iter_name<'_>
+            where
+                Text: AsRef<str>,
+            {
+                self.0.as_ref().pipe($container_name).into_iter()
             }
         }
 
-        impl<'a> IntoIterator for $container_name<'a> {
+        impl<'a> IntoIterator for $container_name<&'a str> {
             type IntoIter = $iter_name<'a>;
-            type Item = $item_name<'a>;
+            type Item = $item_name<&'a str>;
             fn into_iter(self) -> Self::IntoIter {
                 $iter_name(self.0.split('\n'))
             }
@@ -184,7 +218,7 @@ macro_rules! def_list_wrappers {
         pub struct $iter_name<'a>(Split<'a, char>);
 
         impl<'a> Iterator for $iter_name<'a> {
-            type Item = $item_name<'a>;
+            type Item = $item_name<&'a str>;
             fn next(&mut self) -> Option<Self::Item> {
                 self.0.next().map($item_name)
             }
@@ -203,7 +237,7 @@ macro_rules! def_list_wrappers {
 
         $(#[$item_attrs])*
         #[derive(Debug, Display, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, AsRef, Deref)]
-        pub struct $item_name<'a>(pub &'a str);
+        pub struct $item_name<Text>(pub Text);
         impl_str!($item_name);
     )*};
 }

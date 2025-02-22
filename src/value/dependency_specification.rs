@@ -1,6 +1,6 @@
 use super::{DependencySpecification, DependencySpecificationOperator, Version};
 
-impl<'a> DependencySpecification<'a> {
+impl<'a> DependencySpecification<&'a str> {
     /// Extract [`DependencySpecificationOperator`] and [`Version`].
     ///
     /// ```
@@ -15,7 +15,7 @@ impl<'a> DependencySpecification<'a> {
     /// );
     /// assert_eq!(DependencySpecification("").components(), None);
     /// ```
-    pub fn components(&self) -> Option<(DependencySpecificationOperator, Version<'a>)> {
+    pub fn components(&self) -> Option<(DependencySpecificationOperator, Version<&'a str>)> {
         DependencySpecificationOperator::parse(self)
             .map(|(depend_spec_operator, version)| (depend_spec_operator, Version(version)))
     }
