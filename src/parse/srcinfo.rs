@@ -1,7 +1,7 @@
 mod checksums;
 mod data;
 
-use super::PartialParseResult;
+use super::{ParseWithIssues, PartialParse, PartialParseResult};
 use crate::{
     srcinfo::{
         Field, FieldName, ParsedField, RawField, Section,
@@ -242,6 +242,25 @@ impl<'a> ParsedSrcinfo<'a> {
         }
 
         PartialParseResult::new_complete(parsed)
+    }
+}
+
+impl<'a> PartialParse<&'a str> for ParsedSrcinfo<'a> {
+    type Error = SrcinfoParseError<'a>;
+    fn partial_parse(input: &'a str) -> PartialParseResult<Self, Self::Error> {
+        ParsedSrcinfo::parse(input)
+    }
+}
+
+impl<'a, HandleIssue, Error> ParseWithIssues<&'a str, HandleIssue, Error> for ParsedSrcinfo<'a>
+where
+    HandleIssue: FnMut(SrcinfoParseIssue<'a>) -> Result<(), Error>,
+{
+    fn parse_with_issues(
+        input: &'a str,
+        handle_issue: HandleIssue,
+    ) -> PartialParseResult<Self, Error> {
+        ParsedSrcinfo::parse_with_issues(input, handle_issue)
     }
 }
 

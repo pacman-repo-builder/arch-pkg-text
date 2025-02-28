@@ -6,6 +6,7 @@ use super::{
     utils::{parse_line, trimmed_line_is_blank},
 };
 use crate::{
+    parse::{ParseWithIssues, PartialParse, PartialParseResult},
     srcinfo::{
         field::FieldName,
         misc::{ReuseAdvice, True},
@@ -13,6 +14,7 @@ use crate::{
     value::{Architecture, Name},
 };
 use cache::Cache;
+use core::convert::Infallible;
 use core::str::Lines;
 use pipe_trait::Pipe;
 
@@ -174,5 +176,19 @@ impl ReuseAdvice for MemoQuerier<'_> {
 impl<'a> From<&'a str> for MemoQuerier<'a> {
     fn from(value: &'a str) -> Self {
         MemoQuerier::new(value)
+    }
+}
+
+impl<'a> PartialParse<&'a str> for MemoQuerier<'a> {
+    type Error = Infallible;
+    fn partial_parse(text: &'a str) -> PartialParseResult<Self, Self::Error> {
+        MemoQuerier::parse_with_issues(text, ())
+    }
+}
+
+impl<'a, HandleIssue, Error> ParseWithIssues<&'a str, HandleIssue, Error> for MemoQuerier<'a> {
+    fn parse_with_issues(text: &'a str, _: HandleIssue) -> PartialParseResult<Self, Error> {
+        text.pipe(MemoQuerier::new)
+            .pipe(PartialParseResult::new_complete)
     }
 }

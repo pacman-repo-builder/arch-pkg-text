@@ -1,7 +1,12 @@
+use core::convert::Infallible;
+
 use super::{Query, QueryMut};
-use crate::desc::{
-    field::{ParsedField, RawField},
-    misc::{False, ReuseAdvice},
+use crate::{
+    desc::{
+        field::{ParsedField, RawField},
+        misc::{False, ReuseAdvice},
+    },
+    parse::{ParseWithIssues, PartialParse, PartialParseResult},
 };
 use pipe_trait::Pipe;
 
@@ -60,5 +65,19 @@ impl ReuseAdvice for ForgetfulQuerier<'_> {
 impl<'a> From<&'a str> for ForgetfulQuerier<'a> {
     fn from(value: &'a str) -> Self {
         ForgetfulQuerier::new(value)
+    }
+}
+
+impl<'a> PartialParse<&'a str> for ForgetfulQuerier<'a> {
+    type Error = Infallible;
+    fn partial_parse(text: &'a str) -> PartialParseResult<Self, Self::Error> {
+        ForgetfulQuerier::parse_with_issues(text, ())
+    }
+}
+
+impl<'a, HandleIssue, Error> ParseWithIssues<&'a str, HandleIssue, Error> for ForgetfulQuerier<'a> {
+    fn parse_with_issues(text: &'a str, _: HandleIssue) -> PartialParseResult<Self, Error> {
+        text.pipe(ForgetfulQuerier::new)
+            .pipe(PartialParseResult::new_complete)
     }
 }
