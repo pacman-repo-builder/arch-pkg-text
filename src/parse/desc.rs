@@ -159,8 +159,11 @@ impl<'a> ParsedDesc<'a> {
     }
 }
 
+/// Try parsing a `desc` text, unknown fields are ignored, partial success means error.
 impl<'a> TryFrom<&'a str> for ParsedDesc<'a> {
+    /// Error that occurs when parsing fails or incomplete.
     type Error = DescParseError<'a>;
+    /// Try parsing a `desc` text, unknown fields are ignored, partial success means error.
     fn try_from(text: &'a str) -> Result<Self, Self::Error> {
         ParsedDesc::parse(text)
     }
