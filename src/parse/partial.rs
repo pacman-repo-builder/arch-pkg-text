@@ -1,3 +1,25 @@
+/// Partially parse an input.
+pub trait PartialParse<Input>: Sized {
+    /// Error that stopped the parsing process.
+    type Error;
+
+    /// Parse an input until completion or when an error occurs.
+    ///
+    /// The complete or partial result can be recovered regardless of errors.
+    fn partial_parse(input: Input) -> PartialParseResult<Self, Self::Error>;
+}
+
+/// Partially parse an input with an issue handler.
+pub trait ParseWithIssues<Input, HandleIssue, Error>: Sized {
+    /// Parse an input until completion or when the issue handler returns an error.
+    ///
+    /// The complete or partial result can be recovered regardless of errors.
+    fn parse_with_issues(
+        input: Input,
+        handle_issue: HandleIssue,
+    ) -> PartialParseResult<Self, Error>;
+}
+
 /// Result of a parsing process that may or may not be complete.
 #[derive(Debug, Clone, Copy)]
 pub struct PartialParseResult<Parsed, Error> {

@@ -1,4 +1,4 @@
-use super::PartialParseResult;
+use super::{ParseWithIssues, PartialParse, PartialParseResult};
 use crate::desc::{
     FieldName, ParseRawFieldError, ParsedField, Query, QueryMut, RawField,
     misc::{ReuseAdvice, True},
@@ -82,8 +82,7 @@ impl<'a> DescParseIssue<'a> {
 impl<'a> ParsedDesc<'a> {
     /// Parse a `desc` file text, unknown fields are ignored.
     pub fn parse(text: &'a str) -> Result<Self, DescParseError<'a>> {
-        ParsedDesc::parse_with_issues(text, DescParseIssue::ignore_unknown_field)
-            .try_into_complete()
+        ParsedDesc::partial_parse(text).try_into_complete()
     }
 
     /// Parse a `desc` file text with a callback that handle [parsing issues](DescParseIssue).
@@ -166,6 +165,25 @@ impl<'a> TryFrom<&'a str> for ParsedDesc<'a> {
     /// Try parsing a `desc` text, unknown fields are ignored, partial success means error.
     fn try_from(text: &'a str) -> Result<Self, Self::Error> {
         ParsedDesc::parse(text)
+    }
+}
+
+impl<'a> PartialParse<&'a str> for ParsedDesc<'a> {
+    type Error = DescParseError<'a>;
+    fn partial_parse(input: &'a str) -> PartialParseResult<Self, Self::Error> {
+        ParsedDesc::parse_with_issues(input, DescParseIssue::ignore_unknown_field)
+    }
+}
+
+impl<'a, HandleIssue, Error> ParseWithIssues<&'a str, HandleIssue, Error> for ParsedDesc<'a>
+where
+    HandleIssue: FnMut(DescParseIssue<'a>) -> Result<(), Error>,
+{
+    fn parse_with_issues(
+        input: &'a str,
+        handle_issue: HandleIssue,
+    ) -> PartialParseResult<Self, Error> {
+        ParsedDesc::parse_with_issues(input, handle_issue)
     }
 }
 

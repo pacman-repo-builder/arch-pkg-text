@@ -4,12 +4,14 @@ use super::{
     utils::{non_blank_trimmed_lines, parse_line},
 };
 use crate::{
+    parse::{ParseWithIssues, PartialParse, PartialParseResult},
     srcinfo::{
         field::{FieldName, ParsedField, RawField},
         misc::{False, ReuseAdvice},
     },
     value::{Architecture, Name},
 };
+use core::convert::Infallible;
 use iter_scan::IterScan;
 use pipe_trait::Pipe;
 
@@ -111,5 +113,19 @@ impl ReuseAdvice for ForgetfulQuerier<'_> {
 impl<'a> From<&'a str> for ForgetfulQuerier<'a> {
     fn from(value: &'a str) -> Self {
         ForgetfulQuerier::new(value)
+    }
+}
+
+impl<'a> PartialParse<&'a str> for ForgetfulQuerier<'a> {
+    type Error = Infallible;
+    fn partial_parse(text: &'a str) -> PartialParseResult<Self, Self::Error> {
+        ForgetfulQuerier::parse_with_issues(text, ())
+    }
+}
+
+impl<'a, HandleIssue, Error> ParseWithIssues<&'a str, HandleIssue, Error> for ForgetfulQuerier<'a> {
+    fn parse_with_issues(text: &'a str, _: HandleIssue) -> PartialParseResult<Self, Error> {
+        text.pipe(ForgetfulQuerier::new)
+            .pipe(PartialParseResult::new_complete)
     }
 }

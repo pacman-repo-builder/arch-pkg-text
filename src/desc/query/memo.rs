@@ -1,8 +1,13 @@
 use super::QueryMut;
-use crate::desc::{
-    field::{FieldName, ParsedField, RawField},
-    misc::{ReuseAdvice, True},
+use crate::{
+    desc::{
+        field::{FieldName, ParsedField, RawField},
+        misc::{ReuseAdvice, True},
+    },
+    parse::{ParseWithIssues, PartialParse, PartialParseResult},
 };
+use core::convert::Infallible;
+use pipe_trait::Pipe;
 
 /// [Query](QueryMut) with a cache.
 #[derive(Debug, Clone)]
@@ -166,5 +171,19 @@ impl ReuseAdvice for MemoQuerier<'_> {
 impl<'a> From<&'a str> for MemoQuerier<'a> {
     fn from(value: &'a str) -> Self {
         MemoQuerier::new(value)
+    }
+}
+
+impl<'a> PartialParse<&'a str> for MemoQuerier<'a> {
+    type Error = Infallible;
+    fn partial_parse(text: &'a str) -> PartialParseResult<Self, Self::Error> {
+        MemoQuerier::parse_with_issues(text, ())
+    }
+}
+
+impl<'a, HandleIssue, Error> ParseWithIssues<&'a str, HandleIssue, Error> for MemoQuerier<'a> {
+    fn parse_with_issues(text: &'a str, _: HandleIssue) -> PartialParseResult<Self, Error> {
+        text.pipe(MemoQuerier::new)
+            .pipe(PartialParseResult::new_complete)
     }
 }
