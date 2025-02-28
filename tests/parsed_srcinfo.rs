@@ -14,7 +14,7 @@ use arch_pkg_text::{
         UpstreamVersion,
     },
 };
-use hex_literal::hex;
+use hex_lit::hex;
 use pipe_trait::Pipe;
 use pretty_assertions::assert_eq;
 

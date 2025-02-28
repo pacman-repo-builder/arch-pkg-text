@@ -44,7 +44,7 @@ typebool = "0.1.0"
 strum = { version = "0.27.1", default-features = false, features = ["derive", "phf"] }
 
 [dev-dependencies]
-hex-literal = "0.4.1"
+hex_lit = { version = "0.1.1", features = ["rust_v_1_46"] }
 pretty_assertions = "1.4.1"
 
 [package.metadata.docs.rs]
