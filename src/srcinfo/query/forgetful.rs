@@ -107,3 +107,9 @@ impl ReuseAdvice for ForgetfulQuerier<'_> {
     /// This struct is best used to lookup once.
     type ShouldReuse = False;
 }
+
+impl<'a> From<&'a str> for ForgetfulQuerier<'a> {
+    fn from(value: &'a str) -> Self {
+        ForgetfulQuerier::new(value)
+    }
+}

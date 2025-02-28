@@ -170,3 +170,9 @@ impl ReuseAdvice for MemoQuerier<'_> {
     /// This struct is designed to be reused.
     type ShouldReuse = True;
 }
+
+impl<'a> From<&'a str> for MemoQuerier<'a> {
+    fn from(value: &'a str) -> Self {
+        MemoQuerier::new(value)
+    }
+}
