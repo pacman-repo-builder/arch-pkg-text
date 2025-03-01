@@ -25,3 +25,9 @@ pub trait ReuseAdviceSelf: ReuseAdvice {
     }
 }
 impl<Querier: ReuseAdvice + ?Sized> ReuseAdviceSelf for Querier {}
+
+/// Querier types that implement this trait should be reused.
+///
+/// This trait is a convenient alias for [`ReuseAdvice`] with value [`True`].
+pub trait ShouldReuse: ReuseAdvice<ShouldReuse = True> {}
+impl<Querier: ReuseAdvice<ShouldReuse = True> + ?Sized> ShouldReuse for Querier {}
