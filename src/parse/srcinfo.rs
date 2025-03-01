@@ -178,7 +178,9 @@ pub enum SrcinfoParseIssue<'a> {
 impl<'a> SrcinfoParseIssue<'a> {
     /// Return `Ok(())` if the issue was [`SrcinfoParseIssue::UnknownField`],
     /// or return an `Err` of [`SrcinfoParseError`] otherwise.
-    fn ignore_unknown_field(self) -> Result<(), SrcinfoParseError<'a>> {
+    ///
+    /// This function is the default issue handler for [`ParsedSrcinfo`].
+    pub fn ignore_unknown_field(self) -> Result<(), SrcinfoParseError<'a>> {
         Err(match self {
             SrcinfoParseIssue::UnknownField(_) => return Ok(()),
             SrcinfoParseIssue::BaseUniqueFieldDuplication(error) => {
@@ -193,7 +195,7 @@ impl<'a> SrcinfoParseIssue<'a> {
 }
 
 impl<'a> ParsedSrcinfo<'a> {
-    /// Parse `.SRCINFO` text, unknown fields are ignored.
+    /// Parse `.SRCINFO` text, [unknown fields are ignored](SrcinfoParseIssue::ignore_unknown_field).
     pub fn parse(text: &'a str) -> SrcinfoParseReturn<'a> {
         ParsedSrcinfo::parse_with_issues(text, SrcinfoParseIssue::ignore_unknown_field)
     }
@@ -264,11 +266,11 @@ where
     }
 }
 
-/// Try parsing a `.SRCINFO` text, unknown fields are ignored, partial success means error.
+/// Try parsing a `.SRCINFO` text, [unknown fields are ignored](SrcinfoParseIssue::ignore_unknown_field), partial success means error.
 impl<'a> TryFrom<&'a str> for ParsedSrcinfo<'a> {
     /// Error that occurs when parsing fails or incomplete.
     type Error = SrcinfoParseError<'a>;
-    /// Try parsing a `.SRCINFO` text, unknown fields are ignored, partial success means error.
+    /// Try parsing a `.SRCINFO` text, [unknown fields are ignored](SrcinfoParseIssue::ignore_unknown_field), partial success means error.
     fn try_from(text: &'a str) -> Result<Self, Self::Error> {
         ParsedSrcinfo::parse(text).try_into_complete()
     }

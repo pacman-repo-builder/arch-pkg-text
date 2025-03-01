@@ -68,7 +68,9 @@ pub enum DescParseIssue<'a> {
 impl<'a> DescParseIssue<'a> {
     /// Return `Ok(())` if the issue was [`DescParseIssue::UnknownField`],
     /// or return an `Err` of [`DescParseError`] otherwise.
-    fn ignore_unknown_field(self) -> Result<(), DescParseError<'a>> {
+    ///
+    /// This function is the default issue handler for [`ParsedDesc`].
+    pub fn ignore_unknown_field(self) -> Result<(), DescParseError<'a>> {
         Err(match self {
             DescParseIssue::EmptyInput => DescParseError::EmptyInput,
             DescParseIssue::FirstLineIsNotAField(line, _) => {
@@ -80,7 +82,7 @@ impl<'a> DescParseIssue<'a> {
 }
 
 impl<'a> ParsedDesc<'a> {
-    /// Parse a `desc` file text, unknown fields are ignored.
+    /// Parse a `desc` file text, [unknown fields are ignored](DescParseIssue::ignore_unknown_field).
     pub fn parse(text: &'a str) -> Result<Self, DescParseError<'a>> {
         ParsedDesc::partial_parse(text).try_into_complete()
     }
@@ -158,11 +160,11 @@ impl<'a> ParsedDesc<'a> {
     }
 }
 
-/// Try parsing a `desc` text, unknown fields are ignored, partial success means error.
+/// Try parsing a `desc` text, [unknown fields are ignored](DescParseIssue::ignore_unknown_field), partial success means error.
 impl<'a> TryFrom<&'a str> for ParsedDesc<'a> {
     /// Error that occurs when parsing fails or incomplete.
     type Error = DescParseError<'a>;
-    /// Try parsing a `desc` text, unknown fields are ignored, partial success means error.
+    /// Try parsing a `desc` text, [unknown fields are ignored](DescParseIssue::ignore_unknown_field), partial success means error.
     fn try_from(text: &'a str) -> Result<Self, Self::Error> {
         ParsedDesc::parse(text)
     }
