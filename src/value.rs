@@ -89,7 +89,7 @@ macro_rules! def_str_wrappers {
         $name:ident;
     )*) => {$(
         $(#[$attrs])*
-        #[derive(Debug, Display, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, AsRef, Deref)]
+        #[derive(Debug, Display, Clone, Copy, PartialEq, Eq, Hash, AsRef, Deref)]
         pub struct $name<'a>(pub &'a str);
         impl_str!($name);
     )*};
