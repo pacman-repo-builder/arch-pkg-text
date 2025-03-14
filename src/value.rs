@@ -2,7 +2,7 @@
 
 use core::{
     iter::{DoubleEndedIterator, FusedIterator},
-    num::ParseIntError,
+    num::{IntErrorKind, ParseIntError},
     str::Split,
 };
 use derive_more::{AsRef, Deref, Display};
@@ -73,7 +73,11 @@ macro_rules! impl_num {
         impl<'a> $container<'a> {
             /// Extract numeric value.
             pub fn parse(&self) -> Result<$num, ParseIntError> {
-                self.as_str().parse()
+                let handle_error = |error: ParseIntError| match error.kind() {
+                    IntErrorKind::Empty | IntErrorKind::Zero => Ok(0),
+                    _ => Err(error),
+                };
+                self.as_str().parse().or_else(handle_error)
             }
         }
     };
