@@ -355,7 +355,14 @@ mod hex128;
 mod parse_array;
 mod parse_hex;
 mod skip_or_array;
+mod upstream_version;
+mod version;
 
 pub use dependency_specification_operator::DependencySpecificationOperator;
 pub use parse_array::ParseArray;
 pub use skip_or_array::SkipOrArray;
+pub use upstream_version::{
+    UpstreamVersionComponent, UpstreamVersionComponentIter, ValidUpstreamVersion,
+    ValidateUpstreamVersionError,
+};
+pub use version::{ParseVersionError, ParsedVersion, SplitVersionError};
