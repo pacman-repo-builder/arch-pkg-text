@@ -15,7 +15,10 @@ use pretty_assertions::assert_eq;
 /// Run assertions for srcinfo similar to [`COMPLEX`].
 fn assert_complex(querier: &ForgetfulQuerier) {
     assert_eq!(querier.base_name(), Some(Base("complex-example-bin")));
-    assert_eq!(querier.version(), Some(UpstreamVersion("12.34.56.r789")));
+    assert_eq!(
+        querier.version().as_ref().map(UpstreamVersion::as_str),
+        Some("12.34.56.r789"),
+    );
     assert_eq!(querier.release().unwrap().parse().ok(), Some(2));
     assert_eq!(querier.epoch().unwrap().parse().ok(), Some(3));
     assert_eq!(
@@ -164,7 +167,10 @@ fn assert_complex(querier: &ForgetfulQuerier) {
 /// Run assertions for srcinfo similar to [`SIMPLE`].
 fn assert_simple(querier: &ForgetfulQuerier) {
     assert_eq!(querier.base_name(), Some(Base("simple-example-bin")));
-    assert_eq!(querier.version(), Some(UpstreamVersion("12.34.56.r789")));
+    assert_eq!(
+        querier.version().as_ref().map(UpstreamVersion::as_str),
+        Some("12.34.56.r789"),
+    );
     assert_eq!(querier.release().unwrap().parse().ok(), Some(1));
     assert!(querier.epoch().is_none());
     assert_eq!(

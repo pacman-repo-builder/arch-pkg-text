@@ -5,15 +5,14 @@ impl<'a> DependencySpecification<'a> {
     ///
     /// ```
     /// # use arch_pkg_text::value::{DependencySpecification, DependencySpecificationOperator, Version};
-    /// # use pretty_assertions::assert_eq;
-    /// assert_eq!(
+    /// assert!(matches!(
     ///     DependencySpecification(">=1.27.0-1").components(),
     ///     Some((
     ///         DependencySpecificationOperator::GreaterOrEqual,
     ///         Version("1.27.0-1"),
     ///     )),
-    /// );
-    /// assert_eq!(DependencySpecification("").components(), None);
+    /// ));
+    /// assert!(DependencySpecification("").components().is_none());
     /// ```
     pub fn components(&self) -> Option<(DependencySpecificationOperator, Version<'a>)> {
         DependencySpecificationOperator::parse(self)

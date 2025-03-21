@@ -48,7 +48,10 @@ fn assert_complex(querier: &ParsedSrcinfo) {
     eprintln!("STEP: pkgbase");
     let base = dbg!(&querier.base);
     assert_eq!(base.base_name(), Some(Base("complex-example-bin")));
-    assert_eq!(base.version(), Some(UpstreamVersion("12.34.56.r789")));
+    assert_eq!(
+        base.version().as_ref().map(UpstreamVersion::as_str),
+        Some("12.34.56.r789"),
+    );
     assert_eq!(base.release().unwrap().parse().ok(), Some(2));
     assert_eq!(base.epoch().unwrap().parse().ok(), Some(3));
     assert_eq!(
@@ -172,7 +175,10 @@ fn assert_complex(querier: &ParsedSrcinfo) {
 
     eprintln!("STEP: query");
     assert_eq!(querier.base_name(), Some(Base("complex-example-bin")));
-    assert_eq!(querier.version(), Some(UpstreamVersion("12.34.56.r789")));
+    assert_eq!(
+        querier.version().as_ref().map(UpstreamVersion::as_str),
+        Some("12.34.56.r789"),
+    );
     assert_eq!(querier.release().unwrap().parse().ok(), Some(2));
     assert_eq!(querier.epoch().unwrap().parse().ok(), Some(3));
     assert_eq!(
@@ -325,7 +331,10 @@ fn assert_simple(querier: &ParsedSrcinfo) {
     eprintln!("STEP: pkgbase");
     let base = dbg!(&querier.base);
     assert_eq!(base.base_name(), Some(Base("simple-example-bin")));
-    assert_eq!(base.version(), Some(UpstreamVersion("12.34.56.r789")));
+    assert_eq!(
+        base.version().as_ref().map(UpstreamVersion::as_str),
+        Some("12.34.56.r789"),
+    );
     assert_eq!(base.release().unwrap().parse().ok(), Some(1));
     assert!(base.epoch().is_none());
     assert_eq!(
@@ -374,7 +383,10 @@ fn assert_simple(querier: &ParsedSrcinfo) {
 
     eprintln!("STEP: query");
     assert_eq!(querier.base_name(), Some(Base("simple-example-bin")));
-    assert_eq!(querier.version(), Some(UpstreamVersion("12.34.56.r789")));
+    assert_eq!(
+        querier.version().as_ref().map(UpstreamVersion::as_str),
+        Some("12.34.56.r789"),
+    );
     assert_eq!(querier.release().unwrap().parse().ok(), Some(1));
     assert!(querier.epoch().is_none());
     assert_eq!(
@@ -691,8 +703,8 @@ fn unknown_field() {
     eprintln!("ASSERT: fields before the unknown field are recorded");
     assert_eq!(querier.base.base_name(), Some(Base("simple-example-bin")));
     assert_eq!(
-        querier.base.version(),
-        Some(UpstreamVersion("12.34.56.r789"))
+        querier.base.version().as_ref().map(UpstreamVersion::as_str),
+        Some("12.34.56.r789"),
     );
     eprintln!("ASSERT: fields after the unknown field are not recorded");
     assert_eq!(querier.base.architecture(), []);

@@ -32,8 +32,8 @@ fn assert_complex(querier: &mut MemoQuerier, cache_state: bool) {
     assert!(querier.__has_cache(FieldName::Release, 0));
 
     assert_eq!(
-        querier.version_mut(),
-        Some(UpstreamVersion("12.34.56.r789")),
+        querier.version_mut().as_ref().map(UpstreamVersion::as_str),
+        Some("12.34.56.r789"),
     );
     assert_eq!(querier.release_mut().unwrap().parse().ok(), Some(2));
 
@@ -208,8 +208,8 @@ fn assert_simple(querier: &mut MemoQuerier, cache_state: bool) {
     assert!(querier.__has_cache(FieldName::Description, 0));
 
     assert_eq!(
-        querier.version_mut(),
-        Some(UpstreamVersion("12.34.56.r789")),
+        querier.version_mut().as_ref().map(UpstreamVersion::as_str),
+        Some("12.34.56.r789"),
     );
 
     assert!(querier.epoch_mut().is_none());

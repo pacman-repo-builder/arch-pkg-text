@@ -89,7 +89,19 @@ macro_rules! def_str_wrappers {
         $name:ident;
     )*) => {$(
         $(#[$attrs])*
-        #[derive(Debug, Display, Clone, Copy, PartialEq, Eq, Hash, AsRef, Deref)]
+        #[derive(Debug, Display, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash, AsRef, Deref)]
+        pub struct $name<'a>(pub &'a str);
+        impl_str!($name);
+    )*};
+}
+
+macro_rules! def_structured_wrappers {
+    ($(
+        $(#[$attrs:meta])*
+        $name:ident;
+    )*) => {$(
+        $(#[$attrs])*
+        #[derive(Debug, Display, Clone, Copy, AsRef, Deref)]
         pub struct $name<'a>(pub &'a str);
         impl_str!($name);
     )*};
@@ -219,10 +231,6 @@ def_str_wrappers! {
     Name;
     /// Type of value of `BASE` and `pkgbase`.
     Base;
-    /// Type of value of `VERSION`.
-    Version;
-    /// Type of value of `pkgver`.
-    UpstreamVersion;
     /// Type of value of `DESC` and `pkgdesc`.
     Description;
     /// Type of value of `URL`.
@@ -231,12 +239,19 @@ def_str_wrappers! {
     Packager;
     /// Type of value of `changelog`.
     ChangeLog;
-    /// Type of value of `options`.
-    BuildOption;
     /// Type of value of `backup`.
     FilePath;
     /// Type of value of `source`.
     Source;
+}
+
+def_structured_wrappers! {
+    /// Type of value of `VERSION`.
+    Version;
+    /// Type of value of `pkgver`.
+    UpstreamVersion;
+    /// Type of value of `options`.
+    BuildOption;
     /// Type of value of `validpgpkeys`.
     PgpKey;
 }
