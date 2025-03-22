@@ -5,13 +5,13 @@ use core::{
     pin::Pin,
 };
 
-impl<'a, Querier: Query<'a> + ?Sized> Query<'a> for &'a Querier {
+impl<'a, Querier: Query<'a> + ?Sized> Query<'a> for &Querier {
     fn query_raw_text(&self, field_name: FieldName) -> impl Iterator<Item = QueryRawTextItem<'a>> {
         Querier::query_raw_text(*self, field_name)
     }
 }
 
-impl<'a, Querier: Query<'a> + ?Sized> QueryMut<'a> for &'a Querier {
+impl<'a, Querier: Query<'a> + ?Sized> QueryMut<'a> for &Querier {
     fn query_raw_text_mut(
         &mut self,
         field_name: FieldName,
@@ -20,7 +20,7 @@ impl<'a, Querier: Query<'a> + ?Sized> QueryMut<'a> for &'a Querier {
     }
 }
 
-impl<'a, Querier: QueryMut<'a> + ?Sized> QueryMut<'a> for &'a mut Querier {
+impl<'a, Querier: QueryMut<'a> + ?Sized> QueryMut<'a> for &mut Querier {
     fn query_raw_text_mut(
         &mut self,
         field_name: FieldName,
