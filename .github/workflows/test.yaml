@@ -29,7 +29,9 @@ jobs:
             ${{ github.job }}-${{ runner.os }}-${{ hashFiles('rust-toolchain') }}-
 
       - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
+        shell: bash
+        run: |
+          rustup toolchain install "$(cat rust-toolchain)"
 
       - name: Install just
         uses: taiki-e/install-action@just
