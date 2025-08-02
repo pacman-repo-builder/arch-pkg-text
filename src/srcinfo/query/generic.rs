@@ -52,7 +52,7 @@ impl<Querier: ReuseAdvice + ?Sized> ReuseAdvice for &mut Querier {
     type ShouldReuse = Querier::ShouldReuse;
 }
 
-impl<Ptr: Deref<Target: ReuseAdvice + ?Sized>> ReuseAdvice for Pin<Ptr> {
+impl<Ptr: Deref<Target: ReuseAdvice>> ReuseAdvice for Pin<Ptr> {
     type ShouldReuse = <Ptr::Target as ReuseAdvice>::ShouldReuse;
 }
 
