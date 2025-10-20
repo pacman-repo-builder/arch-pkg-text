@@ -58,7 +58,7 @@ impl StrUtils for str {
 
     fn insert_line_above(&self, mut search: impl FnMut(&str) -> bool, value: &str) -> String {
         let mut lines = self.lines();
-        let mut output = String::with_capacity(self.len() + value.len());
+        let mut output = String::with_capacity(self.len() + value.len() + '\n'.len_utf8());
         let mut push = |line: &str| {
             output.push_str(line);
             output.push('\n');
