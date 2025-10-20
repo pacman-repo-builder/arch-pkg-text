@@ -11,6 +11,8 @@ pub trait StrUtils {
     fn uneven_indent(&self) -> String;
     /// Add a single trailing whitespace to every line of a string.
     fn trailing_whitespaces(&self) -> String;
+    /// Insert a line above a line.
+    fn insert_line_above(&self, search: impl FnMut(&str) -> bool, value: &str) -> String;
     /// Insert a line under a line.
     fn insert_line_under(&self, search: impl FnMut(&str) -> bool, value: &str) -> String;
 }
@@ -51,6 +53,27 @@ impl StrUtils for str {
         }
 
         output.shrink_to_fit();
+        output
+    }
+
+    fn insert_line_above(&self, mut search: impl FnMut(&str) -> bool, value: &str) -> String {
+        let mut lines = self.lines();
+        let mut output = String::with_capacity(self.len() + value.len() + '\n'.len_utf8());
+        let mut push = |line: &str| {
+            output.push_str(line);
+            output.push('\n');
+        };
+        for line in lines.by_ref() {
+            if search(line) {
+                push(value);
+                push(line);
+                break;
+            }
+            push(line);
+        }
+        for line in lines {
+            push(line);
+        }
         output
     }
 

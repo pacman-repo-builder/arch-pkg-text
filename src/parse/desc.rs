@@ -99,11 +99,11 @@ impl<'a> ParsedDesc<'a> {
         let mut lines = text.lines_inclusive();
         let mut processed_length = 0;
 
-        macro_rules! return_or_continue {
-            ($issue:expr) => {
+        macro_rules! return_or {
+            ($issue:expr, $alternative:expr) => {
                 match handle_issue($issue) {
                     Err(error) => return PartialParseResult::new_partial(parsed, error),
-                    Ok(()) => continue,
+                    Ok(()) => $alternative,
                 }
             };
         }
@@ -111,12 +111,15 @@ impl<'a> ParsedDesc<'a> {
         // parse the first field
         let (first_line, first_field) = loop {
             let Some(first_line) = lines.next() else {
-                return_or_continue!(DescParseIssue::EmptyInput);
+                return_or!(DescParseIssue::EmptyInput, continue);
             };
             let first_field = match first_line.trim().pipe(RawField::parse_raw) {
                 Ok(first_field) => first_field,
                 Err(error) => {
-                    return_or_continue!(DescParseIssue::FirstLineIsNotAField(first_line, error))
+                    return_or!(
+                        DescParseIssue::FirstLineIsNotAField(first_line, error),
+                        continue
+                    )
                 }
             };
             break (first_line, first_field);
@@ -132,7 +135,7 @@ impl<'a> ParsedDesc<'a> {
                 let value = text[value_start_offset..value_end_offset].trim();
                 parsed.set_raw_value(*field.name(), value);
             } else {
-                return_or_continue!(DescParseIssue::UnknownField(field));
+                return_or!(DescParseIssue::UnknownField(field), ())
             }
             processed_length = value_end_offset;
             current_field = next_field;
