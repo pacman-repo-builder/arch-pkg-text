@@ -108,21 +108,18 @@ impl<'a> ParsedDesc<'a> {
             };
         }
 
-        macro_rules! return_or_continue {
-            ($issue:expr) => {
-                return_or!($issue, continue)
-            };
-        }
-
         // parse the first field
         let (first_line, first_field) = loop {
             let Some(first_line) = lines.next() else {
-                return_or_continue!(DescParseIssue::EmptyInput);
+                return_or!(DescParseIssue::EmptyInput, continue);
             };
             let first_field = match first_line.trim().pipe(RawField::parse_raw) {
                 Ok(first_field) => first_field,
                 Err(error) => {
-                    return_or_continue!(DescParseIssue::FirstLineIsNotAField(first_line, error))
+                    return_or!(
+                        DescParseIssue::FirstLineIsNotAField(first_line, error),
+                        continue
+                    )
                 }
             };
             break (first_line, first_field);
