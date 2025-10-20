@@ -33,7 +33,7 @@ impl SrcinfoParsingUtils for str {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 struct UnknownField<'a>(&'a str, Option<&'a str>);
 
-fn stop_at_unknown_fields(issue: SrcinfoParseIssue) -> Result<(), UnknownField<'_>> {
+fn stop_at_unknown_fields(issue: SrcinfoParseIssue<'_>) -> Result<(), UnknownField<'_>> {
     if let SrcinfoParseIssue::UnknownField(field) = issue {
         Err(UnknownField(field.name_str(), field.architecture_str()))
     } else {
