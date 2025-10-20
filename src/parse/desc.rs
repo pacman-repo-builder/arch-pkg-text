@@ -135,7 +135,7 @@ impl<'a> ParsedDesc<'a> {
                 let value = text[value_start_offset..value_end_offset].trim();
                 parsed.set_raw_value(*field.name(), value);
             } else {
-                return_or!(DescParseIssue::UnknownField(field), { /* fallthrough */ })
+                return_or!(DescParseIssue::UnknownField(field), ())
             }
             processed_length = value_end_offset;
             current_field = next_field;
