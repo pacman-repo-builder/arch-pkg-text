@@ -612,7 +612,7 @@ fn unique_field_duplication() {
     let contains = move |search: &'static str| move |line: &str| line.contains(search);
 
     eprintln!("CASE: duplicated pkgbase under pkgbase");
-    let srcinfo = SIMPLE.insert_line_under(contains("pkgbase"), "pkgbase = duplicated");
+    let srcinfo = SIMPLE.insert_below_line(contains("pkgbase"), "pkgbase = duplicated");
     let result = dbg!(ParsedSrcinfo::try_from(srcinfo.as_str()));
     assert!(matches!(
         result,
@@ -626,7 +626,7 @@ fn unique_field_duplication() {
     );
 
     eprintln!("CASE: duplicated pkgdesc under pkgbase");
-    let srcinfo = SIMPLE.insert_line_under(contains("pkgdesc"), "pkgdesc = duplicated");
+    let srcinfo = SIMPLE.insert_below_line(contains("pkgdesc"), "pkgdesc = duplicated");
     let result = dbg!(ParsedSrcinfo::try_from(srcinfo.as_str()));
     assert!(matches!(
         result,
@@ -642,7 +642,7 @@ fn unique_field_duplication() {
     );
 
     eprintln!("CASE: duplicated pkgver under pkgbase");
-    let srcinfo = SIMPLE.insert_line_under(contains("pkgver"), "pkgver = 0.1.2");
+    let srcinfo = SIMPLE.insert_below_line(contains("pkgver"), "pkgver = 0.1.2");
     let result = dbg!(ParsedSrcinfo::try_from(srcinfo.as_str()));
     assert!(matches!(
         result,
@@ -656,7 +656,7 @@ fn unique_field_duplication() {
     );
 
     eprintln!("CASE: duplicated pkgdesc under pkgname");
-    let srcinfo = COMPLEX.insert_line_under(
+    let srcinfo = COMPLEX.insert_below_line(
         |line| line.contains("pkgdesc") && line.contains("foo-bin"),
         "pkgdesc = duplicated",
     );
@@ -678,7 +678,7 @@ fn unique_field_duplication() {
 
 #[test]
 fn invalid_line() {
-    let srcinfo = SIMPLE.insert_line_under(|line| line.contains("pkgbase"), "invalid line");
+    let srcinfo = SIMPLE.insert_below_line(|line| line.contains("pkgbase"), "invalid line");
     let result = dbg!(ParsedSrcinfo::try_from(srcinfo.as_str()));
     assert!(matches!(
         result,
@@ -695,7 +695,7 @@ fn unknown_field() {
     let contains = move |search: &'static str| move |line: &str| line.contains(search);
 
     eprintln!("CASE: unknown field");
-    let srcinfo = SIMPLE.insert_line_under(contains("pkgver"), "unknown = some value");
+    let srcinfo = SIMPLE.insert_below_line(contains("pkgver"), "unknown = some value");
     let (querier, error) =
         ParsedSrcinfo::parse_with_issues(&srcinfo, stop_at_unknown_fields).into_partial();
     dbg!(&querier, &error);

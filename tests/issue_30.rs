@@ -8,7 +8,7 @@ use arch_pkg_text::{
 use std::sync::LazyLock;
 
 static TEXT: LazyLock<String> = LazyLock::new(|| {
-    include_str!("fixtures/gnome-shell.desc").insert_line_above(
+    include_str!("fixtures/gnome-shell.desc").insert_above_line(
         |line| line.contains("%DESC%"),
         "%THISFIELDISUNKNOWN%\nFoo\nBar\nBaz",
     )

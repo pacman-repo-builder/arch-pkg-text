@@ -11,10 +11,10 @@ pub trait StrUtils {
     fn uneven_indent(&self) -> String;
     /// Add a single trailing whitespace to every line of a string.
     fn trailing_whitespaces(&self) -> String;
-    /// Insert a line above a line.
-    fn insert_line_above(&self, search: impl FnMut(&str) -> bool, value: &str) -> String;
-    /// Insert a line under a line.
-    fn insert_line_under(&self, search: impl FnMut(&str) -> bool, value: &str) -> String;
+    /// Insert a given content above the first line that matches the predicate.
+    fn insert_above_line(&self, predicate: impl FnMut(&str) -> bool, content: &str) -> String;
+    /// Insert a given content below the first line that matches the predicate.
+    fn insert_below_line(&self, predicate: impl FnMut(&str) -> bool, content: &str) -> String;
 }
 
 impl StrUtils for str {
@@ -56,16 +56,16 @@ impl StrUtils for str {
         output
     }
 
-    fn insert_line_above(&self, mut search: impl FnMut(&str) -> bool, value: &str) -> String {
+    fn insert_above_line(&self, mut predicate: impl FnMut(&str) -> bool, content: &str) -> String {
         let mut lines = self.lines();
-        let mut output = String::with_capacity(self.len() + value.len() + '\n'.len_utf8());
+        let mut output = String::with_capacity(self.len() + content.len() + '\n'.len_utf8());
         let mut push = |line: &str| {
             output.push_str(line);
             output.push('\n');
         };
         for line in lines.by_ref() {
-            if search(line) {
-                push(value);
+            if predicate(line) {
+                push(content);
                 push(line);
                 break;
             }
@@ -77,14 +77,14 @@ impl StrUtils for str {
         output
     }
 
-    fn insert_line_under(&self, mut search: impl FnMut(&str) -> bool, value: &str) -> String {
+    fn insert_below_line(&self, mut predicate: impl FnMut(&str) -> bool, content: &str) -> String {
         let mut lines = self.lines();
-        let mut output = String::with_capacity(self.len() + value.len());
+        let mut output = String::with_capacity(self.len() + content.len());
         for line in lines.by_ref() {
             output.push_str(line);
             output.push('\n');
-            if search(line) {
-                output.push_str(value);
+            if predicate(line) {
+                output.push_str(content);
                 output.push('\n');
                 break;
             }
