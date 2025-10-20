@@ -86,7 +86,7 @@ fn unknown_field() {
     #[derive(Debug, Clone, Copy, PartialEq, Eq)]
     struct UnknownField<'a>(&'a str);
 
-    fn stop_at_unknown_fields(issue: DescParseIssue) -> Result<(), UnknownField<'_>> {
+    fn stop_at_unknown_fields(issue: DescParseIssue<'_>) -> Result<(), UnknownField<'_>> {
         if let DescParseIssue::UnknownField(field) = issue {
             field.name_str().pipe(UnknownField).pipe(Err)
         } else {

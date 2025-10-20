@@ -113,20 +113,20 @@ macro_rules! def_cache {
                 }
             }
 
-            fn extract_base_value(item: QueryRawTextItem) -> Option<&'_ str> {
+            fn extract_base_value(item: QueryRawTextItem<'_>) -> Option<&'_ str> {
                 let (value, section, architecture) = item.into_tuple3();
                 debug_assert_eq!(section, Section::Base);
                 architecture.is_none().then_some(value)
             }
 
-            fn extract_shared_value_no_arch(item: QueryRawTextItem) -> Option<QueryItem<'_, &'_ str, ()>> {
+            fn extract_shared_value_no_arch(item: QueryRawTextItem<'_>) -> Option<QueryItem<'_, &'_ str, ()>> {
                 let (value, section, architecture) = item.into_tuple3();
                 architecture
                     .is_none()
                     .then_some(QueryItem::from_tuple2((value, section)))
             }
 
-            fn extract_name_value(item: QueryRawTextItem) -> Option<&'_ str> {
+            fn extract_name_value(item: QueryRawTextItem<'_>) -> Option<&'_ str> {
                 let (value, section, architecture) = item.into_tuple3();
                 architecture.is_none().then_some(())?;
                 debug_assert_eq!(section, value.pipe(Name).pipe(Section::Derivative));
