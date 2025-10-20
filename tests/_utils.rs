@@ -71,28 +71,25 @@ impl StrUtils for str {
             }
             push(line);
         }
-        for line in lines {
-            push(line);
-        }
+        lines.for_each(push);
         output
     }
 
     fn insert_below_line(&self, mut predicate: impl FnMut(&str) -> bool, content: &str) -> String {
         let mut lines = self.lines();
         let mut output = String::with_capacity(self.len() + content.len());
-        for line in lines.by_ref() {
+        let mut push = |line: &str| {
             output.push_str(line);
             output.push('\n');
+        };
+        for line in lines.by_ref() {
+            push(line);
             if predicate(line) {
-                output.push_str(content);
-                output.push('\n');
+                push(content);
                 break;
             }
         }
-        for line in lines {
-            output.push_str(line);
-            output.push('\n');
-        }
+        lines.for_each(push);
         output
     }
 }
