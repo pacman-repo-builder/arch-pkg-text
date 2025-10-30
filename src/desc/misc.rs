@@ -1,4 +1,4 @@
-//! Miscellaneous items.
+//! Miscellaneous items related to [`desc`](super).
 
 mod derive_query_mut;
 mod reuse_advice;
