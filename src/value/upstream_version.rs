@@ -80,7 +80,7 @@ impl<'a> UpstreamVersionComponent<'a> {
 /// This struct is created by calling [`ValidUpstreamVersion::components`].
 #[derive(Debug, Clone)]
 pub struct UpstreamVersionComponentIter<'a> {
-    segments: Split<'a, [char; 2]>,
+    segments: Split<'a, [char; 4]>,
 }
 
 impl<'a> Iterator for UpstreamVersionComponentIter<'a> {
@@ -112,12 +112,13 @@ impl<'a> ValidUpstreamVersion<'a> {
 
     /// Iterate over all components of the version.
     ///
-    /// Components are separated by dots (`.`) or underscores (`_`).
-    /// Either separator are treated the same way because they are treated
+    /// Components are separated by dots (`.`), underscores (`_`), plus signs
+    /// (`+`), or at signs (`@`).
+    /// All separators are treated the same way because they are treated
     /// the same by [`vercmp`](https://man.archlinux.org/man/vercmp.8.en).
     pub fn components(&self) -> UpstreamVersionComponentIter<'a> {
         UpstreamVersionComponentIter {
-            segments: self.as_str().split(['.', '_']),
+            segments: self.as_str().split(['.', '_', '+', '@']),
         }
     }
 }
@@ -149,11 +150,15 @@ impl Ord for ValidUpstreamVersion<'_> {
     /// assert!(validate("1.1.0") > validate("1.1"));
     /// assert!(validate("1.1.0") < validate("1.1.0.0"));
     ///
-    /// // The difference between dots and underscores are ignored
+    /// // The difference between dots, underscores, plus signs, and at signs are ignored
     /// assert!(validate("1.2.3") == validate("1.2_3"));
     /// assert!(validate("1.2.3") == validate("1_2_3"));
     /// assert!(validate("1.2.0") < validate("1.2_3"));
     /// assert!(validate("1_1.0") > validate("1.1"));
+    /// assert!(validate("1+2.3") == validate("1@2_3"));
+    /// assert!(validate("1@2@3") == validate("1+2+3"));
+    /// assert!(validate("1@2.0") < validate("1.2_3"));
+    /// assert!(validate("1_1.0") > validate("1+1"));
     ///
     /// // Leading zeros are ignored
     /// assert!(validate("01.02.3") == validate("1.2.03"));
@@ -185,8 +190,9 @@ impl PartialEq for ValidUpstreamVersion<'_> {
     /// Return `true` if [`ValidUpstreamVersion::cmp`] returns [`Ordering::Equal`].
     /// Otherwise, return `false`.
     ///
-    /// **NOTE:** Two versions being equal doesn't necessary means that their internal
-    /// strings are equal. This is because dots (`.`) and underscores (`_`) are ignored.
+    /// **NOTE:** Two versions being equal doesn't necessarily means that their internal
+    /// strings are equal. This is because dots (`.`), underscores (`_`), plus signs (`+`),
+    /// and at signs (`@`) were ignored during parsing.
     fn eq(&self, other: &Self) -> bool {
         self.cmp(other) == Ordering::Equal
     }
@@ -213,7 +219,15 @@ pub struct ValidateUpstreamVersionError<'a> {
 impl<'a> UpstreamVersion<'a> {
     /// Validate the version, return a [`ValidUpstreamVersion`] on success.
     ///
-    /// A valid version is a string that contains only alphanumerics, dots (`.`), and underscores (`_`).
+    /// > Package release tags follow the same naming restrictions as version tags.
+    /// > -- from <https://wiki.archlinux.org/title/Arch_package_guidelines#Package_versioning>
+    ///
+    /// > Package names can contain only alphanumeric characters and any of `@`, `.`, `_`, `+`, `-`.
+    /// > Names are not allowed to start with hyphens or dots. All letters should be lowercase.
+    /// > -- from <https://wiki.archlinux.org/title/Arch_package_guidelines#Package_naming>
+    ///
+    /// Since a dash (`-`) signifies a `pkgrel` which is not part of upstream version, it is not
+    /// considered a valid character.
     ///
     /// ```
     /// # use arch_pkg_text::value::UpstreamVersion;
@@ -225,9 +239,9 @@ impl<'a> UpstreamVersion<'a> {
     /// assert!(UpstreamVersion("2:12.34_56a-1").validate().is_err());
     /// ```
     pub fn validate(&self) -> Result<ValidUpstreamVersion<'a>, ValidateUpstreamVersionError<'a>> {
-        let invalid_char = self
-            .chars()
-            .find(|char| !matches!(char, '0'..='9' | '.' | '_' | 'a'..='z' | 'A'..='Z' ));
+        let invalid_char = self.chars().find(
+            |char| !matches!(char, '0'..='9' | '.' | '_' | '+' | '@' | 'a'..='z' | 'A'..='Z' ),
+        );
         if let Some(character) = invalid_char {
             Err(ValidateUpstreamVersionError {
                 character,
