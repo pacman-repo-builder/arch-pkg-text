@@ -150,11 +150,15 @@ impl Ord for ValidUpstreamVersion<'_> {
     /// assert!(validate("1.1.0") > validate("1.1"));
     /// assert!(validate("1.1.0") < validate("1.1.0.0"));
     ///
-    /// // The difference between dots and underscores are ignored
+    /// // The difference between dots, underscores, plus signs, and at signs are ignored
     /// assert!(validate("1.2.3") == validate("1.2_3"));
     /// assert!(validate("1.2.3") == validate("1_2_3"));
     /// assert!(validate("1.2.0") < validate("1.2_3"));
     /// assert!(validate("1_1.0") > validate("1.1"));
+    /// assert!(validate("1+2.3") == validate("1@2_3"));
+    /// assert!(validate("1@2@3") == validate("1+2+3"));
+    /// assert!(validate("1@2.0") < validate("1.2_3"));
+    /// assert!(validate("1_1.0") > validate("1+1"));
     ///
     /// // Leading zeros are ignored
     /// assert!(validate("01.02.3") == validate("1.2.03"));
