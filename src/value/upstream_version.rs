@@ -80,7 +80,7 @@ impl<'a> UpstreamVersionComponent<'a> {
 /// This struct is created by calling [`ValidUpstreamVersion::components`].
 #[derive(Debug, Clone)]
 pub struct UpstreamVersionComponentIter<'a> {
-    segments: Split<'a, [char; 4]>,
+    segments: Split<'a, &'static [char]>,
 }
 
 impl<'a> Iterator for UpstreamVersionComponentIter<'a> {
@@ -118,7 +118,7 @@ impl<'a> ValidUpstreamVersion<'a> {
     /// the same by [`vercmp`](https://man.archlinux.org/man/vercmp.8.en).
     pub fn components(&self) -> UpstreamVersionComponentIter<'a> {
         UpstreamVersionComponentIter {
-            segments: self.as_str().split(['.', '_', '+', '@']),
+            segments: self.as_str().split(&['.', '_', '+', '@']),
         }
     }
 }
