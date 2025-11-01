@@ -114,7 +114,7 @@ impl<'a> ValidUpstreamVersion<'a> {
     ///
     /// Components are separated by dots (`.`), underscores (`_`), plus signs
     /// (`+`), or at signs (`@`).
-    /// Either separator are treated the same way because they are treated
+    /// All separators are treated the same way because they are treated
     /// the same by [`vercmp`](https://man.archlinux.org/man/vercmp.8.en).
     pub fn components(&self) -> UpstreamVersionComponentIter<'a> {
         UpstreamVersionComponentIter {
@@ -186,7 +186,7 @@ impl PartialEq for ValidUpstreamVersion<'_> {
     /// Return `true` if [`ValidUpstreamVersion::cmp`] returns [`Ordering::Equal`].
     /// Otherwise, return `false`.
     ///
-    /// **NOTE:** Two versions being equal doesn't necessary means that their internal
+    /// **NOTE:** Two versions being equal doesn't necessarily means that their internal
     /// strings are equal. This is because dots (`.`), underscores (`_`), plus signs (`+`),
     /// and at signs (`@`) were ignored during parsing.
     fn eq(&self, other: &Self) -> bool {
