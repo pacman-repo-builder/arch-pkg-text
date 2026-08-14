@@ -1,4 +1,4 @@
-use arch_pkg_text::desc::{FieldName, ParseRawFieldError, ParsedField, RawField};
+use arch_pkg_text::desc::{FieldName, ParseFieldError, ParseRawFieldError, ParsedField, RawField};
 use pretty_assertions::assert_eq;
 
 #[test]
@@ -13,6 +13,7 @@ fn parse_raw_field() {
     assert_eq!(parse("%MD5SUM%"), Some("MD5SUM"));
     assert_eq!(parse("%SHA256SUM%"), Some("SHA256SUM"));
     assert_eq!(parse("%B2SUM%"), Some("B2SUM"));
+    assert_eq!(parse("%123%"), Some("123"));
 }
 
 #[test]
@@ -22,7 +23,10 @@ fn parse_parsed_field() {
     assert_eq!(parse("%ISIZE%"), Some(FieldName::InstalledSize));
     assert_eq!(parse("%MD5SUM%"), Some(FieldName::Md5Checksum));
     assert_eq!(parse("%SHA256SUM%"), Some(FieldName::Sha256Checksum));
-    assert_eq!(parse("%B2SUM%"), None); // syntactically valid, but not a known field
+
+    // syntactically valid, it is the name that isn't known
+    let error = ParsedField::parse("%B2SUM%").unwrap_err();
+    assert!(matches!(error, ParseFieldError::Name(_)));
 }
 
 #[test]
@@ -57,4 +61,5 @@ fn parse_raw_field_error() {
         error,
         ParseRawFieldError::InvalidCharacter(3, '-'),
     ));
+    assert_eq!(error.to_string(), "Found invalid character '-' at index 3");
 }
