@@ -52,7 +52,7 @@ pub enum ParseRawFieldError {
     #[display("Field name is empty")]
     Empty,
     #[display(
-        "Found invalid character {_1:?} at index {_0} which is neither an ASCII uppercase letter nor an ASCII digit"
+        "Found invalid character {_1:?} at index {_0} which is neither an ASCII uppercase nor an ASCII digit"
     )]
     InvalidCharacter(usize, char),
 }
