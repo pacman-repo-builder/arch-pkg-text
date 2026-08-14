@@ -50,10 +50,7 @@ fn parse_raw_field_error() {
         error,
         ParseRawFieldError::InvalidCharacter(0, 'n'),
     ));
-    assert_eq!(
-        error.to_string(),
-        "Found invalid character 'n' at index 0 which is neither an ASCII uppercase nor an ASCII digit",
-    );
+    assert_eq!(error.to_string(), "Found invalid character 'n' at index 0");
 
     let error = RawField::parse_raw("%SHA-256%").unwrap_err();
     assert!(matches!(
