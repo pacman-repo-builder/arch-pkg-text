@@ -1,9 +1,5 @@
 //! Issue: Incorrect output for `ParsedDesc::installed_size()`.
 //!
-//! The value of a field whose name contains digits (such as `%MD5SUM%` or
-//! `%SHA256SUM%`) used to be treated as a part of the value of the field
-//! before it.
-//!
 //! <https://github.com/pacman-repo-builder/arch-pkg-text/issues/40>
 
 pub mod _utils;
