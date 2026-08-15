@@ -110,8 +110,6 @@ impl<'a> ParsedDesc<'a> {
         // parse the first field
         let (first_line, first_field) = loop {
             let Some(first_line) = lines.next() else {
-                // There is nothing left to read, retrying would only spin forever,
-                // so a tolerated `EmptyInput` ends the parsing process.
                 return_or!(
                     DescParseIssue::EmptyInput,
                     return PartialParseResult::new_complete(parsed)
@@ -133,10 +131,6 @@ impl<'a> ParsedDesc<'a> {
         let mut current_field = Some((first_field, first_line));
         while let Some((field, field_line)) = current_field {
             let (value_length, next_field) = ParsedDesc::parse_next(&mut lines);
-            // The offset is derived from the field line itself instead of an accumulator,
-            // so that lines which are consumed without being accounted for
-            // (such as the ones skipped by a tolerated `FirstLineIsNotAField`)
-            // cannot desynchronize the offsets of the values.
             let value_start_offset =
                 field_line.as_ptr() as usize + field_line.len() - text.as_ptr() as usize;
             let value_end_offset = value_start_offset + value_length;
