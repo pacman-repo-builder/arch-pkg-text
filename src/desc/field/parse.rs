@@ -51,18 +51,22 @@ pub enum ParseRawFieldError {
     IncorrectEndingCharacter,
     #[display("Field name is empty")]
     Empty,
-    #[display("Found invalid character {_1:?} at index {_0} which isn't ASCII uppercase")]
-    NotAsciiUppercase(usize, char),
+    #[display("Found invalid character {_1:?} at index {_0}")]
+    InvalidCharacter(usize, char),
 }
 
 impl<'a> RawField<'a> {
     /// Parse a [`RawField`] from a [`str`].
+    ///
+    /// A field name consists of ASCII uppercase letters and ASCII digits.
     ///
     /// ```
     /// # use arch_pkg_text::desc::RawField;
     /// # use pretty_assertions::assert_eq;
     /// let raw_field = RawField::parse_raw("%NAME%").unwrap();
     /// assert_eq!(raw_field.name_str(), "NAME");
+    /// let raw_field = RawField::parse_raw("%SHA256SUM%").unwrap();
+    /// assert_eq!(raw_field.name_str(), "SHA256SUM");
     /// ```
     pub fn parse_raw(input: &'a str) -> Result<Self, ParseRawFieldError> {
         let field_name = input
@@ -77,9 +81,9 @@ impl<'a> RawField<'a> {
 
         if let Some((index, char)) = field_name
             .char_indices()
-            .find(|(_, x)| !x.is_ascii_uppercase())
+            .find(|(_, x)| !x.is_ascii_uppercase() && !x.is_ascii_digit())
         {
-            return Err(ParseRawFieldError::NotAsciiUppercase(index, char));
+            return Err(ParseRawFieldError::InvalidCharacter(index, char));
         }
 
         Ok(Field(field_name))
