@@ -16,7 +16,6 @@ const MD5SUM: &str = "165f04122017ec76579594b17f15f8eb";
 const SHA256SUM: &str = "3e84aac341825e2dd5f4a477ab03682d80e3e1a1a9b55abe38f9e01dd712852a";
 const PGPSIG: &str = "iHUEABYKAB0WIQSDvIiJNRtd67toQW64rAhgDxCM3wUCZlKf1AAKCRC4rAhgDxCM319XAQDZW8vRCMsnOsn0GKvVAhNeoZW916fS87NpWeW/CLf3lgD/Y17FTUlh9CTXE/zg54ltntRedOrKXwgJ2zL3kd+mpA0=";
 
-/// The fixture lacks an `%MD5SUM%` field, add one to cover it as well.
 static TEXT: LazyLock<String> = LazyLock::new(|| {
     include_str!("fixtures/gnome-shell.desc").insert_above_line(
         |line| line.contains("%SHA256SUM%"),
