@@ -97,7 +97,6 @@ impl<'a> ParsedDesc<'a> {
     {
         let mut parsed = ParsedDesc::default();
         let mut lines = text.lines_inclusive();
-        let mut processed_length = 0;
 
         macro_rules! return_or {
             ($issue:expr, $alternative:expr) => {
@@ -111,7 +110,12 @@ impl<'a> ParsedDesc<'a> {
         // parse the first field
         let (first_line, first_field) = loop {
             let Some(first_line) = lines.next() else {
-                return_or!(DescParseIssue::EmptyInput, continue);
+                // There is nothing left to read, retrying would only spin forever,
+                // so a tolerated `EmptyInput` ends the parsing process.
+                return_or!(
+                    DescParseIssue::EmptyInput,
+                    return PartialParseResult::new_complete(parsed)
+                );
             };
             let first_field = match first_line.trim().pipe(RawField::parse_raw) {
                 Ok(first_field) => first_field,
@@ -129,7 +133,12 @@ impl<'a> ParsedDesc<'a> {
         let mut current_field = Some((first_field, first_line));
         while let Some((field, field_line)) = current_field {
             let (value_length, next_field) = ParsedDesc::parse_next(&mut lines);
-            let value_start_offset = processed_length + field_line.len();
+            // The offset is derived from the field line itself instead of an accumulator,
+            // so that lines which are consumed without being accounted for
+            // (such as the ones skipped by a tolerated `FirstLineIsNotAField`)
+            // cannot desynchronize the offsets of the values.
+            let value_start_offset =
+                field_line.as_ptr() as usize + field_line.len() - text.as_ptr() as usize;
             let value_end_offset = value_start_offset + value_length;
             if let Ok(field) = field.to_parsed::<FieldName>() {
                 let value = text[value_start_offset..value_end_offset].trim();
@@ -137,7 +146,6 @@ impl<'a> ParsedDesc<'a> {
             } else {
                 return_or!(DescParseIssue::UnknownField(field), ())
             }
-            processed_length = value_end_offset;
             current_field = next_field;
         }
 
