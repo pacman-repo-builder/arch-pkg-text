@@ -27,7 +27,10 @@ macro_rules! def_traits {
 
         /// Get information from a `desc` file, mutability required.
         ///
-        /// The rules of [`Query`] apply here as well.
+        /// Every querier follows the rules below:
+        /// * A field that is absent from the text yields `None`.
+        /// * A field whose value is empty also yields `None`.
+        /// * Should a field occur more than once, only its first occurrence counts.
         pub trait QueryMut<'a> {
             fn query_raw_text_mut(&mut self, field: ParsedField) -> Option<&'a str>;
             $(
