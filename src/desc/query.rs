@@ -10,17 +10,10 @@ macro_rules! def_traits {
     )*) => {
         /// Get information from a `desc` file.
         ///
-        /// # Shared semantics
-        ///
-        /// Every querier of a `desc` file text answers the same question with the same answer,
-        /// they only differ in [time complexity](crate::desc::misc::ReuseAdvice). Consequently,
-        /// the rules below apply to all of them:
-        ///
+        /// Every querier follows the rules below:
         /// * A field that is absent from the text yields `None`.
-        /// * A field whose value is empty also yields `None`, it is indistinguishable from an
-        ///   absent field.
-        /// * Should a field occur more than once, only its first occurrence is taken into account,
-        ///   the later duplicates are ignored. Note that `pacman` never emits duplicate fields.
+        /// * A field whose value is empty also yields `None`.
+        /// * Should a field occur more than once, only its first occurrence counts.
         pub trait Query<'a> {
             fn query_raw_text(&self, field: ParsedField) -> Option<&'a str>;
             $(
@@ -34,9 +27,7 @@ macro_rules! def_traits {
 
         /// Get information from a `desc` file, mutability required.
         ///
-        /// The [shared semantics](Query#shared-semantics) of [`Query`] also apply here: an absent
-        /// field and an empty value both yield `None`, and only the first occurrence of a
-        /// duplicated field is taken into account.
+        /// The rules of [`Query`] apply here as well.
         pub trait QueryMut<'a> {
             fn query_raw_text_mut(&mut self, field: ParsedField) -> Option<&'a str>;
             $(

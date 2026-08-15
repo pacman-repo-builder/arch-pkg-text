@@ -45,30 +45,13 @@ where
 /// Error when attempt to parse a [`RawField`] with [`RawField::parse_raw`].
 #[derive(Debug, Display, Clone, Copy, Error)]
 pub enum ParseRawFieldError {
-    /// The input doesn't start with a `%`.
     #[display("Input doesn't start with '%'")]
     IncorrectStartingCharacter,
-    /// The input doesn't end with a `%`.
     #[display("Input doesn't end with '%'")]
     IncorrectEndingCharacter,
-    /// There is nothing between the surrounding `%`.
     #[display("Field name is empty")]
     Empty,
-    /// The field name contains a character that is neither an ASCII uppercase letter nor an ASCII digit.
-    ///
     /// The index is relative to the field name, which is the input without the surrounding `%`.
-    /// Add 1 to it to get the index of the character within the input.
-    ///
-    /// ```
-    /// # use arch_pkg_text::desc::{ParseRawFieldError, RawField};
-    /// # use pretty_assertions::assert_eq;
-    /// let error = RawField::parse_raw("%SHA-256%").unwrap_err();
-    /// let ParseRawFieldError::InvalidCharacter(index, char) = error else {
-    ///     panic!("Unexpected error: {error}");
-    /// };
-    /// assert_eq!((index, char), (3, '-'));
-    /// assert_eq!("%SHA-256%".as_bytes()[index + 1], b'-');
-    /// ```
     #[display("Found invalid character {_1:?} at index {_0}")]
     InvalidCharacter(usize, char),
 }

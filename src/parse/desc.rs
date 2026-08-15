@@ -24,8 +24,6 @@ macro_rules! def_struct {
 
         impl<'a> ParsedDesc<'a> {
             /// Get a raw value from the querier.
-            ///
-            /// An empty value is reported as `None`.
             fn get_raw_value(&self, field_name: FieldName) -> Option<&'a str> {
                 match field_name {$(
                     FieldName::$field => self.$field.filter(|value| !value.is_empty()),
@@ -33,8 +31,6 @@ macro_rules! def_struct {
             }
 
             /// Add a raw value into the querier.
-            ///
-            /// Only the first occurrence of a field is stored, the later duplicates are discarded.
             fn set_raw_value(&mut self, field_name: FieldName, raw_value: &'a str) {
                 match field_name {$(
                     FieldName::$field => if self.$field.is_none() {
