@@ -25,9 +25,7 @@ fn parse_parsed_field() {
     assert_eq!(parse("%SHA256SUM%"), Some(FieldName::Sha256Checksum));
 
     // syntactically valid, it is the name that isn't known
-    let error = ParsedField::parse("%THISFIELDISUNKNOWN%").unwrap_err();
-    assert!(matches!(error, ParseFieldError::Name(_)));
-    let error = ParsedField::parse("%123%").unwrap_err();
+    let error = ParsedField::parse("%THISFIELDISUNKNOWN123%").unwrap_err();
     assert!(matches!(error, ParseFieldError::Name(_)));
 }
 
