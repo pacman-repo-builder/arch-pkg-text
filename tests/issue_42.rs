@@ -22,20 +22,26 @@ fn issue_name(issue: DescParseIssue<'_>) -> &'static str {
     }
 }
 
+/// Number of issues after which the parser is deemed to not terminate.
+const MAX_ISSUES: usize = 1000;
+
 /// Parse `text` with a handler that tolerates every issue,
 /// returning the parsed data alongside the issues that were reported.
+///
+/// The handler panics instead of erroring, so that a parser which fails to
+/// terminate names the test that caught it, and so that the handler can prove
+/// through [`Infallible`] that none of the results below is a partial one.
 fn parse_tolerantly(text: &str) -> (ParsedDesc<'_>, Vec<&'static str>) {
     let mut issues = Vec::new();
-    let (parsed, error) = ParsedDesc::parse_with_issues(text, |issue| {
+    let parsed = ParsedDesc::parse_with_issues(text, |issue| {
         issues.push(issue_name(issue));
-        // Give up long before a hang would be reported as a timeout.
-        if issues.len() > 1000 {
-            return Err("too many issues");
+        if issues.len() > MAX_ISSUES {
+            panic!("The issue handler was called more than {MAX_ISSUES} times");
         }
-        Ok(())
+        Ok::<(), Infallible>(())
     })
-    .into_partial();
-    assert_eq!(error, None);
+    .try_into_complete()
+    .unwrap();
     (parsed, issues)
 }
 
