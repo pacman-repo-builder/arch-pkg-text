@@ -27,10 +27,6 @@ const MAX_ISSUES: usize = 1000;
 
 /// Parse `text` with a handler that tolerates every issue,
 /// returning the parsed data alongside the issues that were reported.
-///
-/// The handler panics instead of erroring, so that a parser which fails to
-/// terminate names the test that caught it, and so that the handler can prove
-/// through [`Infallible`] that none of the results below is a partial one.
 fn parse_tolerantly(text: &str) -> (ParsedDesc<'_>, Vec<&'static str>) {
     let mut issues = Vec::new();
     let parsed = ParsedDesc::parse_with_issues(text, |issue| {
