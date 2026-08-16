@@ -97,7 +97,7 @@ fn multiple_leading_garbage_lines_do_not_shift_values() {
         [
             "FirstLineIsNotAField",
             "FirstLineIsNotAField",
-            "FirstLineIsNotAField"
+            "FirstLineIsNotAField",
         ],
     );
     assert_query(&parsed);
