@@ -64,7 +64,6 @@ fn parse_raw_field_error() {
         error,
         ParseRawFieldError::InvalidCharacter(3, '-'),
     ));
-    // the index is relative to the field name: '-' is at index 4 of the input
     assert_eq!(
         error.to_string(),
         "Field name contains invalid character '-' at index 3",
