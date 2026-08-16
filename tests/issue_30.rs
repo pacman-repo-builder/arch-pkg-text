@@ -5,6 +5,7 @@ use arch_pkg_text::{
     ParsedDesc, QueryDesc,
     value::{Architecture, Dependency, Description, FileName, Name},
 };
+use pretty_assertions::assert_eq;
 use std::sync::LazyLock;
 
 static TEXT: LazyLock<String> = LazyLock::new(|| {
