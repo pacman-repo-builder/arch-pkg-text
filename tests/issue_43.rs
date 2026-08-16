@@ -124,7 +124,6 @@ fn duplicate_field_after_querying_a_later_field() {
             Some("hello"),
             "querier = {querier_name}",
         );
-        // the whole text has been scanned by now, the answer must not change because of it
         assert_eq!(
             querier.name_mut().map(|value| value.as_str()),
             Some("first"),
