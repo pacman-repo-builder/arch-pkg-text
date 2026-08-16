@@ -29,12 +29,12 @@ const MAX_ISSUES: usize = 1000;
 /// returning the parsed data alongside the issues that were reported.
 fn parse_tolerantly(text: &str) -> (ParsedDesc<'_>, Vec<&'static str>) {
     let mut issues = Vec::new();
-    let parsed = ParsedDesc::parse_with_issues(text, |issue| {
+    let parsed = ParsedDesc::parse_with_issues(text, |issue| -> Result<(), Infallible> {
         issues.push(issue_name(issue));
         if issues.len() > MAX_ISSUES {
             panic!("The issue handler was called more than {MAX_ISSUES} times");
         }
-        Ok::<(), Infallible>(())
+        Ok(())
     })
     .try_into_complete()
     .unwrap();
