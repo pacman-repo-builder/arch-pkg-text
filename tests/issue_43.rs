@@ -45,17 +45,17 @@ fn empty_value_in_the_middle() {
         assert_eq!(
             querier.name_mut().map(|value| value.as_str()),
             Some("foo"),
-            "querier = {querier_name}",
+            "querier = {querier_name}; %NAME% precedes the empty %GROUPS%",
         );
         assert_eq!(
             querier.groups_mut().map(groups),
             None,
-            "querier = {querier_name}",
+            "querier = {querier_name}; %GROUPS% is empty, hence None",
         );
         assert_eq!(
             querier.architecture_mut().map(architectures),
             Some(vec!["x86_64"]),
-            "querier = {querier_name}",
+            "querier = {querier_name}; %ARCH% follows the empty %GROUPS%",
         );
     });
 }
@@ -72,12 +72,12 @@ fn empty_value_at_the_end() {
         assert_eq!(
             querier.name_mut().map(|value| value.as_str()),
             Some("foo"),
-            "querier = {querier_name}",
+            "querier = {querier_name}; %NAME% precedes the empty %GROUPS%",
         );
         assert_eq!(
             querier.groups_mut().map(groups),
             None,
-            "querier = {querier_name}",
+            "querier = {querier_name}; %GROUPS% is empty and last, hence None",
         );
     });
 }
@@ -98,7 +98,7 @@ fn duplicate_field() {
         assert_eq!(
             querier.name_mut().map(|value| value.as_str()),
             Some("first"),
-            "querier = {querier_name}",
+            "querier = {querier_name}; %NAME% occurs twice, the first occurrence wins",
         );
     });
 }
@@ -122,12 +122,12 @@ fn duplicate_field_after_querying_a_later_field() {
         assert_eq!(
             querier.description_mut().map(|value| value.as_str()),
             Some("hello"),
-            "querier = {querier_name}",
+            "querier = {querier_name}; %DESC% lies behind the second %NAME%",
         );
         assert_eq!(
             querier.name_mut().map(|value| value.as_str()),
             Some("first"),
-            "querier = {querier_name}",
+            "querier = {querier_name}; %NAME% must not change after the whole text was scanned",
         );
     });
 }
@@ -148,7 +148,7 @@ fn duplicate_field_whose_first_occurrence_is_empty() {
         assert_eq!(
             querier.groups_mut().map(groups),
             None,
-            "querier = {querier_name}",
+            "querier = {querier_name}; the first %GROUPS% is empty, hence None",
         );
     });
 
@@ -156,12 +156,12 @@ fn duplicate_field_whose_first_occurrence_is_empty() {
         assert_eq!(
             querier.name_mut().map(|value| value.as_str()),
             Some("foo"),
-            "querier = {querier_name}",
+            "querier = {querier_name}; %NAME% queried before %GROUPS%",
         );
         assert_eq!(
             querier.groups_mut().map(groups),
             None,
-            "querier = {querier_name}",
+            "querier = {querier_name}; the first %GROUPS% is empty, hence None",
         );
     });
 }
