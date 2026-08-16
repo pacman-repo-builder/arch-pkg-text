@@ -5,163 +5,190 @@
 use arch_pkg_text::{
     ParsedDesc, QueryDescMut,
     desc::{ForgetfulQuerier, MemoQuerier},
-    value::{ArchitectureList, GroupList},
+    value::{Architecture, Description, Name},
 };
 use pretty_assertions::assert_eq;
 use text_block_macros::text_block_fnl;
 
-/// Run the same assertions against all 3 queriers of a `desc` file text.
-///
-/// Every querier is constructed anew, so that the assertions of one querier
-/// don't interfere with the assertions of another.
-fn assert_all_queriers<'a>(text: &'a str, assert: impl Fn(&str, &mut dyn QueryDescMut<'a>)) {
-    assert("ParsedDesc", &mut ParsedDesc::parse(text).unwrap());
-    assert("ForgetfulQuerier", &mut ForgetfulQuerier::new(text));
-    assert("MemoQuerier", &mut MemoQuerier::new(text));
-}
+const EMPTY_VALUE_IN_THE_MIDDLE: &str = text_block_fnl! {
+    "%NAME%"
+    "foo"
+    ""
+    "%GROUPS%"
+    ""
+    "%ARCH%"
+    "x86_64"
+};
 
-/// List the groups as strings.
-fn groups(list: GroupList<'_>) -> Vec<&'_ str> {
-    list.into_iter().map(|item| item.as_str()).collect()
-}
+const EMPTY_VALUE_AT_THE_END: &str = text_block_fnl! {
+    "%NAME%"
+    "foo"
+    ""
+    "%GROUPS%"
+};
 
-/// List the architectures as strings.
-fn architectures(list: ArchitectureList<'_>) -> Vec<&'_ str> {
-    list.into_iter().map(|item| item.as_str()).collect()
-}
+const DUPLICATE_FIELD: &str = text_block_fnl! {
+    "%NAME%"
+    "first"
+    ""
+    "%ARCH%"
+    "x86_64"
+    ""
+    "%NAME%"
+    "second"
+};
+
+const DUPLICATE_FIELD_FOLLOWED_BY_ANOTHER_FIELD: &str = text_block_fnl! {
+    "%NAME%"
+    "first"
+    ""
+    "%ARCH%"
+    "x86_64"
+    ""
+    "%NAME%"
+    "second"
+    ""
+    "%DESC%"
+    "hello"
+};
+
+const DUPLICATE_FIELD_WITH_EMPTY_FIRST_OCCURRENCE: &str = text_block_fnl! {
+    "%GROUPS%"
+    ""
+    "%NAME%"
+    "foo"
+    ""
+    "%GROUPS%"
+    "later"
+};
 
 #[test]
 fn empty_value_in_the_middle() {
-    let text = text_block_fnl! {
-        "%NAME%"
-        "foo"
-        ""
-        "%GROUPS%"
-        ""
-        "%ARCH%"
-        "x86_64"
-    };
-    assert_all_queriers(text, |querier_name, querier| {
-        assert_eq!(
-            querier.name_mut().map(|value| value.as_str()),
-            Some("foo"),
-            "{querier_name}: %NAME% precedes the empty %GROUPS%",
-        );
-        assert_eq!(
-            querier.groups_mut().map(groups),
-            None,
-            "{querier_name}: %GROUPS% is empty, hence None",
-        );
-        assert_eq!(
-            querier.architecture_mut().map(architectures),
-            Some(vec!["x86_64"]),
-            "{querier_name}: %ARCH% follows the empty %GROUPS%",
-        );
-    });
+    fn run_assertions<'a>(querier: &mut impl QueryDescMut<'a>) {
+        eprintln!("ASSERT: %NAME% precedes the empty %GROUPS%");
+        assert_eq!(querier.name_mut(), Some(Name("foo")));
+
+        eprintln!("ASSERT: %GROUPS% is empty, hence None");
+        assert!(querier.groups_mut().is_none());
+
+        eprintln!("ASSERT: %ARCH% follows the empty %GROUPS%");
+        let mut architecture = querier.architecture_mut().unwrap().into_iter();
+        assert_eq!(architecture.next(), Some(Architecture("x86_64")));
+        assert_eq!(architecture.next(), None);
+    }
+
+    eprintln!("CASE: ParsedDesc");
+    run_assertions(&mut ParsedDesc::parse(EMPTY_VALUE_IN_THE_MIDDLE).unwrap());
+
+    eprintln!("CASE: ForgetfulQuerier");
+    run_assertions(&mut ForgetfulQuerier::new(EMPTY_VALUE_IN_THE_MIDDLE));
+
+    eprintln!("CASE: MemoQuerier");
+    run_assertions(&mut MemoQuerier::new(EMPTY_VALUE_IN_THE_MIDDLE));
 }
 
 #[test]
 fn empty_value_at_the_end() {
-    let text = text_block_fnl! {
-        "%NAME%"
-        "foo"
-        ""
-        "%GROUPS%"
-    };
-    assert_all_queriers(text, |querier_name, querier| {
-        assert_eq!(
-            querier.name_mut().map(|value| value.as_str()),
-            Some("foo"),
-            "{querier_name}: %NAME% precedes the empty %GROUPS%",
-        );
-        assert_eq!(
-            querier.groups_mut().map(groups),
-            None,
-            "{querier_name}: %GROUPS% is empty and last, hence None",
-        );
-    });
+    fn run_assertions<'a>(querier: &mut impl QueryDescMut<'a>) {
+        eprintln!("ASSERT: %NAME% precedes the empty %GROUPS%");
+        assert_eq!(querier.name_mut(), Some(Name("foo")));
+
+        eprintln!("ASSERT: %GROUPS% is empty and last, hence None");
+        assert!(querier.groups_mut().is_none());
+    }
+
+    eprintln!("CASE: ParsedDesc");
+    run_assertions(&mut ParsedDesc::parse(EMPTY_VALUE_AT_THE_END).unwrap());
+
+    eprintln!("CASE: ForgetfulQuerier");
+    run_assertions(&mut ForgetfulQuerier::new(EMPTY_VALUE_AT_THE_END));
+
+    eprintln!("CASE: MemoQuerier");
+    run_assertions(&mut MemoQuerier::new(EMPTY_VALUE_AT_THE_END));
 }
 
 #[test]
 fn duplicate_field() {
-    let text = text_block_fnl! {
-        "%NAME%"
-        "first"
-        ""
-        "%ARCH%"
-        "x86_64"
-        ""
-        "%NAME%"
-        "second"
-    };
-    assert_all_queriers(text, |querier_name, querier| {
-        assert_eq!(
-            querier.name_mut().map(|value| value.as_str()),
-            Some("first"),
-            "{querier_name}: %NAME% occurs twice, the first occurrence wins",
-        );
-    });
+    fn run_assertions<'a>(querier: &mut impl QueryDescMut<'a>) {
+        eprintln!("ASSERT: %NAME% occurs twice, the first occurrence wins");
+        assert_eq!(querier.name_mut(), Some(Name("first")));
+    }
+
+    eprintln!("CASE: ParsedDesc");
+    run_assertions(&mut ParsedDesc::parse(DUPLICATE_FIELD).unwrap());
+
+    eprintln!("CASE: ForgetfulQuerier");
+    run_assertions(&mut ForgetfulQuerier::new(DUPLICATE_FIELD));
+
+    eprintln!("CASE: MemoQuerier");
+    run_assertions(&mut MemoQuerier::new(DUPLICATE_FIELD));
 }
 
 #[test]
 fn duplicate_field_after_querying_a_later_field() {
-    let text = text_block_fnl! {
-        "%NAME%"
-        "first"
-        ""
-        "%ARCH%"
-        "x86_64"
-        ""
-        "%NAME%"
-        "second"
-        ""
-        "%DESC%"
-        "hello"
-    };
-    assert_all_queriers(text, |querier_name, querier| {
-        assert_eq!(
-            querier.description_mut().map(|value| value.as_str()),
-            Some("hello"),
-            "{querier_name}: %DESC% lies behind the second %NAME%",
-        );
-        assert_eq!(
-            querier.name_mut().map(|value| value.as_str()),
-            Some("first"),
-            "{querier_name}: %NAME% must not change after the whole text was scanned",
-        );
-    });
+    fn run_assertions<'a>(querier: &mut impl QueryDescMut<'a>) {
+        eprintln!("ASSERT: %DESC% lies behind the second %NAME%");
+        assert_eq!(querier.description_mut(), Some(Description("hello")));
+
+        eprintln!("ASSERT: %NAME% must not change after the whole text was scanned");
+        assert_eq!(querier.name_mut(), Some(Name("first")));
+    }
+
+    eprintln!("CASE: ParsedDesc");
+    run_assertions(&mut ParsedDesc::parse(DUPLICATE_FIELD_FOLLOWED_BY_ANOTHER_FIELD).unwrap());
+
+    eprintln!("CASE: ForgetfulQuerier");
+    run_assertions(&mut ForgetfulQuerier::new(
+        DUPLICATE_FIELD_FOLLOWED_BY_ANOTHER_FIELD,
+    ));
+
+    eprintln!("CASE: MemoQuerier");
+    run_assertions(&mut MemoQuerier::new(
+        DUPLICATE_FIELD_FOLLOWED_BY_ANOTHER_FIELD,
+    ));
 }
 
 #[test]
 fn duplicate_field_whose_first_occurrence_is_empty() {
-    let text = text_block_fnl! {
-        "%GROUPS%"
-        ""
-        "%NAME%"
-        "foo"
-        ""
-        "%GROUPS%"
-        "later"
-    };
+    fn run_assertions<'a>(querier: &mut impl QueryDescMut<'a>) {
+        eprintln!("ASSERT: the first %GROUPS% is empty, hence None");
+        assert!(querier.groups_mut().is_none());
+    }
 
-    assert_all_queriers(text, |querier_name, querier| {
-        assert_eq!(
-            querier.groups_mut().map(groups),
-            None,
-            "{querier_name}: the first %GROUPS% is empty, hence None",
-        );
-    });
+    eprintln!("CASE: ParsedDesc");
+    run_assertions(&mut ParsedDesc::parse(DUPLICATE_FIELD_WITH_EMPTY_FIRST_OCCURRENCE).unwrap());
 
-    assert_all_queriers(text, |querier_name, querier| {
-        assert_eq!(
-            querier.name_mut().map(|value| value.as_str()),
-            Some("foo"),
-            "{querier_name}: %NAME% queried before %GROUPS%",
-        );
-        assert_eq!(
-            querier.groups_mut().map(groups),
-            None,
-            "{querier_name}: the first %GROUPS% is empty, hence None",
-        );
-    });
+    eprintln!("CASE: ForgetfulQuerier");
+    run_assertions(&mut ForgetfulQuerier::new(
+        DUPLICATE_FIELD_WITH_EMPTY_FIRST_OCCURRENCE,
+    ));
+
+    eprintln!("CASE: MemoQuerier");
+    run_assertions(&mut MemoQuerier::new(
+        DUPLICATE_FIELD_WITH_EMPTY_FIRST_OCCURRENCE,
+    ));
+}
+
+#[test]
+fn duplicate_field_whose_first_occurrence_is_empty_after_querying_another_field() {
+    fn run_assertions<'a>(querier: &mut impl QueryDescMut<'a>) {
+        eprintln!("ASSERT: %NAME% lies between the 2 occurrences of %GROUPS%");
+        assert_eq!(querier.name_mut(), Some(Name("foo")));
+
+        eprintln!("ASSERT: the first %GROUPS% is empty, hence None");
+        assert!(querier.groups_mut().is_none());
+    }
+
+    eprintln!("CASE: ParsedDesc");
+    run_assertions(&mut ParsedDesc::parse(DUPLICATE_FIELD_WITH_EMPTY_FIRST_OCCURRENCE).unwrap());
+
+    eprintln!("CASE: ForgetfulQuerier");
+    run_assertions(&mut ForgetfulQuerier::new(
+        DUPLICATE_FIELD_WITH_EMPTY_FIRST_OCCURRENCE,
+    ));
+
+    eprintln!("CASE: MemoQuerier");
+    run_assertions(&mut MemoQuerier::new(
+        DUPLICATE_FIELD_WITH_EMPTY_FIRST_OCCURRENCE,
+    ));
 }
