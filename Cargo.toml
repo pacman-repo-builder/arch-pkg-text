@@ -46,6 +46,7 @@ strum = { version = "0.27.2", default-features = false, features = ["derive", "p
 [dev-dependencies]
 hex_lit = { version = "0.1.1", features = ["rust_v_1_46"] }
 pretty_assertions = "1.4.1"
+text-block-macros = "0.2.0"
 
 [package.metadata.docs.rs]
 all-features = true

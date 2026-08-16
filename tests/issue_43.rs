@@ -8,6 +8,7 @@ use arch_pkg_text::{
     value::{ArchitectureList, GroupList},
 };
 use pretty_assertions::assert_eq;
+use text_block_macros::text_block_fnl;
 
 /// Run the same assertions against all 3 queriers of a `desc` file text.
 ///
@@ -31,7 +32,15 @@ fn architectures(list: ArchitectureList<'_>) -> Vec<&'_ str> {
 
 #[test]
 fn empty_value_in_the_middle() {
-    let text = "%NAME%\nfoo\n\n%GROUPS%\n\n%ARCH%\nx86_64\n";
+    let text = text_block_fnl! {
+        "%NAME%"
+        "foo"
+        ""
+        "%GROUPS%"
+        ""
+        "%ARCH%"
+        "x86_64"
+    };
     assert_all_queriers(text, |querier_name, querier| {
         assert_eq!(
             querier.name_mut().map(|value| value.as_str()),
@@ -53,7 +62,12 @@ fn empty_value_in_the_middle() {
 
 #[test]
 fn empty_value_at_the_end() {
-    let text = "%NAME%\nfoo\n\n%GROUPS%\n";
+    let text = text_block_fnl! {
+        "%NAME%"
+        "foo"
+        ""
+        "%GROUPS%"
+    };
     assert_all_queriers(text, |querier_name, querier| {
         assert_eq!(
             querier.name_mut().map(|value| value.as_str()),
@@ -70,7 +84,16 @@ fn empty_value_at_the_end() {
 
 #[test]
 fn duplicate_field() {
-    let text = "%NAME%\nfirst\n\n%ARCH%\nx86_64\n\n%NAME%\nsecond\n";
+    let text = text_block_fnl! {
+        "%NAME%"
+        "first"
+        ""
+        "%ARCH%"
+        "x86_64"
+        ""
+        "%NAME%"
+        "second"
+    };
     assert_all_queriers(text, |querier_name, querier| {
         assert_eq!(
             querier.name_mut().map(|value| value.as_str()),
@@ -82,7 +105,19 @@ fn duplicate_field() {
 
 #[test]
 fn duplicate_field_after_querying_a_later_field() {
-    let text = "%NAME%\nfirst\n\n%ARCH%\nx86_64\n\n%NAME%\nsecond\n\n%DESC%\nhello\n";
+    let text = text_block_fnl! {
+        "%NAME%"
+        "first"
+        ""
+        "%ARCH%"
+        "x86_64"
+        ""
+        "%NAME%"
+        "second"
+        ""
+        "%DESC%"
+        "hello"
+    };
     assert_all_queriers(text, |querier_name, querier| {
         assert_eq!(
             querier.description_mut().map(|value| value.as_str()),
@@ -100,7 +135,15 @@ fn duplicate_field_after_querying_a_later_field() {
 
 #[test]
 fn duplicate_field_whose_first_occurrence_is_empty() {
-    let text = "%GROUPS%\n\n%NAME%\nfoo\n\n%GROUPS%\nlater\n";
+    let text = text_block_fnl! {
+        "%GROUPS%"
+        ""
+        "%NAME%"
+        "foo"
+        ""
+        "%GROUPS%"
+        "later"
+    };
 
     assert_all_queriers(text, |querier_name, querier| {
         assert_eq!(
