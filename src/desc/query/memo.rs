@@ -14,10 +14,6 @@ use pipe_trait::Pipe;
 pub struct MemoQuerier<'a> {
     text: &'a str,
     cache: Cache<'a>,
-    /// The untrimmed field line that starts [`MemoQuerier::text`], together with its parsed form.
-    ///
-    /// The line is kept untrimmed so that the offsets derived from it delimit
-    /// the value exactly, without the surrounding whitespace of the field line.
     last: Option<(&'a str, RawField<'a>)>,
 }
 
