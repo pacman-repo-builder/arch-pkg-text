@@ -53,10 +53,8 @@ def_struct!(
 /// Error type of [`ParsedDesc::parse`].
 #[derive(Debug, Display, Error, Clone, Copy)]
 pub enum DescParseError<'a> {
-    #[display("Input is empty")]
-    EmptyInput,
     #[display("Input has no field")]
-    NoFieldFound,
+    NoField,
     #[display("Receive a value without field: {_0:?}")]
     ValueWithoutField(#[error(not(source))] &'a str),
 }
@@ -64,8 +62,7 @@ pub enum DescParseError<'a> {
 /// Issue that may arise during parsing.
 #[derive(Debug, Clone, Copy)]
 pub enum DescParseIssue<'a> {
-    EmptyInput,
-    NoFieldFound,
+    NoField,
     FirstLineIsNotAField(&'a str, ParseRawFieldError),
     UnknownField(RawField<'a>),
 }
@@ -77,8 +74,7 @@ impl<'a> DescParseIssue<'a> {
     /// This function is the default issue handler for [`ParsedDesc`].
     pub fn ignore_unknown_field(self) -> Result<(), DescParseError<'a>> {
         Err(match self {
-            DescParseIssue::EmptyInput => DescParseError::EmptyInput,
-            DescParseIssue::NoFieldFound => DescParseError::NoFieldFound,
+            DescParseIssue::NoField => DescParseError::NoField,
             DescParseIssue::FirstLineIsNotAField(line, _) => {
                 DescParseError::ValueWithoutField(line)
             }
@@ -114,17 +110,13 @@ impl<'a> ParsedDesc<'a> {
         }
 
         // parse the first field
-        let mut has_line = false;
         let (first_line, first_field) = loop {
             let Some(first_line) = lines.next() else {
-                let issue = if has_line {
-                    DescParseIssue::NoFieldFound
-                } else {
-                    DescParseIssue::EmptyInput
-                };
-                return_or!(issue, return PartialParseResult::new_complete(parsed));
+                return_or!(
+                    DescParseIssue::NoField,
+                    return PartialParseResult::new_complete(parsed)
+                );
             };
-            has_line = true;
             let first_field = match first_line.trim().pipe(RawField::parse_raw) {
                 Ok(first_field) => first_field,
                 Err(error) => {

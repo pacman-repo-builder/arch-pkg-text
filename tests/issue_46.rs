@@ -15,8 +15,7 @@ const DESC: &str = include_str!("fixtures/gnome-shell.desc");
 /// Name of the variant of a [`DescParseIssue`], to be recorded by the issue handlers below.
 fn issue_name(issue: DescParseIssue<'_>) -> &'static str {
     match issue {
-        DescParseIssue::EmptyInput => "EmptyInput",
-        DescParseIssue::NoFieldFound => "NoFieldFound",
+        DescParseIssue::NoField => "NoField",
         DescParseIssue::FirstLineIsNotAField(_, _) => "FirstLineIsNotAField",
         DescParseIssue::UnknownField(_) => "UnknownField",
     }
@@ -46,46 +45,43 @@ fn error_of(text: &str) -> Option<DescParseError<'_>> {
     .1
 }
 
-/// An input that yields no line at all is the only empty input.
+/// An input whose lines are all non-fields isn't empty, so it must not be described as empty.
 #[test]
-fn empty_input_is_still_empty() {
-    assert_eq!(issues_of(""), ["EmptyInput"]);
-    let error = dbg!(error_of("")).unwrap();
-    assert!(matches!(error, DescParseError::EmptyInput));
-    assert_eq!(error.to_string(), "Input is empty");
-}
-
-/// An input whose lines are all non-fields isn't empty, it merely has no field.
-#[test]
-fn field_less_input_is_not_empty() {
+fn field_less_input_is_not_described_as_empty() {
     assert_eq!(
         issues_of("not a field\n"),
-        ["FirstLineIsNotAField", "NoFieldFound",]
+        ["FirstLineIsNotAField", "NoField"],
     );
     let error = dbg!(error_of("not a field\n")).unwrap();
-    assert!(matches!(error, DescParseError::NoFieldFound));
+    assert!(matches!(error, DescParseError::NoField));
     assert_eq!(error.to_string(), "Input has no field");
 }
 
-/// Blank lines are lines, too.
+/// Blank lines are lines, too, so an input made of them isn't empty either.
 #[test]
-fn blank_lines_only_input_is_not_empty() {
+fn blank_lines_only_input_is_not_described_as_empty() {
     assert_eq!(
         issues_of("\n\n"),
-        [
-            "FirstLineIsNotAField",
-            "FirstLineIsNotAField",
-            "NoFieldFound",
-        ]
+        ["FirstLineIsNotAField", "FirstLineIsNotAField", "NoField"],
     );
     let error = dbg!(error_of("\n\n")).unwrap();
-    assert!(matches!(error, DescParseError::NoFieldFound));
+    assert!(matches!(error, DescParseError::NoField));
     assert_eq!(error.to_string(), "Input has no field");
 }
 
-/// An input that does contain a field reports neither issue.
+/// An empty input has no field either, so it reports the very same issue and error.
 #[test]
-fn input_with_field_reports_neither_issue() {
+fn empty_input_reports_the_same_issue() {
+    assert_eq!(issues_of(""), ["NoField"]);
+    let error = dbg!(error_of("")).unwrap();
+    assert!(matches!(error, DescParseError::NoField));
+    assert_eq!(error.to_string(), "Input has no field");
+}
+
+/// An input that does contain a field reports neither the issue nor the error,
+/// no matter what precedes that field.
+#[test]
+fn input_with_field_reports_no_issue() {
     assert_eq!(issues_of(DESC), [] as [&str; 0]);
     let text = format!("garbage line\n{DESC}");
     assert_eq!(issues_of(&text), ["FirstLineIsNotAField"]);
@@ -106,6 +102,6 @@ fn default_handler_is_unaffected() {
     );
     assert_eq!(
         ParsedDesc::parse(DESC).unwrap().name(),
-        Some(Name("gnome-shell"))
+        Some(Name("gnome-shell")),
     );
 }
