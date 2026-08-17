@@ -7,6 +7,7 @@ use arch_pkg_text::{
     desc::{ForgetfulQuerier, MemoQuerier},
     value::{Architecture, Description, Name},
 };
+use pipe_trait::Pipe;
 use pretty_assertions::assert_eq;
 use text_block_macros::text_block_fnl;
 
@@ -78,13 +79,20 @@ fn empty_value_in_the_middle() {
     }
 
     eprintln!("CASE: ParsedDesc");
-    run_assertions(&mut ParsedDesc::parse(EMPTY_VALUE_IN_THE_MIDDLE).unwrap());
+    EMPTY_VALUE_IN_THE_MIDDLE
+        .pipe(ParsedDesc::parse)
+        .unwrap()
+        .pipe_mut(run_assertions);
 
     eprintln!("CASE: ForgetfulQuerier");
-    run_assertions(&mut ForgetfulQuerier::new(EMPTY_VALUE_IN_THE_MIDDLE));
+    EMPTY_VALUE_IN_THE_MIDDLE
+        .pipe(ForgetfulQuerier::new)
+        .pipe_mut(run_assertions);
 
     eprintln!("CASE: MemoQuerier");
-    run_assertions(&mut MemoQuerier::new(EMPTY_VALUE_IN_THE_MIDDLE));
+    EMPTY_VALUE_IN_THE_MIDDLE
+        .pipe(MemoQuerier::new)
+        .pipe_mut(run_assertions);
 }
 
 #[test]
@@ -98,13 +106,20 @@ fn empty_value_at_the_end() {
     }
 
     eprintln!("CASE: ParsedDesc");
-    run_assertions(&mut ParsedDesc::parse(EMPTY_VALUE_AT_THE_END).unwrap());
+    EMPTY_VALUE_AT_THE_END
+        .pipe(ParsedDesc::parse)
+        .unwrap()
+        .pipe_mut(run_assertions);
 
     eprintln!("CASE: ForgetfulQuerier");
-    run_assertions(&mut ForgetfulQuerier::new(EMPTY_VALUE_AT_THE_END));
+    EMPTY_VALUE_AT_THE_END
+        .pipe(ForgetfulQuerier::new)
+        .pipe_mut(run_assertions);
 
     eprintln!("CASE: MemoQuerier");
-    run_assertions(&mut MemoQuerier::new(EMPTY_VALUE_AT_THE_END));
+    EMPTY_VALUE_AT_THE_END
+        .pipe(MemoQuerier::new)
+        .pipe_mut(run_assertions);
 }
 
 #[test]
@@ -115,13 +130,20 @@ fn duplicate_field() {
     }
 
     eprintln!("CASE: ParsedDesc");
-    run_assertions(&mut ParsedDesc::parse(DUPLICATE_FIELD).unwrap());
+    DUPLICATE_FIELD
+        .pipe(ParsedDesc::parse)
+        .unwrap()
+        .pipe_mut(run_assertions);
 
     eprintln!("CASE: ForgetfulQuerier");
-    run_assertions(&mut ForgetfulQuerier::new(DUPLICATE_FIELD));
+    DUPLICATE_FIELD
+        .pipe(ForgetfulQuerier::new)
+        .pipe_mut(run_assertions);
 
     eprintln!("CASE: MemoQuerier");
-    run_assertions(&mut MemoQuerier::new(DUPLICATE_FIELD));
+    DUPLICATE_FIELD
+        .pipe(MemoQuerier::new)
+        .pipe_mut(run_assertions);
 }
 
 #[test]
@@ -135,17 +157,20 @@ fn duplicate_field_after_querying_a_later_field() {
     }
 
     eprintln!("CASE: ParsedDesc");
-    run_assertions(&mut ParsedDesc::parse(DUPLICATE_FIELD_FOLLOWED_BY_ANOTHER_FIELD).unwrap());
+    DUPLICATE_FIELD_FOLLOWED_BY_ANOTHER_FIELD
+        .pipe(ParsedDesc::parse)
+        .unwrap()
+        .pipe_mut(run_assertions);
 
     eprintln!("CASE: ForgetfulQuerier");
-    run_assertions(&mut ForgetfulQuerier::new(
-        DUPLICATE_FIELD_FOLLOWED_BY_ANOTHER_FIELD,
-    ));
+    DUPLICATE_FIELD_FOLLOWED_BY_ANOTHER_FIELD
+        .pipe(ForgetfulQuerier::new)
+        .pipe_mut(run_assertions);
 
     eprintln!("CASE: MemoQuerier");
-    run_assertions(&mut MemoQuerier::new(
-        DUPLICATE_FIELD_FOLLOWED_BY_ANOTHER_FIELD,
-    ));
+    DUPLICATE_FIELD_FOLLOWED_BY_ANOTHER_FIELD
+        .pipe(MemoQuerier::new)
+        .pipe_mut(run_assertions);
 }
 
 #[test]
@@ -156,17 +181,20 @@ fn duplicate_field_whose_first_occurrence_is_empty() {
     }
 
     eprintln!("CASE: ParsedDesc");
-    run_assertions(&mut ParsedDesc::parse(DUPLICATE_FIELD_WITH_EMPTY_FIRST_OCCURRENCE).unwrap());
+    DUPLICATE_FIELD_WITH_EMPTY_FIRST_OCCURRENCE
+        .pipe(ParsedDesc::parse)
+        .unwrap()
+        .pipe_mut(run_assertions);
 
     eprintln!("CASE: ForgetfulQuerier");
-    run_assertions(&mut ForgetfulQuerier::new(
-        DUPLICATE_FIELD_WITH_EMPTY_FIRST_OCCURRENCE,
-    ));
+    DUPLICATE_FIELD_WITH_EMPTY_FIRST_OCCURRENCE
+        .pipe(ForgetfulQuerier::new)
+        .pipe_mut(run_assertions);
 
     eprintln!("CASE: MemoQuerier");
-    run_assertions(&mut MemoQuerier::new(
-        DUPLICATE_FIELD_WITH_EMPTY_FIRST_OCCURRENCE,
-    ));
+    DUPLICATE_FIELD_WITH_EMPTY_FIRST_OCCURRENCE
+        .pipe(MemoQuerier::new)
+        .pipe_mut(run_assertions);
 }
 
 #[test]
@@ -180,15 +208,18 @@ fn duplicate_field_whose_first_occurrence_is_empty_after_querying_another_field(
     }
 
     eprintln!("CASE: ParsedDesc");
-    run_assertions(&mut ParsedDesc::parse(DUPLICATE_FIELD_WITH_EMPTY_FIRST_OCCURRENCE).unwrap());
+    DUPLICATE_FIELD_WITH_EMPTY_FIRST_OCCURRENCE
+        .pipe(ParsedDesc::parse)
+        .unwrap()
+        .pipe_mut(run_assertions);
 
     eprintln!("CASE: ForgetfulQuerier");
-    run_assertions(&mut ForgetfulQuerier::new(
-        DUPLICATE_FIELD_WITH_EMPTY_FIRST_OCCURRENCE,
-    ));
+    DUPLICATE_FIELD_WITH_EMPTY_FIRST_OCCURRENCE
+        .pipe(ForgetfulQuerier::new)
+        .pipe_mut(run_assertions);
 
     eprintln!("CASE: MemoQuerier");
-    run_assertions(&mut MemoQuerier::new(
-        DUPLICATE_FIELD_WITH_EMPTY_FIRST_OCCURRENCE,
-    ));
+    DUPLICATE_FIELD_WITH_EMPTY_FIRST_OCCURRENCE
+        .pipe(MemoQuerier::new)
+        .pipe_mut(run_assertions);
 }
