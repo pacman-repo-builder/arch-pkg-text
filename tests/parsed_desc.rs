@@ -77,8 +77,8 @@ fn value_without_field() {
 #[test]
 fn empty_input() {
     let error = dbg!(ParsedDesc::parse("")).unwrap_err();
-    assert!(matches!(error, DescParseError::EmptyInput,));
-    assert_eq!(error.to_string(), "Input is empty");
+    assert!(matches!(error, DescParseError::NoField,));
+    assert_eq!(error.to_string(), "Input has no field");
 }
 
 #[test]

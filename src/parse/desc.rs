@@ -53,8 +53,8 @@ def_struct!(
 /// Error type of [`ParsedDesc::parse`].
 #[derive(Debug, Display, Error, Clone, Copy)]
 pub enum DescParseError<'a> {
-    #[display("Input is empty")]
-    EmptyInput,
+    #[display("Input has no field")]
+    NoField,
     #[display("Receive a value without field: {_0:?}")]
     ValueWithoutField(#[error(not(source))] &'a str),
 }
@@ -62,7 +62,7 @@ pub enum DescParseError<'a> {
 /// Issue that may arise during parsing.
 #[derive(Debug, Clone, Copy)]
 pub enum DescParseIssue<'a> {
-    EmptyInput,
+    NoField,
     FirstLineIsNotAField(&'a str, ParseRawFieldError),
     UnknownField(RawField<'a>),
 }
@@ -74,7 +74,7 @@ impl<'a> DescParseIssue<'a> {
     /// This function is the default issue handler for [`ParsedDesc`].
     pub fn ignore_unknown_field(self) -> Result<(), DescParseError<'a>> {
         Err(match self {
-            DescParseIssue::EmptyInput => DescParseError::EmptyInput,
+            DescParseIssue::NoField => DescParseError::NoField,
             DescParseIssue::FirstLineIsNotAField(line, _) => {
                 DescParseError::ValueWithoutField(line)
             }
@@ -113,7 +113,7 @@ impl<'a> ParsedDesc<'a> {
         let (first_line, first_field) = loop {
             let Some(first_line) = lines.next() else {
                 return_or!(
-                    DescParseIssue::EmptyInput,
+                    DescParseIssue::NoField,
                     return PartialParseResult::new_complete(parsed)
                 );
             };

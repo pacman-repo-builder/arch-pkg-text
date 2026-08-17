@@ -16,7 +16,7 @@ const DESC: &str = include_str!("fixtures/gnome-shell.desc");
 /// Name of the variant of a [`DescParseIssue`], to be recorded by the issue handlers below.
 fn issue_name(issue: DescParseIssue<'_>) -> &'static str {
     match issue {
-        DescParseIssue::EmptyInput => "EmptyInput",
+        DescParseIssue::NoField => "NoField",
         DescParseIssue::FirstLineIsNotAField(_, _) => "FirstLineIsNotAField",
         DescParseIssue::UnknownField(_) => "UnknownField",
     }
@@ -61,11 +61,11 @@ fn assert_query<'a>(querier: &impl QueryDesc<'a>) {
     assert_eq!(architecture.next(), None);
 }
 
-/// An empty input has nothing left to parse, so a tolerated `EmptyInput` must end the parse.
+/// An empty input has nothing left to parse, so a tolerated `NoField` must end the parse.
 #[test]
 fn empty_input_terminates() {
     let (parsed, issues) = parse_tolerantly("");
-    assert_eq!(issues, ["EmptyInput"]);
+    assert_eq!(issues, ["NoField"]);
     assert_eq!(parsed.name(), None);
 }
 
@@ -75,7 +75,7 @@ fn input_without_field_terminates() {
     let (parsed, issues) = parse_tolerantly("not a field\nneither is this\n");
     assert_eq!(
         issues,
-        ["FirstLineIsNotAField", "FirstLineIsNotAField", "EmptyInput"],
+        ["FirstLineIsNotAField", "FirstLineIsNotAField", "NoField",],
     );
     assert_eq!(parsed.name(), None);
 }
@@ -119,7 +119,7 @@ fn non_ascii_leading_garbage_does_not_panic() {
 fn intolerant_handler_still_stops_the_parse() {
     let (parsed, error) =
         ParsedDesc::parse_with_issues("", |issue| Err::<(), _>(issue_name(issue))).into_partial();
-    assert_eq!(error, Some("EmptyInput"));
+    assert_eq!(error, Some("NoField"));
     assert_eq!(parsed.name(), None);
 
     let (parsed, error) =
