@@ -53,13 +53,10 @@ def_struct!(
 /// Error type of [`ParsedDesc::parse`].
 #[derive(Debug, Display, Error, Clone, Copy)]
 pub enum DescParseError<'a> {
-    /// The input didn't contain a single line.
     #[display("Input is empty")]
     EmptyInput,
-    /// The input wasn't empty, but none of its lines was a field.
     #[display("Input has no field")]
     NoFieldFound,
-    /// A value was found before any field was.
     #[display("Receive a value without field: {_0:?}")]
     ValueWithoutField(#[error(not(source))] &'a str),
 }
@@ -67,22 +64,9 @@ pub enum DescParseError<'a> {
 /// Issue that may arise during parsing.
 #[derive(Debug, Clone, Copy)]
 pub enum DescParseIssue<'a> {
-    /// The input didn't contain a single line.
-    ///
-    /// This issue is only ever reported as the first issue of a parsing process.
     EmptyInput,
-    /// The input wasn't empty, but none of its lines was a field.
-    ///
-    /// This issue is reported after every line of the input had been reported
-    /// as [`DescParseIssue::FirstLineIsNotAField`] and tolerated.
     NoFieldFound,
-    /// A line that was expected to be a field wasn't one.
-    ///
-    /// Tolerating this issue causes the line to be skipped.
     FirstLineIsNotAField(&'a str, ParseRawFieldError),
-    /// A field whose name doesn't belong to [`FieldName`] was found.
-    ///
-    /// Tolerating this issue causes the field and its value to be discarded.
     UnknownField(RawField<'a>),
 }
 
