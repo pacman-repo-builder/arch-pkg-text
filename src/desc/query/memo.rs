@@ -31,35 +31,34 @@ impl<'a> MemoQuerier<'a> {
     fn next_entry(&mut self) -> Option<(RawField<'a>, &'a str)> {
         let mut lines = self.text.lines();
 
-        let (field_str, raw_field) = if let Some((field_str, raw_field)) = self.last {
+        let (field_line, raw_field) = if let Some((field_line, raw_field)) = self.last {
             lines.next()?;
-            (field_str, raw_field)
+            (field_line, raw_field)
         } else {
-            let field_str = lines.next()?.trim();
-            let raw_field = RawField::parse_raw(field_str).ok()?;
-            (field_str, raw_field)
+            let field_line = lines.next()?;
+            let raw_field = RawField::parse_raw(field_line.trim()).ok()?;
+            (field_line, raw_field)
         };
 
         let value_start_offset =
-            field_str.as_ptr() as usize + field_str.len() - self.text.as_ptr() as usize;
+            field_line.as_ptr() as usize + field_line.len() - self.text.as_ptr() as usize;
         let next = lines.find_map(|line| -> Option<(&'a str, RawField<'a>)> {
-            let field_str = line.trim();
-            let raw_field = RawField::parse_raw(field_str).ok()?;
-            Some((field_str, raw_field))
+            let raw_field = RawField::parse_raw(line.trim()).ok()?;
+            Some((line, raw_field))
         });
 
-        let Some((next_field_str, next_raw_field)) = next else {
-            let value = self.text[value_start_offset..].trim_matches(['\n', '\r']);
+        let Some((next_field_line, next_raw_field)) = next else {
+            let value = self.text[value_start_offset..].trim();
             self.text = "";
             self.last = None;
             return Some((raw_field, value));
         };
 
-        let value_end_offset = next_field_str.as_ptr() as usize - self.text.as_ptr() as usize;
-        let value = self.text[value_start_offset..value_end_offset].trim_matches(['\n', '\r']);
+        let value_end_offset = next_field_line.as_ptr() as usize - self.text.as_ptr() as usize;
+        let value = self.text[value_start_offset..value_end_offset].trim();
 
         // prepare for the next call
-        self.last = Some((next_field_str, next_raw_field));
+        self.last = Some((next_field_line, next_raw_field));
         self.text = &self.text[value_end_offset..];
 
         Some((raw_field, value))
