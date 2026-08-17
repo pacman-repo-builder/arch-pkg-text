@@ -26,14 +26,16 @@ macro_rules! def_struct {
             /// Get a raw value from the querier.
             fn get_raw_value(&self, field_name: FieldName) -> Option<&'a str> {
                 match field_name {$(
-                    FieldName::$field => self.$field,
+                    FieldName::$field => self.$field.filter(|value| !value.is_empty()),
                 )*}
             }
 
             /// Add a raw value into the querier.
             fn set_raw_value(&mut self, field_name: FieldName, raw_value: &'a str) {
                 match field_name {$(
-                    FieldName::$field => self.$field = Some(raw_value),
+                    FieldName::$field => if self.$field.is_none() {
+                        self.$field = Some(raw_value);
+                    },
                 )*}
             }
         }

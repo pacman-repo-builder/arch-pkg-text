@@ -51,7 +51,7 @@ pub enum ParseRawFieldError {
     IncorrectEndingCharacter,
     #[display("Field name is empty")]
     Empty,
-    #[display("Found invalid character {_1:?} at index {_0}")]
+    #[display("Field name contains invalid character {_1:?} at index {_0}")]
     InvalidCharacter(usize, char),
 }
 

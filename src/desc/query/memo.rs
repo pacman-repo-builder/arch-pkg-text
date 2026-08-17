@@ -82,6 +82,9 @@ impl<'a> QueryMut<'a> for MemoQuerier<'a> {
             let Ok(parsed_field) = raw_field.to_parsed::<FieldName>() else {
                 continue;
             };
+            if self.cache.get(parsed_field.name()).is_some() {
+                continue; // the field was already encountered, the first occurrence wins
+            }
             let value = if value.is_empty() { None } else { Some(value) };
             self.cache.add(&parsed_field, value);
             if parsed_field == field {
