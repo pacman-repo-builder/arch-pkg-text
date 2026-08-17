@@ -42,7 +42,7 @@ impl<'a> Query<'a> for ForgetfulQuerier<'a> {
             .take_while(|(line, _)| RawField::try_from(line.trim()).is_err())
             .last()?; // no last means empty iterator, which means no content
 
-        let value = self.0[value_start_offset..value_end_offset].trim_matches(['\n', '\r']);
+        let value = self.0[value_start_offset..value_end_offset].trim();
 
         if value.is_empty() { None } else { Some(value) }
     }
