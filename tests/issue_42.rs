@@ -17,6 +17,7 @@ const DESC: &str = include_str!("fixtures/gnome-shell.desc");
 fn issue_name(issue: DescParseIssue<'_>) -> &'static str {
     match issue {
         DescParseIssue::EmptyInput => "EmptyInput",
+        DescParseIssue::NoFieldFound => "NoFieldFound",
         DescParseIssue::FirstLineIsNotAField(_, _) => "FirstLineIsNotAField",
         DescParseIssue::UnknownField(_) => "UnknownField",
     }
@@ -75,7 +76,11 @@ fn input_without_field_terminates() {
     let (parsed, issues) = parse_tolerantly("not a field\nneither is this\n");
     assert_eq!(
         issues,
-        ["FirstLineIsNotAField", "FirstLineIsNotAField", "EmptyInput"],
+        [
+            "FirstLineIsNotAField",
+            "FirstLineIsNotAField",
+            "NoFieldFound",
+        ],
     );
     assert_eq!(parsed.name(), None);
 }

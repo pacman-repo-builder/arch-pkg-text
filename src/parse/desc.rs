@@ -53,8 +53,13 @@ def_struct!(
 /// Error type of [`ParsedDesc::parse`].
 #[derive(Debug, Display, Error, Clone, Copy)]
 pub enum DescParseError<'a> {
+    /// The input didn't contain a single line.
     #[display("Input is empty")]
     EmptyInput,
+    /// The input wasn't empty, but none of its lines was a field.
+    #[display("Input has no field")]
+    NoFieldFound,
+    /// A value was found before any field was.
     #[display("Receive a value without field: {_0:?}")]
     ValueWithoutField(#[error(not(source))] &'a str),
 }
@@ -62,8 +67,22 @@ pub enum DescParseError<'a> {
 /// Issue that may arise during parsing.
 #[derive(Debug, Clone, Copy)]
 pub enum DescParseIssue<'a> {
+    /// The input didn't contain a single line.
+    ///
+    /// This issue is only ever reported as the first issue of a parsing process.
     EmptyInput,
+    /// The input wasn't empty, but none of its lines was a field.
+    ///
+    /// This issue is reported after every line of the input had been reported
+    /// as [`DescParseIssue::FirstLineIsNotAField`] and tolerated.
+    NoFieldFound,
+    /// A line that was expected to be a field wasn't one.
+    ///
+    /// Tolerating this issue causes the line to be skipped.
     FirstLineIsNotAField(&'a str, ParseRawFieldError),
+    /// A field whose name doesn't belong to [`FieldName`] was found.
+    ///
+    /// Tolerating this issue causes the field and its value to be discarded.
     UnknownField(RawField<'a>),
 }
 
@@ -75,6 +94,7 @@ impl<'a> DescParseIssue<'a> {
     pub fn ignore_unknown_field(self) -> Result<(), DescParseError<'a>> {
         Err(match self {
             DescParseIssue::EmptyInput => DescParseError::EmptyInput,
+            DescParseIssue::NoFieldFound => DescParseError::NoFieldFound,
             DescParseIssue::FirstLineIsNotAField(line, _) => {
                 DescParseError::ValueWithoutField(line)
             }
@@ -110,13 +130,17 @@ impl<'a> ParsedDesc<'a> {
         }
 
         // parse the first field
+        let mut has_line = false;
         let (first_line, first_field) = loop {
             let Some(first_line) = lines.next() else {
-                return_or!(
-                    DescParseIssue::EmptyInput,
-                    return PartialParseResult::new_complete(parsed)
-                );
+                let issue = if has_line {
+                    DescParseIssue::NoFieldFound
+                } else {
+                    DescParseIssue::EmptyInput
+                };
+                return_or!(issue, return PartialParseResult::new_complete(parsed));
             };
+            has_line = true;
             let first_field = match first_line.trim().pipe(RawField::parse_raw) {
                 Ok(first_field) => first_field,
                 Err(error) => {
